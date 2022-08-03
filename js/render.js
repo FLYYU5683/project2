@@ -37,26 +37,22 @@ var WW = window.innerWidth;
 var HH = window.innerHeight;
 
 
-    if (switchCamera) {
-
-        renderer.setViewport(0, 0, WW , HH );
-        renderer.clear();
-        renderer.render(scene, camera);
-
-    } 
-    else {
-        if (!look) {
-
-            camera2.position.copy(camera.localToWorld(new THREE.Vector3(0,0,0)));
-            camera2.lookAt(balls[0].pos)
-
-            look = !look;
-        }
-        renderer.setViewport(0, 0, WW , HH );
-        renderer.clear();
-        renderer.render(scene, camera2);
-    }
-
+	if(balls[0].pos.clone().sub(steve.direct.position).length() <= 30||follow){	
+	
+	renderer.setViewport(0, 0, WW , HH );
+	renderer.clear();
+    renderer.render(scene, camera);
+	
+  } else {
+  	var temp = new THREE.Vector3(balls[0].pos.x,camera.position.y,balls[0].pos.z)
+	temp.sub(steve.direct.position).normalize().multiplyScalar(100)
+	camera2.position.copy(steve.direct.position.clone().add(temp))
+	camera2.lookAt(balls[0].pos)
+	renderer.render(scene, camera2);
+	renderer.setViewport(0, 0, WW , HH );
+	renderer.clear();
+    renderer.render(scene, camera2);
+  }
 
     if (keyboard.pressed("M")) {
         renderer.setScissorTest(true);
@@ -67,9 +63,6 @@ var HH = window.innerHeight;
         renderer.render(scene, cameraM);
         renderer.setScissorTest(false);
     }
-
-
-
 
     renderer.setScissorTest(true);
     renderer.setScissor(0, HH/4, WW / 2, HH / 3);

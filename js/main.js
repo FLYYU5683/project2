@@ -32,8 +32,8 @@ function init() {
   document.body.appendChild(renderer.domElement);
  renderer.localClippingEnabled = true;
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.set(0, 20, 32);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  camera.position.set(0, 25, 40);
+  camera.lookAt(new THREE.Vector3(0, 10, 0));
   
   camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
   let controls = new OrbitControls(camera2, renderer.domElement);
