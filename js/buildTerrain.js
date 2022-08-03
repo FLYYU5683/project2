@@ -42,14 +42,14 @@ function buildPlane(){
     "}"
 	].join("\n"),
     fragmentShader:[
-	"uniform sampler2D tex",
-    "varying vec2 vUv",
-    "varying vec4 wpos",
-    "void main() ",
-    "    vec2 vUv = vec2(wpos.z, wpos.x)",
-    "    vUv = vUv*0.05",
-    "     vec4 rgb = texture2D (tex, vUv)",
-    "     gl_FragColor = rgb",
+	"uniform sampler2D tex;",
+    "varying vec2 vUv;",
+    "varying vec4 wpos;",
+    "void main(){",
+    "    vec2 vUv = vec2(wpos.z, wpos.x);",
+    "    vUv = vUv*0.05;",
+    "     vec4 rgb = texture2D (tex, vUv);",
+    "     gl_FragColor = rgb;",
     "}"
 	].join("\n")
   }));
@@ -75,18 +75,18 @@ function buildPlane(){
     "void main() {",
 		"wpos = modelMatrix * vec4(position,1.0);",
         "vec4 epos = viewMatrix * wpos;",
-        "gl_Position = projectionMatrix * epos;  " ,     
+        "gl_Position = projectionMatrix * epos;",     
     "}"
 	].join("\n"),
     fragmentShader:[
-	"uniform sampler2D tex",
-    "varying vec2 vUv",
-    "varying vec4 wpos",
-    "void main() ",
-    "    vec2 vUv = vec2(wpos.z, wpos.x)",
-    "    vUv = vUv*0.05",
-    "     vec4 rgb = texture2D (tex, vUv)",
-    "     gl_FragColor = rgb",
+	"uniform sampler2D tex;",
+    "varying vec2 vUv;",
+    "varying vec4 wpos;",
+    "void main(){",
+    "    vec2 vUv = vec2(wpos.z, wpos.x);",
+    "    vUv = vUv*0.05;",
+    "     vec4 rgb = texture2D (tex, vUv);",
+    "     gl_FragColor = rgb;",
     "}"
 	].join("\n")
   }));
@@ -116,14 +116,14 @@ function buildPlane(){
     "}"
 	].join("\n"),
     fragmentShader:[
-	"uniform sampler2D tex",
-    "varying vec2 vUv",
-    "varying vec4 wpos",
-    "void main() ",
-    "    vec2 vUv = vec2(wpos.z, wpos.x)",
-    "    vUv = vUv*0.05",
-    "     vec4 rgb = texture2D (tex, vUv)",
-    "     gl_FragColor = rgb",
+	"uniform sampler2D tex;",
+    "varying vec2 vUv;",
+    "varying vec4 wpos;",
+    "void main(){",
+    "    vec2 vUv = vec2(wpos.z, wpos.x);",
+    "    vUv = vUv*0.05;",
+    "     vec4 rgb = texture2D (tex, vUv);",
+    "     gl_FragColor = rgb;",
     "}"
 	].join("\n")
   }));
@@ -205,14 +205,14 @@ function buildPlane(){
     "}"
 	].join("\n"),
     fragmentShader:[
-	"uniform sampler2D tex",
-    "varying vec2 vUv",
-    "varying vec4 wpos",
-    "void main() ",
-    "    vec2 vUv = vec2(wpos.z, wpos.x)",
-    "    vUv = vUv*0.05",
-    "     vec4 rgb = texture2D (tex, vUv)",
-    "     gl_FragColor = rgb",
+	"uniform sampler2D tex;",
+    "varying vec2 vUv;",
+    "varying vec4 wpos;",
+    "void main(){",
+    "    vec2 vUv = vec2(wpos.z, wpos.x);",
+    "    vUv = vUv*0.05;",
+    "     vec4 rgb = texture2D (tex, vUv);",
+    "     gl_FragColor = rgb;",
     "}"
 	].join("\n")
   }));
