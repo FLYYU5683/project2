@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<body>
+<style>
+body {
+	overflow: hidden;
+	margin:0;
+	padding:0;
+}
+#info {
+	position: absolute;
+	top: 20px;
+	width: 100%;
+	text-align: center;
+	color: #ffff00;
+}
+</style>  
+
+<div id="info">GOLF<br> 
+<button id="toggle" style="width:15%">Switch Pose</button>
+<button id="toggle2" style="width:15%">Locked Camera</button>
+<button id="toggle3" style="width:15%">Start</button>
+</div>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script type="module">
+
+import {init,animate,balls,startGame,switchCamera,camSwitch} from "./demo1.js/main.js";
+import {standVerse} from "./demo1.js/Steve.js";
+
+$('#toggle').click(function() {
+  standVerse();
+});
+
+$('#toggle3').click(function() {
+	$('#toggle3').text("ReStart");
+	startGame();
+	balls[0].start();
+	balls[1].start();
+});
+$('#toggle2').click(function(){
+	if(switchCamera){
+		$('#toggle2').text("Locked Camera")
+	}
+	else{
+		$('#toggle2').text("Orbit Camera")
+	}
+	camSwitch()
+})
+
+init();
+animate();
+
+</script>
+</body>
+</html>
