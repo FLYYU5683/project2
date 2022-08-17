@@ -212,7 +212,7 @@ function levelRestart(){
 }
 function setSoundID(){
 	backGroundMusic = document.getElementById('backGroundMusic')
-	backGroundMusic.volume = 0.05;
+	backGroundMusic.volume = 0.5;
 	backGroundMusic.play();
 }
 export {init,animate,startGame}
