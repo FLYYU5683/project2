@@ -133,6 +133,7 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   window.addEventListener('resize', onWindowResize, false);
+  setSoundID()
 }
 function animate() {
   flyFlag()
@@ -193,8 +194,8 @@ function levelPlus(){
 function levelRestart(){
 	level = 1;
 }
-function setSoundID(ID){
-	backGroundMusic = document.getElementById(ID)
+function setSoundID(){
+	backGroundMusic = document.getElementById('backGroundMusic')
 	backGroundMusic.volume = 0.05;
 	backGroundMusic.play();
 }
