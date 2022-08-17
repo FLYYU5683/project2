@@ -1,8 +1,8 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {scene,sceneHUD,sceneStroke,camera,camera2,cameraM,cameraHUD,cameraStroke,cameraOrbit,switchCamera,renderer,stroke,balls,steve} from './main.js'
-import {follow,move} from './Steve.js'
-import {keyboard} from './keyPressed.js'
-import {floor4} from './buildTerrain.js'
+import {scene,sceneHUD,sceneStroke,camera,cameraOnBall,camera2,cameraM,cameraHUD,cameraStroke,cameraOrbit,switchCamera,renderer,stroke,balls,steve} from './main.js'
+import {follow,walkFin} from './Steve.js'
+import {keyboard,cameraMove,cameraMoveFin} from './keyPressed.js'
+import {floor4,floor5} from './buildTerrain.js'
 
 (function() {
   Math.clamp = function(val, min, max) {
@@ -36,22 +36,23 @@ var WW = window.innerWidth;
 var HH = window.innerHeight;
 
 	if(switchCamera){
-		if(balls[0].pos.clone().sub(steve.direct.position).length() <= 30||follow){	
-		
 		renderer.setViewport(0, 0, WW , HH );
 		renderer.clear();
 		renderer.render(scene, camera);
+		/*
+		if(cameraMove || cameraMoveFin ||walkFin){	
 		
-	  } else {
-		var temp = new THREE.Vector3(balls[0].pos.x,camera.position.y,balls[0].pos.z);
-		temp.sub(steve.direct.position).normalize().multiplyScalar(100);
-		camera2.position.copy(steve.direct.position.clone().add(temp));
-		camera2.lookAt(balls[0].pos);
-		//renderer.render(scene, camera2);
 		renderer.setViewport(0, 0, WW , HH );
 		renderer.clear();
-		renderer.render(scene, camera2);
+		renderer.render(scene, cameraOnBall);
+		
+	  } 
+	  else {
+		renderer.setViewport(0, 0, WW , HH );
+		renderer.clear();
+		renderer.render(scene, camera);
 	  }
+	  */
 	}
 	else{
 		renderer.setViewport(0, 0, WW , HH );
@@ -75,6 +76,7 @@ var HH = window.innerHeight;
     //renderer.clear();  // important!
     renderer.render(sceneHUD, cameraHUD);
 	floor4.material.uniforms.hole.value.copy (new THREE.Vector3(10,-0.2,-60));
+	floor5.material.uniforms.hole.value.copy (new THREE.Vector3(165,-0.2,-215));
     renderer.setScissorTest(false);
 
 }

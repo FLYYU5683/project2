@@ -20,8 +20,8 @@ class FinitePlane {
 }
 
 class Wall {
-  constructor(len, localN) {
-    var geometry = new THREE.BoxGeometry(len, 5, 2.5);
+  constructor(len,height, localN) {
+    var geometry = new THREE.BoxGeometry(len, height, 2.5);
     var material = new THREE.MeshPhongMaterial({
       color: 0xA23400,
       shininess: 200,
@@ -33,6 +33,7 @@ class Wall {
     this.mesh = mesh;
 	mesh.castShadow = true;
 	mesh.receiveShadow = true;
+	this.height = height / 2;
     this.len = len
     this.localN = localN.clone();
   }
@@ -43,4 +44,18 @@ class Wall {
   }
 
 }
-export {Wall,FinitePlane}
+class Wall2{
+  constructor(len,height,localN,mesh){
+	this.mesh = mesh;
+	this.height = height / 2;
+    this.len = len
+    this.localN = localN.clone();
+  }
+  update() {
+    this.mesh.updateMatrixWorld();
+    let normalMat = new THREE.Matrix3().getNormalMatrix(this.mesh.matrixWorld);
+    this.normal = this.localN.clone().applyMatrix3(normalMat).normalize()
+  }
+	
+}
+export {Wall,Wall2,FinitePlane}
