@@ -218,4 +218,3 @@ function setSoundID(){
 export {init,animate,startGame}
 export {scene,sceneHUD,sceneStroke,camera,cameraOnBall,camera2,cameraM,cameraHUD,cameraStroke,cameraOrbit,renderer,switchCamera,camSwitch}
 export {steve,stroke,PowerBar,block,ballR,light,texture,balls,start,level,levelPlus,levelRestart}
-export {setSoundID}
