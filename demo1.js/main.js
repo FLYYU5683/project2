@@ -19,7 +19,6 @@ var start = false;
 var flag;
 var level = 1;
 var backgroundMusic;
-
 function init() {
   switchCamera = true;
   scene = new THREE.Scene();
@@ -211,6 +210,7 @@ function levelPlus(){
 function levelRestart(){
 	level = 1;
 }
+
 function setSoundID(){
 	backgroundMusic = document.getElementById('backgroundMusic')
 	backgroundMusic.volume = 0.5;
@@ -218,4 +218,3 @@ function setSoundID(){
 export {init,animate,startGame}
 export {scene,sceneHUD,sceneStroke,camera,cameraOnBall,camera2,cameraM,cameraHUD,cameraStroke,cameraOrbit,renderer,switchCamera,camSwitch}
 export {steve,stroke,PowerBar,block,ballR,light,texture,balls,start,level,levelPlus,levelRestart}
-export {setSoundID}
