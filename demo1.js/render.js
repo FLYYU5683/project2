@@ -59,25 +59,14 @@ var HH = window.innerHeight;
 		renderer.clear();
 		renderer.render(scene,cameraOrbit)
 	}
-    if (keyboard.pressed("M")) {
-        renderer.setScissorTest(true);
-        renderer.setScissor(WW/4, HH/4, WW / 2, HH / 2);
-
-        renderer.setViewport(WW/4, HH/4, WW / 2, HH / 2);
-        renderer.clear();  // important!
-        renderer.render(scene, cameraM);
-        renderer.setScissorTest(false);
-    }
-
-    renderer.setScissorTest(true);
-    renderer.setScissor(0, HH/4, WW / 2, HH / 3);
-
-    renderer.setViewport(0, HH/4, WW / 2, HH / 3);
     //renderer.clear();  // important!
+	
     renderer.render(sceneHUD, cameraHUD);
 	floor4.material.uniforms.hole.value.copy (new THREE.Vector3(10,-0.2,-60));
 	floor5.material.uniforms.hole.value.copy (new THREE.Vector3(165,-0.2,-215));
     renderer.setScissorTest(false);
+	
+	
 
 }
 export {textureAnimate,onWindowResize,render}
