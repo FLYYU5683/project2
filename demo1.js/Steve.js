@@ -3,17 +3,18 @@ import {Line2} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/Line
 import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineMaterial.js';
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import {balls,texture,scene,camera} from './main.js';
-import {resetTheta,theta,spaceEffect,Power} from './keyPressed.js'
+import {resetTheta,theta,spaceEffect,Power,beforeHit,ballMove} from './keyPressed.js'
 
 const WW = 4,HH = 12;
-var gyro;
-var move = false,swing = false,isSwing = false,stand = true,follow=true,change = false,isChange = false;
-var T = 1,count;
+var swing = false,isSwing = false,stand = true,follow=true,change = false,isChange = false;
+var stop=true;
+var T = 1,count = 1;
 var matLine;
 var clock = new THREE.Clock();
 var ts = clock.getElapsedTime();
 var ts2 = clock.getElapsedTime();
 var ts3 = clock.getElapsedTime();
+var walkFin = false;
 
 (function() {
   Math.clamp = function(val, min, max) {
@@ -27,9 +28,19 @@ class Steve{
      this.pos=new THREE.Vector3(0,12,0);
      this.vel=new THREE.Vector3(0,0,0);
      this.force=new THREE.Vector3(0,0,0);
+     this.goal = new THREE.Vector3(0,0,0);
+     this.begin = new THREE.Vector3(0,0,0);
+     this.uv = new THREE.Vector3(0,0,0);
+     this.temp = new THREE.Vector3(0,0,0);
+     this.temp2 = new THREE.Vector3(0,0,0);
+	 this.temp3 = new THREE.Vector3(0,0,0);
 	 this.direct = new THREE.Group();
      this.body = new THREE.Group();
      this.hands = new THREE.Group();
+	 this.footPath = new THREE.Group();
+	 this.footPath2 = new THREE.Group();
+	 this.footPath3 = new THREE.Group();
+	 this.footPath4 = new THREE.Group();
      this.power=0.1;
      this.angle=0;	 
 	 this.target=null;
@@ -125,14 +136,11 @@ class Steve{
   this.Puffer.visible = false;
   //torso.rotation.x=-Math.PI/6;
 
-
-  gyro = new Gyroscope();
-  this.body.add(gyro);
-  //gyro.add(camera2);
   this.line =this.buildLine();
   this.arrow = this.buildArrow();
+  this.arrow.position.y = 1;
   
-  this.body.position.set(-10, 0, 2);
+  this.body.position.set(-10, -1, 2);
   this.direct.add(this.body,this.line,this.arrow);
   this.direct.position.set(-2, 0, 0);
 
@@ -140,75 +148,238 @@ class Steve{
   hitPoint.position.set(0, 0, 1)
   hitPoint.visible = false;
   this.direct.add(hitPoint)
+  this.body.visible = false;
   scene.add(this.direct);
   
   this.direct.add(camera);
+  this.direct.visible = false;
   //////////////////////////////////////////////////////////
 }
-  update(dt){
-    if(move==false){
-    this.setTarget(balls[0].mesh.localToWorld(new THREE.Vector3(0, 0, 0)));
-	}
-    this.accumulateForce();
-    this.vel.add(this.force.clone().multiplyScalar(dt));
-
-		// ARRIVAL: velocity modulation
-    if (this.target !== null) {   
-      let dst = this.target.distanceTo(this.pos);
-      if (dst < this.ARRIVAL_R) {  // close enough
-        this.vel.setLength(dst);
-      }
-    }
-    
-   	// MAXSPEED modulation
-		let speed = this.vel.length()
-		this.vel.setLength(Math.clamp(speed, 0, this.MAXSPEED))
-		this.pos.add(this.vel.clone().multiplyScalar(dt))
-        this.direct.position.copy(this.pos)
-		
-		if (balls[0].vel.length() <= 0.001&&isSwing==true&&!spaceEffect&&!swing) {
-    console.log('a');
-    move = false;
-    isSwing = false;
-    this.head.rotation.y = Math.PI / 2;
-    resetTheta();
-	stand = true;
+  buildFootPrint(){
+	  
+	  var loader = new THREE.TextureLoader();
+    var map = loader.load("https://i.imgur.com/ifTuBvu.png");
+   this.left=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map,
+    transparent: true
+  }));
+  this.left2=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map,
+    transparent: true
+  }));
+  this.left3=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map,
+    transparent: true
+  }));
+  this.left4=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map,
+    transparent: true
+  }));
+  var  loader2 = new THREE.TextureLoader();
+  var  map2 = loader2.load("https://i.imgur.com/DZ2BjPS.png");
+   this.right=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map2,
+    transparent: true
+  }));
+  this.right2=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map2,
+    transparent: true
+  }));
+  this.right3=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map2,
+    transparent: true
+  }));
+  this.right4=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
+    map: map2,
+    transparent: true
+  }));
+  
+  this.right.position.set(2,0.1,0);
+  this.left.position.set(-2,0.1,0);
+  this.right.rotation.x=-Math.PI/2;
+  this.left.rotation.x=-Math.PI/2;
+  this.left.material.opacity=0;
+  this.right.material.opacity=0;
+  this.footPath.add(this.right);
+  this.footPath.add(this.left);
+  scene.add(this.footPath);  
+  
+  this.right2.position.set(2,0.1,0);
+  this.left2.position.set(-2,0.1,0);
+  this.right2.rotation.x=-Math.PI/2;
+  this.left2.rotation.x=-Math.PI/2;
+  this.left2.material.opacity=0;
+  this.right2.material.opacity=0;
+  this.footPath2.add(this.right2);
+  this.footPath2.add(this.left2);
+  scene.add(this.footPath2);
+  
+  this.right3.position.set(2,0.1,0);
+  this.left3.position.set(-2,0.1,0);
+  this.right3.rotation.x=-Math.PI/2;
+  this.left3.rotation.x=-Math.PI/2;
+  this.left3.material.opacity=0;
+  this.right3.material.opacity=0;
+  this.footPath3.add(this.right3);
+  this.footPath3.add(this.left3);
+  scene.add(this.footPath3);
+  
+  this.right4.position.set(2,0.1,0);
+  this.left4.position.set(-2,0.1,0);
+  this.right4.rotation.x=-Math.PI/2;
+  this.left4.rotation.x=-Math.PI/2;
+  this.left4.material.opacity=0;
+  this.right4.material.opacity=0;
+  this.footPath4.add(this.right4);
+  this.footPath4.add(this.left4);
+  scene.add(this.footPath4);  
+	  
+	  
   }
-
-    
-    // for orientable agent
-    // non PD version
-    if (this.vel.length() > 0.1) {
-	    	this.angle = Math.atan2 (-this.vel.z, this.vel.x)
-    		this.direct.rotation.y = this.angle
-			let intKey3=this.keyframe3(clock.getElapsedTime());
-                this.lArm.rotation.z = intKey3[1];
-                this.rArm.rotation.z = intKey3[0];
-                this.lLeg.rotation.z = intKey3[0];
-                this.rLeg.rotation.z = intKey3[1];
-			follow=true;
-   	}
+  footUpdate(){
+	  this.uv.x=this.goal.x-this.begin.x;
+      this.uv.z=this.goal.z-this.begin.z;
+      this.uv.normalize();
+	  
+	  
+	  this.footPath.position.set(this.footPath.position.x+this.uv.x*6,0.1,this.footPath.position.z+this.uv.z*6)
+	  this.footPath.lookAt(this.begin.x,0,this.begin.z);
+	  if(count==1)
+	  {
+		this.left.material.opacity=0;
+		this.temp.copy(this.direct.position)		
+		this.right.material.opacity=1;
+        this.footPath2.position.set(this.temp.x,0.1,this.temp.z);
+	    this.footPath2.lookAt(this.begin.x,0,this.begin.z);
+        this.left2.material.opacity=0.8;
+	    this.right2.material.opacity=0;		
+	  }
+	  else if(count==2)
+	  {
+         this.left.material.opacity=1;
+		 this.right.material.opacity=0;
+		 this.footPath2.position.set(this.temp.x,0.1,this.temp.z);
+	     this.footPath2.lookAt(this.begin.x,0,this.begin.z);
+		 this.left2.material.opacity=0;
+	     this.right2.material.opacity=0.8;
+		 this.footPath3.position.set(this.temp2.x,0.1,this.temp2.z);
+		 this.footPath3.lookAt(this.begin.x,0,this.begin.z);
+		 this.left3.material.opacity=0.5;
+	     this.right3.material.opacity=0;
+	  }
+     else
+     {
+        if(this.left.material.opacity==1)
+		{
+		   this.left.material.opacity=0;
+		   this.right.material.opacity=1;
+		   this.footPath2.position.set(this.temp.x,0.1,this.temp.z);
+	       this.footPath2.lookAt(this.begin.x,0,this.begin.z);
+		   this.left2.material.opacity=0.8;
+	       this.right2.material.opacity=0;
+           this.footPath3.position.set(this.temp2.x,0.1,this.temp2.z);
+		   this.footPath3.lookAt(this.begin.x,0,this.begin.z);
+		   this.left3.material.opacity=0;
+	       this.right3.material.opacity=0.5;
+           this.footPath4.position.set(this.temp3.x,0.1,this.temp3.z);
+		   this.footPath4.lookAt(this.begin.x,0,this.begin.z);
+		   this.left4.material.opacity=0.2;
+	       this.right4.material.opacity=0;		   
+		}
+        else
+        {
+		   this.left.material.opacity=1;
+		   this.right.material.opacity=0;
+		   this.footPath2.position.set(this.temp.x,0.1,this.temp.z);
+	       this.footPath2.lookAt(this.begin.x,0,this.begin.z);
+		   this.left2.material.opacity=0;
+	       this.right2.material.opacity=0.8;
+           this.footPath3.position.set(this.temp2.x,0.1,this.temp2.z);
+		   this.footPath3.lookAt(this.begin.x,0,this.begin.z);
+		   this.left3.material.opacity=0.5;
+	       this.right3.material.opacity=0;
+           this.footPath4.position.set(this.temp3.x,0.1,this.temp3.z);
+		   this.footPath4.lookAt(this.begin.x,0,this.begin.z);
+		   this.left4.material.opacity=0;
+	       this.right4.material.opacity=0.2;
+		}			
+     
+     }	 
+	 
+   this.temp3.copy(this.temp2);
+   this.temp2.copy(this.temp);
+   this.temp.copy(this.footPath.position);
+   count++;
+   
+   let distance = new THREE.Vector3(0,0,0);
+   
+   distance.copy(this.goal.clone().sub(this.begin));
+   distance.normalize().multiplyScalar((count)*6);
+   //console.log(distance.length(),this.goal.clone().sub(this.begin).length())
+   if(distance.length()>=this.goal.clone().sub(this.begin).length()){
+		stop=true;
+		this.left.material.opacity=0;
+        this.right.material.opacity=0;
+		this.left2.material.opacity=0;
+        this.right2.material.opacity=0;
+		this.left3.material.opacity=0;
+        this.right3.material.opacity=0;
+		this.left4.material.opacity=0;
+        this.right4.material.opacity=0;
+		this.direct.position.copy(balls[0].pos)
+		count=1;
+		walkFin = false;
+	}
 	else
 	{
-	   follow=false;
+		stop=false;
 	}
-	    this.pose5.lThigh = -Math.PI/80* this.vel.length();
-		this.pose5.rThigh = Math.PI/80 * this.vel.length();
-		this.pose6.lThigh = Math.PI/80 * this.vel.length();
-		this.pose6.rThigh = -Math.PI/80* this.vel.length();
-		
-  if (stand == false) {
-    if (swing == true) {
-      if (isSwing == false) {
-        ts = clock.getElapsedTime();
-        isSwing = true;
-      }
-      let intKey = this.keyframe(clock.getElapsedTime(), T);
-      this.hands.rotation.x = intKey[0];
-      this.hands.rotation.x = intKey[1];
-    }
+	  
   }
+  update(dt){
+	if(stop==false){	  
+     setTimeout(this.footUpdate.bind(this),100);
+     stopTrue();
+	}
+	if(!beforeHit && !swing){
+		this.body.visible = true
+		swing = true;
+		this.head.rotation.y = Math.PI / 2;
+		this.pos.copy(balls[0].mesh.localToWorld(new THREE.Vector3(0, 0, 0)))
+		this.direct.position.copy(this.pos)
+		
+		this.lLeg.rotation.x = Math.PI / 12;
+		this.rLeg.rotation.x = -Math.PI / 12;
+		this.rArm.rotation.x = Math.PI / 10;
+		this.lArm.rotation.x = -Math.PI / 10;
+		this.rArm.rotation.z = Math.PI / 5;
+		this.lArm.rotation.z = Math.PI / 5;
 
+		this.lArm.position.set(0, HH / 2 - 6, -(WW + WW / 2 + 3));
+		this.rArm.position.set(0, HH / 2 - 6, WW + WW / 2 - 3);
+
+		this.torso.rotation.z = -Math.PI / 4.5;
+
+		this.hands.position.y = 9.5;
+		this.hands.position.x = -0.5;
+		if (isSwing == false) {
+		    this.hands.rotation.x = -theta;
+		}
+		this.Puffer.visible = true;
+	}
+	if(swing){
+		if (isSwing == false) {
+			ts = clock.getElapsedTime();
+			isSwing = true;
+		}
+		let intKey = this.keyframe(clock.getElapsedTime(), T);
+		this.hands.rotation.x = intKey[0];
+		this.hands.rotation.x = intKey[1];
+	}
+	this.pose5.lThigh = -Math.PI/80* this.vel.length();
+	this.pose5.rThigh = Math.PI/80 * this.vel.length();
+	this.pose6.lThigh = Math.PI/80 * this.vel.length();
+	this.pose6.rThigh = -Math.PI/80* this.vel.length();
   if (change == true) {
     if (isChange == false) {
       ts2 = clock.getElapsedTime();
@@ -225,52 +396,7 @@ class Steve{
   this.pose1.rThigh = -theta;
   this.pose2.lThigh = Math.PI / 8 + theta;
   this.pose2.rThigh = Math.PI / 8 + theta;
-  
-	  
-	  //pose
-  if (stand == false) {
-    this.lLeg.rotation.x = Math.PI / 12;
-    this.rLeg.rotation.x = -Math.PI / 12;
-    this.rArm.rotation.x = Math.PI / 10;
-    this.lArm.rotation.x = -Math.PI / 10;
-    this.rArm.rotation.z = Math.PI / 5;
-    this.lArm.rotation.z = Math.PI / 5;
 
-    this.lArm.position.set(0, HH / 2 - 6, -(WW + WW / 2 + 3));
-    this.rArm.position.set(0, HH / 2 - 6, WW + WW / 2 - 3);
-
-    this.torso.rotation.z = -Math.PI / 4.5;
-
-    this.hands.position.y = 9.5;
-    this.hands.position.x = -0.5;
-    if (isSwing == false) {
-      this.hands.rotation.x = -theta;
-    }
-
-    this.Puffer.visible = true;
-	count=0;
-  } else {
-    if(count==0){
-    this.lArm.position.set(0, HH, -11);
-    this.rArm.position.set(-1, HH - 2, 5);
-
-    this.lLeg.rotation.x = 0;
-    this.rLeg.rotation.x = 0;
-    this.rArm.rotation.x = 0;
-    this.lArm.rotation.x = 0;
-    this.rArm.rotation.z = 0;
-    this.lArm.rotation.z = 0;
-    this.torso.rotation.z = 0;
-
-    this.hands.position.y = 0;
-    this.hands.position.x = 0;
-	this.hands.rotation.x = 0;
-    this.Puffer.visible = false;
-	count=1;
-}
-  }
-  
-  
    
    }
   keyframe3(t){
@@ -750,22 +876,6 @@ class Steve{
   group.visible = false;
   return group;
 }
-/*
-  buildArrow(){
-		var stick = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.3,5),new THREE.MeshBasicMaterial({color: 0xffff00}))
-    var cone = new THREE.Mesh(new THREE.ConeGeometry( 0.5, 2, 32 ),new THREE.MeshBasicMaterial( {color: 0xffff00} ));
-		stick.position.y = 0.5;
-		cone.rotation.x = -Math.PI / 2;
-		cone.position.set(0,0.5,-2.5)
-		
-		var group = new THREE.Group();
-		group.add(stick,cone);
-		group.position.z = -2.5;
-		scene.add(group);
-		group.visible = false;
-		return group;
-	}
-	*/
   setTarget(pos) {
     var temp=new THREE.Vector3(pos.x,0,pos.z);
   	if (this.target !== null)
@@ -787,7 +897,6 @@ class Steve{
 			circle.material.color.copy(color);
 		}
 	}
-	console.log(circles)
 	circles.children[0].position.set(0 , 0.03 , 1 + r)
 	circles.children[1].position.set(-2 * r,0.03,1 + 3 * r)
 	circles.children[2].position.set(0,0.03,1 + 3 * r)
@@ -818,9 +927,10 @@ class Steve{
     if (this.target) 
     	this.force.copy(this.targetInducedForce(this.target));
   }
-}
-function moveTrue(){
-	move = true;
+  start(){
+	this.direct.visible = true;
+	this.direct.position.copy(balls[0].pos);
+  }
 }
 function swingTrue(){
 	swing = true;
@@ -828,4 +938,10 @@ function swingTrue(){
 function standVerse(){
 	stand = !stand;
 }
-export {Steve,matLine,moveTrue,swingTrue,standVerse,follow,move,stand,swing}
+function stopTrue(){
+	stop= !stop;
+}
+function walkFinFalse(){
+	walkFin = false;
+}
+export {Steve,matLine,swingTrue,standVerse,follow,stand,swing,stop,stopTrue,walkFin,walkFinFalse}
