@@ -50,9 +50,8 @@ function init() {
   cameraM.lookAt(40, 0,-60);
   
   
-  cameraHUD = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraHUD.position.set(0, 20, 32);
-  cameraHUD.lookAt(0, 0, 0);
+	cameraHUD = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 1600);
+  cameraHUD.position.z = 1580;
   
   cameraStroke = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
   cameraStroke.position.set(0, 0, 24);
@@ -134,6 +133,23 @@ function init() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   window.addEventListener('resize', onWindowResize, false);
   setSoundID()
+  
+  let loader2 = new THREE.TextureLoader();
+
+  var texture3 = loader2.load('https://i.imgur.com/fYgKcAf.jpeg%27');
+   var texMat = new THREE.MeshBasicMaterial({
+    opacity: 0.7,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    map: texture3});
+	
+  var frame = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), texMat);
+  var score = frame.clone();
+   score.position.set(-6, 9, 0);
+  //score.position.set(-4, 18, 22);
+  sceneHUD.add(score);
+  
 }
 function animate() {
   flyFlag()
