@@ -18,8 +18,7 @@ var light;
 var start = false;
 var flag;
 var level = 1;
-var backGroundMusic;
-
+var backgroundMusic;
 function init() {
   switchCamera = true;
   scene = new THREE.Scene();
@@ -152,6 +151,7 @@ function init() {
   
 }
 function animate() {
+  backgroundMusic.play();
   flyFlag()
   var dt = clock.getDelta();
 
@@ -210,10 +210,10 @@ function levelPlus(){
 function levelRestart(){
 	level = 1;
 }
+
 function setSoundID(){
-	backGroundMusic = document.getElementById('backGroundMusic')
-	backGroundMusic.volume = 0.5;
-	backGroundMusic.play();
+	backgroundMusic = document.getElementById('backgroundMusic')
+	backgroundMusic.volume = 0.5;
 }
 export {init,animate,startGame}
 export {scene,sceneHUD,sceneStroke,camera,cameraOnBall,camera2,cameraM,cameraHUD,cameraStroke,cameraOrbit,renderer,switchCamera,camSwitch}
