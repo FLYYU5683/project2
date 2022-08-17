@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<body>
+<style>
+body {
+	overflow: hidden;
+	margin:0;
+	padding:0;
+}
+#info {
+	position: absolute;
+	top: 20px;
+	width: 100%;
+	text-align: center;
+	color: #ffff00;
+}
+</style>  
+
+<div id="info">GOLF<br> 
+<button id="toggle" style="width:8%">Switch Pose</button>
+<button id="toggle2" style="width:8%">Locked Camera</button><br>
+<button id="toggle3" style="width:8%">Start</button>
+</div>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<audio id="hitwall" style="display:none">
+<source src="./sound/hitwall.mp3" type='audio/mp3'>
+</audio>
+<audio id="backGroundMusic" style="display:none">
+<source src="./sound/backGroundMusic.mp3" type='audio/mp3'>
+</audio>
+
+<script type="module">
+
+import {init,animate,balls,startGame,switchCamera,camSwitch,steve} from "./demo1.js/main.js";
+import {standVerse} from "./demo1.js/Steve.js";
+
+$('#toggle').click(function() {
+  standVerse();
+});
+
+$('#toggle3').click(function() {
+	$('#toggle3').text("ReStart");
+	startGame();
+	balls[0].start();
+	balls[1].start();
+	steve.start();
+});
+$('#toggle2').click(function(){
+	if(switchCamera){
+		$('#toggle2').text("Locked Camera")
+	}
+	else{
+		$('#toggle2').text("Orbit Camera")
+	}
+	camSwitch()
+})
+
+init();
+animate();
+</script>
+</body>
+</html>
