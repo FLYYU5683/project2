@@ -535,37 +535,7 @@ function buildfloors(){
 	texture2.wrapT = THREE.RepeatWrapping;
 	
 	var material = new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide});
-	/*
-	var material = new THREE.ShaderMaterial({
-    uniforms: {
-      tex: {
-        type: 't',
-        value: texture2
-      },
-    },
-	side: THREE.DoubleSide,
-    vertexShader:[
-    "varying vec2 vUv;",
-    "varying vec4 wpos;",
-    "void main() {",
-		"wpos = modelMatrix * vec4(position,1.0);",
-        "vec4 epos = viewMatrix * wpos;",
-        "gl_Position = projectionMatrix * epos; " ,     
-    "}"
-	].join("\n"),
-    fragmentShader:[
-	"uniform sampler2D tex;",
-    "varying vec2 vUv;",
-    "varying vec4 wpos;",
-    "void main(){",
-    "    vec2 vUv = vec2(wpos.z, wpos.x);",
-    "    vUv = vUv*0.05;",
-    "     vec4 rgb = texture2D (tex, vUv);",
-    "     gl_FragColor = rgb;",
-    "}"
-	].join("\n")
-  });
-  */
+
 	var convertUV = function(x,z){
 		return [(x - 60) / 130,(z + 150) / 50]
 	}
@@ -587,58 +557,15 @@ function buildfloors(){
 	var convertUV2 = function(x,z){
 		return [(x - 140) / 50,(z + 230) / 80]
 	}
+
+	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
+	texture2.wrapS = THREE.RepeatWrapping;
+	texture2.wrapT = THREE.RepeatWrapping;
 	
-	/*
-	var geometry = new ParametricGeometry(function(u0, v0, pos) {
-		let x = -25 + 50 * u0;
-		let z = -40 + 80 * v0;
-		pos.set(x, heightFunc(x, z), z);
-	}, 40, 40);
-	*/
-	let meshMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      tex: {
-        type: 't',
-        value: texture2
-      },
-      radius: {
-        type: 'f',
-        value: 2.576
-      },
-      hole: {
-          type: 'v3',
-        value: new THREE.Vector3() // default hole at (0,0,0)
-      }
-    },side: THREE.DoubleSide,
-    vertexShader:[
-	  "varying vec4 wpos;",
-	  "varying vec2 vUv;",
-	  "void main() {",
-		"vUv = uv;",
-		"wpos = modelMatrix * vec4(position,1.0);",
-			"vec4 epos = viewMatrix * wpos;",
-			"gl_Position = projectionMatrix * epos; ",       
-	  "}"
-	].join("\n"),
-    fragmentShader:[
-	  "varying vec4 wpos;",
-	  "varying vec2 vUv;",
-	  "uniform vec3 hole;",
-	  "uniform float radius;",
-	  "uniform sampler2D tex;",
-	  "void main() {",
-			"vec2 vUv = vec2(wpos.z, wpos.x);",
-			"vUv = vUv*0.05;",
-			" vec4 rgb = texture2D (tex, vUv);",
-		 "if (distance (hole,wpos.xyz) < radius)",
-			"discard;",
-		 "else",
-			 "gl_FragColor = rgb;",
-	 "}"
-	].join("\n")
-  });
-  
-	floor5 = new THREE.Mesh(geometry2, meshMaterial);
+	floor5 = new THREE.Mesh(geometry2, new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide}));
+	
+	floor5.material.map.repeat.set( 4, 4 );
+	floor5.receiveShadow = true;
 	floor5.y = 0;
 	floor5.heightFunc = heightFunc;
 	floor5.inHeightFunc = inHeightFunc;

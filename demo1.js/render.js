@@ -37,7 +37,7 @@ function render() {
     renderer.render(scene, cameraOrbit);
   }
     renderer.render(sceneHUD, cameraHUD);
-	floor5.material.uniforms.hole.value.copy (new THREE.Vector3(165,-0.2,-215));
+	//floor5.material.uniforms.hole.value.copy (new THREE.Vector3(165,-0.2,-215));
 }
 
 export {onWindowResize,render}
