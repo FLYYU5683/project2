@@ -32,78 +32,14 @@ function keyPressed() {
 	var EPS = 0.7
 	if (beforeHit && balls[0].vel.length() <= EPS / 5) {
 		steve.arrow.visible = true;
-		for(var i = 0; i < 9; i++)
-			steve.arrow.children[i].visible = true;
+		for(var i = 0; i < 19; i++)
+			steve.arrow.children[i].visible = false;
 		
 		var check = Math.floor(Power * 10) / 10;
-		switch (check){
-			case 0:
-				for(var i = 9; i < 9; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 9; i--)
-					steve.arrow.children[i].visible = false;
-				break;
-			case 0.1 :
-				for(var i = 9; i < 10; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 10; i--)
-					steve.arrow.children[i].visible = false;
-				break;
-			case 0.2 :
-				for(var i = 9; i < 11; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 11; i--)
-					steve.arrow.children[i].visible = false;
-				break;
-			case 0.3 :
-				for(var i = 9; i < 12; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 12; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-			case 0.4 :
-				for(var i = 9; i < 13; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 13; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-			case 0.5 :
-				for(var i = 9; i < 14; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 14; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-			case 0.6 :
-				for(var i = 9; i < 15; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 15; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-			case 0.7 :
-				for(var i = 9; i < 16; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 16; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-			case 0.8 :
-				for(var i = 9; i < 17; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 17; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-			case 0.9 :
-				for(var i = 9; i < 18; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 18; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-			case 1 :
-				for(var i = 9; i < 19; i++)
-					steve.arrow.children[i].visible = true;
-				for(var i = steve.arrow.children.length - 1; i >= 19; i--)
-					steve.arrow.children[i].visible = false;
-				break;			
-		}
+		
+		for(var i = 0; 9 + check < i; i++)
+			steve.arrow.children[i].visible = true;
+		
 		if(balls[1].vel.length() <= EPS && !predict){
 			//predictLine.visible = false;
 			let temp = new THREE.Vector3(0, 0, 0);
@@ -267,7 +203,7 @@ function keyPressed() {
 	cameraMove = false
 	cameraMoveFin = true;
 	ballMove = false
-	steve.body.visible = false;
+	steve.body.visible = true;
 	steve.goal.copy(balls[0].pos)
 	steve.begin.copy(steve.direct.position)
 	steve.footPath.position.copy(steve.direct.position)

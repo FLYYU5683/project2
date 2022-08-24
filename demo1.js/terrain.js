@@ -44,18 +44,4 @@ class Wall {
   }
 
 }
-class Wall2{
-  constructor(len,height,localN,mesh){
-	this.mesh = mesh;
-	this.height = height / 2;
-    this.len = len
-    this.localN = localN.clone();
-  }
-  update() {
-    this.mesh.updateMatrixWorld();
-    let normalMat = new THREE.Matrix3().getNormalMatrix(this.mesh.matrixWorld);
-    this.normal = this.localN.clone().applyMatrix3(normalMat).normalize()
-  }
-	
-}
-export {Wall,Wall2,FinitePlane}
+export {Wall,FinitePlane}
