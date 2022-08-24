@@ -1,91 +1,79 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
-import {buildTerrain,table,planes,walls,wall2s} from './buildTerrain.js';
-import {BuildBlock,BuildPowerBar,BuildFlag,matLine2,matLine3} from './buildThing.js';
+import {buildTerrain,table,planes,walls} from './buildTerrain.js';
 import {Particle} from './Particle.js'
-import {textureAnimate,onWindowResize,render} from './render.js'
-import {Steve,matLine,stop,stopTrue} from './Steve.js'
-import {keyPressed} from './keyPressed.js'
+import {onWindowResize,render} from './render.js'
+import {Steve} from './Steve.js'
+import {leftMouseDown,leftMouseUp,middleMouseDown,rightMouseDown,rightMouseUp,mouseMove,mouseEvent,mouseWheel} from "./mouseEvent.js"
 
-var camera,cameraOnBall,camera2,cameraM,cameraHUD,cameraStroke,cameraOrbit, scene,sceneHUD,sceneStroke, renderer, switchCamera;
+var cameraOnPlayer,cameraForMouse,cameraHUD,cameraOrbit,scene,sceneHUD,renderer;
 var steve,balls = [];
-var texture;
 var clock = new THREE.Clock();
-var stroke;
-var PowerBar,block;
-var ballR = 1;
-var light;
 var start = false;
-var flag;
 var level = 1;
-var backgroundMusic;
+var backgroundMusic,hitSound;
+var controls;
+var pickables = [];
+var startButton;
+var textureHUD;
+var inholeSound;
 function init() {
-  switchCamera = true;
+	
   scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2( 0x21384f, 0.0050,1000);
+  scene.background = new THREE.Color( 0x21384f );
   sceneHUD = new THREE.Scene();
-  sceneStroke = new THREE.Scene();
 
   var amblight = new THREE.AmbientLight(0x255483); // soft white light
   scene.add(amblight);
 
   renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x21384f);
+  renderer.setClearColor(0x21384f , 0);
   document.body.appendChild(renderer.domElement);
- renderer.localClippingEnabled = true;
-  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.set(0, 25, 40);
-  camera.lookAt(new THREE.Vector3(0, 10, 0));
   
-  cameraOnBall = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraOnBall.position.set(0, 25, 40);
-  cameraOnBall.lookAt(new THREE.Vector3(0, 10, 0));
+  cameraOnPlayer = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  cameraOnPlayer.position.set(0, 40, 70);
+  cameraOnPlayer.lookAt(0, 5.68, 10);
   
-  camera2 = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera2.lookAt(new THREE.Vector3(0, 0, 0));
-	
-  cameraM = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraM.position.set(40, 120,-60 );
-  cameraM.lookAt(40, 0,-60);
-  
-  
-	cameraHUD = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 1600);
+  cameraForMouse = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+  cameraForMouse.position.set(0, 40, 70);
+  cameraForMouse.lookAt(0, 5.68, 10);
+
+  cameraHUD = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 1600);
   cameraHUD.position.z = 1580;
   
-  cameraStroke = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraStroke.position.set(0, 0, 24);
-  cameraStroke.lookAt(0, 0, 0);
-  
   cameraOrbit = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraOrbit.position.set(0,50,70);
-  cameraOrbit.lookAt(0,0,0);
-  let controls = new OrbitControls(cameraOrbit, renderer.domElement);
+  cameraOrbit.position.set(0, 40, 70);
+  cameraOrbit.lookAt(0,1,10);
+  
+  controls = new OrbitControls(cameraOrbit, renderer.domElement);
   
 
-  var loader = new THREE.TextureLoader();
-  loader.setCrossOrigin('');
-  texture = loader.load('http://i.imgur.com/dSQ0A9W.png');
+
+  
   ////////////////////////////////////////////////////////////////
   var gridXZ = new THREE.GridHelper(400, 40, 'red', 'white');
   //gridXZ.position.set(75,1,-80);
   gridXZ.position.y = 1
   //scene.add(gridXZ);
   
+  //steve
   steve=new Steve(4,12);
   steve.buildsteve();
   steve.buildFootPrint();
+  
   //light
   let light2 = new THREE.DirectionalLight(0xffffff);
   light2.position.set(50, 70, 50);
   light2.castShadow = true;
   
   light2.shadow.camera.left = -50;
-  light2.shadow.camera.right = 50;
-  light2.shadow.camera.top = -50;
-  light2.shadow.camera.bottom = 50;
+  light2.shadow.camera.right = 100;
+  light2.shadow.camera.top = -100;
+  light2.shadow.camera.bottom = 100;
   light2.shadow.camera.near = 1;
   light2.shadow.camera.far = 200;
-  //light2.target = puck;
   light2.shadow.mapSize.width = light2.shadow.mapSize.height = 1024;
   light2.shadow.bias = -0.007
   
@@ -93,70 +81,69 @@ function init() {
   var dlshelper = new THREE.CameraHelper (light2.shadow.camera) 
   //scene.add ( dlshelper );
 
-  PowerBar = BuildPowerBar();
-  sceneHUD.add(PowerBar);
-  block=BuildBlock();
-  sceneHUD.add(block);
-
+  //balls
   var ballMaterial = new THREE.MeshPhongMaterial({
     map: new THREE.TextureLoader().load(
-      'https://i.imgur.com/TYIPjD9.jpg'
+      'https://i.imgur.com/GjnQxsb.jpg'
     )
   });
-  var ballGeometry = new THREE.SphereGeometry(ballR, 64);
-  var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
-  var ball = new Particle(ballMesh);
-  ball.dtt =  0.016;
-  ball.ID = "player";
-  balls.push(ball);
-  balls[0].pos.set(10, 2, -2);
   
-  light = new THREE.DirectionalLight(0xffffff);
-  //scene.add(light);
+  var ballGeometry = new THREE.SphereGeometry(1, 64);
+  var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
+  var ball = new Particle(ballMesh,0.016,"player");
+  balls.push(ball);
+  
+		
+  var ballGeometry2 = new THREE.SphereGeometry(1, 64);
+  var ballMesh2 = new THREE.Mesh(ballGeometry2, ballMaterial);
+  ballMesh2.visible = false;
+  var ball2 = new Particle(ballMesh2,0.054,"predict")
+  balls.push(ball2);
+  //
+  
   buildTerrain()
   renderer.autoClear = false;
-		
-	var ballGeometry2 = new THREE.SphereGeometry(ballR, 64);
-    var ballMesh2 = new THREE.Mesh(ballGeometry2, ballMaterial);
-	ballMesh2.visible = false;
-	var ball2 = new Particle(ballMesh2)
-	ball2.dtt = 0.054
-	balls.push(ball2);
-	ball2.ID = "predict";
-
-	flag = BuildFlag();
-	//scene.add(flag);
-	flag.position.set(10,-6,-60);
-	
+  
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   window.addEventListener('resize', onWindowResize, false);
-  setSoundID()
   
-  let loader2 = new THREE.TextureLoader();
+  document.addEventListener('mousedown', leftMouseDown, false);
+  document.addEventListener('mouseup', leftMouseUp, false);
+  document.addEventListener('mousedown', middleMouseDown, false);
+  document.addEventListener('mousedown', rightMouseDown, false);
+  document.addEventListener('mouseup', rightMouseUp, false);
+  document.addEventListener('mousemove', mouseMove, false);
+  document.addEventListener('mousedown', pressStart, false);
+  document.addEventListener( 'mousewheel', mouseWheel, false );
 
-  var texture3 = loader2.load('https://i.imgur.com/fYgKcAf.jpeg%27');
-   var texMat = new THREE.MeshBasicMaterial({
-    opacity: 0.7,
+  backgroundMusic = document.getElementById('backgroundMusic')
+  hitSound = document.getElementById('hit')
+  inholeSound = document.getElementById('inhole')
+  backgroundMusic.volume = 0.2;
+  hitSound.volume = 1;
+  balls[0].hitSound = hitSound;
+  let loader3 = new THREE.TextureLoader();
+  var texture4 = loader3.load("https://i.imgur.com/PegGW4D.png")
+  var startButtonMaterial = new THREE.MeshBasicMaterial({
+    opacity: 1,
+	alphaTest:0.5,
     transparent: true,
-    depthTest: false,
+	depthTest: false,
     depthWrite: false,
-    map: texture3});
-	
-  var frame = new THREE.Mesh(new THREE.PlaneGeometry(8, 2), texMat);
-  var score = frame.clone();
-   score.position.set(-6, 9, 0);
-  //score.position.set(-4, 18, 22);
-  sceneHUD.add(score);
-  
+    map: texture4});
+  startButton = new THREE.Mesh(new THREE.PlaneGeometry(6, 8), startButtonMaterial);
+   startButton.position.set(0, 0, 0);
+   pickables.push(startButton)
+   sceneHUD.add(startButton)
+  HUDtexture()
 }
 function animate() {
-  backgroundMusic.play();
-  flyFlag()
+  //backgroundMusic.play();
   var dt = clock.getDelta();
 
   balls.forEach(function(b) {
-    b.update(dt)
+    b.update()
   });
   table.updateMatrixWorld();
   steve.update(dt);
@@ -165,7 +152,7 @@ function animate() {
    balls[0].mesh.visible=false;
   }
   else{
-	keyPressed();
+	mouseEvent();
     balls[0].mesh.visible=true;
   }
   planes.forEach(function(b) {
@@ -176,33 +163,9 @@ function animate() {
     b.update()
   });
   
-  wall2s.forEach(function(b) {
-    b.update()
-  });
-  
-  matLine.resolution.set(window.innerWidth, window.innerHeight);
-  matLine2.resolution.set(window.innerWidth, window.innerHeight); 
-  matLine3.resolution.set(window.innerWidth, window.innerHeight); 
-
   render();
   requestAnimationFrame(animate);
 	
-}
-function flyFlag(){
-	if(flag.position.clone().sub(balls[0].pos).length() <= 30){
-		if(flag.position.y <= 5)
-			flag.position.y += 0.2;
-	}
-	else{
-		if(flag.position.y >= -6)
-			flag.position.y -= 0.2;
-	}
-}
-function startGame(){
-	start = true;
-}
-function camSwitch(){
-	switchCamera = !switchCamera;
 }
 function levelPlus(){
 	level++;
@@ -210,11 +173,62 @@ function levelPlus(){
 function levelRestart(){
 	level = 1;
 }
-
-function setSoundID(){
-	backgroundMusic = document.getElementById('backgroundMusic')
-	backgroundMusic.volume = 0.5;
+function pressStart(){
+	event.preventDefault();
+	if(!start){
+	var mouse = new THREE.Vector2()
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	var raycaster = new THREE.Raycaster()
+    raycaster.setFromCamera(mouse, cameraHUD);
+    var intersects = raycaster.intersectObjects(pickables, true);
+      if (intersects.length > 0) {
+		balls[0].start();
+		balls[1].start();
+		steve.start();
+		start = true;
+		startButton.visible = false
+      }
+	}
 }
-export {init,animate,startGame}
-export {scene,sceneHUD,sceneStroke,camera,cameraOnBall,camera2,cameraM,cameraHUD,cameraStroke,cameraOrbit,renderer,switchCamera,camSwitch}
-export {steve,stroke,PowerBar,block,ballR,light,texture,balls,start,level,levelPlus,levelRestart}
+function HUDtexture(){
+        var loader = new THREE.TextureLoader();
+        // load a resource
+        textureHUD = loader.load(
+        // URL ...
+        'https://i.imgur.com/MNTptLL.jpg',
+        // onLoad ...
+        function(textureHUD) {
+        // do something with the texture
+        // Plane with default texture coordinates [0,1]x[0,1]
+        },
+            undefined, // onProgress
+        // onError ...
+        function(xhr) {
+          console.log('An error happened');
+        }
+        );
+        var texMat = new THREE.MeshBasicMaterial({
+             opacity: 0.7,
+             transparent: true,
+             depthTest: false,
+             depthWrite: false,
+             map: textureHUD
+        });
+        
+        
+        var frame = new THREE.Mesh(new THREE.PlaneGeometry(6, 2), texMat);
+        textureHUD.wrapS = THREE.RepeatWrapping;
+        textureHUD.wrapT = THREE.RepeatWrapping;
+        textureHUD.repeat.set (1,1/3);
+		textureHUD.offset.x = 0;
+		textureHUD.offset.y = 2/3;
+        
+        var score = frame.clone();
+        score.position.set(-7, 9, 0);
+        sceneHUD.add(score);
+
+}
+export {init,animate}
+export {scene,sceneHUD,cameraOnPlayer,cameraHUD,cameraOrbit,renderer,cameraForMouse}
+export {steve,balls,start,level,levelPlus,levelRestart,controls,hitSound,inholeSound,textureHUD}

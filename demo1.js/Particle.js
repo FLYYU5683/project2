@@ -1,18 +1,16 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {planes,holes,curveds,spheres,cylinders,walls,wall2s,floors} from './buildTerrain.js';
-import {ballR,scene,light,start,balls,stroke,level,levelPlus,levelRestart} from './main.js'
-import {textureAnimate} from './render.js'
-import {preInHole} from './keyPressed.js'
+import {planes,holes,cylinders,walls,floors} from './buildTerrain.js';
+import {scene,start,balls,level,levelPlus,levelRestart,hitSound,inholeSound} from './main.js'
+import {preInHole,countSwingReset} from './mouseEvent.js'
 class Particle {
-  constructor(mesh) {
+  constructor(mesh,dt,id) {
 	  
     this.vel = new THREE.Vector3(0, 0, 0);
-    this.pos = new THREE.Vector3(10, 1, 0);
+    this.pos = new THREE.Vector3(0,1,10);
     this.force = new THREE.Vector3(0, -10, 0);
     this.torque = new THREE.Vector3(0.0001, 0, 0);
     this.lastP = new THREE.Vector3(0, 0, 0)
 	
-
     this.mesh = mesh;
 	mesh.position.copy(this.pos)
 	this.mesh.castShadow = true;
@@ -22,17 +20,19 @@ class Particle {
     this.delta = 0.082; //滾動摩擦係數
     this.theta = 0; //轉動的角度
 
+	this.dt = dt;
+	this.ID = id;
     this.nowIsFlyC = true;
     this.nowIsFlyP = true;
 	this.nowIsFlyF = true;
     this.us = 6;
+	this.r = 1;
 
     scene.add(this.mesh);
 
   }
-  update(dt) {
-	
-    var dtt = this.dtt;
+  update() {
+    var dtt = this.dt;
     var rollingWS = new THREE.Vector3();
     var N = new THREE.Vector3(0, 0, 0);
 
@@ -40,19 +40,21 @@ class Particle {
     var velV = new THREE.Vector3(0, 0, 0);
     rollingWS.copy(this.vel.clone().normalize().multiplyScalar(-this.force.dot(this.n)).multiplyScalar(this.m * this.delta * dtt))
     velH.copy(this.vel.clone().projectOnPlane(this.n));
-    velV.copy(this.vel.clone().projectOnVector(this.n));
-
+    velV.copy(this.vel.clone().projectOnVector(this.n));	
+	
+	
     if (!this.nowIsFlyP || !this.nowIsFlyC || !this.nowIsFlyF) {
       if (velH.length() >= rollingWS.length())
         velH.sub(rollingWS)
       else
         velH.copy(new THREE.Vector3(0, 0, 0));
+	  this.theta = this.vel.length() * dtt / this.r;
     }
-    //console.log(this.vel)
+	this.mesh.rotateOnWorldAxis(this.n.clone().cross(this.vel).normalize(), this.theta);	
+
     this.vel.copy(velH.add(velV))
 	if(start)
 		this.vel.add(this.force.clone().multiplyScalar(this.m).multiplyScalar(dtt));
-
     this.pos.add(this.vel.clone().multiplyScalar(dtt));
 
 	  this.checkHole(holes)
@@ -61,20 +63,14 @@ class Particle {
 			
 			this.checkFloor(floors)
 
-			this.contact(curveds)
-
 			this.checkWall(walls)
 
 			this.checkCylinder(cylinders)
-			
-			this.checkSphere(spheres)
 		
 		}
     this.lastP.copy(this.pos);
 
     this.mesh.position.copy(this.pos);
-    light.position.copy(this.pos);
-    light.position.y += 100;
   }
   checkHole(holes) {
     const COR = 0.64;
@@ -112,10 +108,10 @@ class Particle {
 		
 		ballPos.copy(hole.worldToLocal(this.pos.clone()))
 
-		if(ballPos.clone().sub(cylinderPos).length() >= hole.r - ballR && ballPos.clone().sub(cylinderPos).length() <= hole.r + ballR && Math.abs(cylinderPos.length()) <= hole.height / 2){
+		if(ballPos.clone().sub(cylinderPos).length() >= hole.r - this.r && ballPos.clone().sub(cylinderPos).length() <= hole.r + this.r && Math.abs(cylinderPos.length()) <= hole.height / 2){
 			ballPos.sub(cylinderPos).normalize()
 			var temp1 = new THREE.Vector3();
-			temp1.copy(cylinderPos.clone().add(ballPos.clone().multiplyScalar(hole.r-ballR)))
+			temp1.copy(cylinderPos.clone().add(ballPos.clone().multiplyScalar(hole.r-this.r)))
 			this.n.copy(ballPos)
 			this.pos.copy(hole.localToWorld(temp1))
 			this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
@@ -158,8 +154,8 @@ class Particle {
 			var tempP = new THREE.Vector3(0,0,0);
 		    tempP.copy(hole.worldToLocal(this.pos.clone()));
 		    let posR = tempP.x * tempP.x + tempP.z * tempP.z;
-			if (posR <= (hole.r - ballR) * (hole.r - ballR) && tempP.y <= ballR){
-				this.pos.y = hole.position.y + ballR;
+			if (posR <= (hole.r - this.r) * (hole.r - this.r) && tempP.y <= this.r){
+				this.pos.y = hole.position.y + this.r;
 				var tempV = new THREE.Vector3(0, 0, 0)
 				tempV.copy(this.vel.clone().projectOnVector(hole.normal).negate())
 				this.vel.sub(hole.normal.clone().multiplyScalar((1 + CR) * this.vel.dot(hole.normal)));
@@ -175,13 +171,18 @@ class Particle {
 		this.pos.set(0,1,10).
 		*/
 		if(this.ID == "player" && hole.ID == "hole"){
-			levelPlus();
+			inholeSound.play();
+			//levelPlus();
 			this.inHole = false;
 			this.nowIsFlyP = false;
 			this.nowIsFlyC = false;
 			this.nowIsFlyF = false;
-			//hole.level++;
 			
+			this.pos.set(0,1,10);
+			this.vel.set(0,0,0);
+			countSwingReset();
+			
+			/*
 			if(level == 2){
 				alert("next level")
 				this.pos.set(80,1,-125);
@@ -194,12 +195,7 @@ class Particle {
 				this.pos.set(0,1,0);
 				this.vel.set(0,0,0);
 			}
-			textureAnimate.count = 1;
-			if (stroke) {
-				var texture = stroke.material.map;
-				texture.offset.x = 0;
-				texture.offset.y = 0;
-			}
+			*/
 		}
 		if(this.ID == "predict"){
 			preInHole()
@@ -246,95 +242,6 @@ class Particle {
     }
 
   }
-  contact(curveds) {
-    const COR = 0.61;
-    var count = 0;
-    for (var i = 0; i < curveds.length; i++) {
-      let curved = curveds[i];
-      var ballOnP = new THREE.Vector3();
-      var u0, v0;
-      var ans = curved.inMeshFunc(curved.worldToLocal(this.pos.clone()).x, curved.worldToLocal(this.pos.clone()).z);
-      u0 = ans[0]
-      v0 = ans[1]
-      //console.log(u0 ,v0)
-
-      curved.meshFunc(u0, v0, ballOnP)
-
-      var n = new THREE.Vector3(0, 0, 0);
-      if (u0 >= 0 && v0 >= 0 && u0 <= 1 && v0 <= 1) {
-        const d = 0.0001;
-        var du = new THREE.Vector3()
-        var dv = new THREE.Vector3()
-
-        curved.meshFunc(u0 + d, v0, du)
-        curved.meshFunc(u0, v0 + d, dv)
-        du.sub(ballOnP).divideScalar(d)
-        dv.sub(ballOnP).divideScalar(d)
-
-        //du.cross(dv).normalize()
-        dv.cross(du).normalize()
-
-        var y = new THREE.Vector3();
-        //y.copy(ballOnP.clone().add(new THREE.Vector3(0, du.clone().multiplyScalar(ballR).y, 0)))
-        y.copy(ballOnP.clone().add(new THREE.Vector3(0, dv.clone().multiplyScalar(ballR).y, 0)))
-        if (y.y - curved.worldToLocal(this.pos.clone()).y >= 0 && y.y - curved.worldToLocal(this.pos.clone()).y <= 20) {
-          count++;
-
-
-          //this.n.copy(du);
-          this.n.copy(dv);
-          this.pos.copy(curved.localToWorld(ballOnP.clone().add(new THREE.Vector3(0, this.n.clone().multiplyScalar(ballR).y, 0))));
-
-          
-
-          if (this.nowIsFlyC && this.nowIsFlyP && this.nowIsFlyF) {
-			var tempV = new THREE.Vector3(0, 0, 0)
-            tempV.copy(this.vel.clone().projectOnVector(this.n).negate())
-            this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
-            this.vel.add(tempV.multiplyScalar(COR))
-          } else {
-            this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
-          }
-          this.nowIsFlyC = false;
-        }
-
-      }
-    }
-    if (count == 0) {
-      this.nowIsFlyC = true;
-    }
-  }
-  checkSphere(spheres){
-        var count = 0;
-        var COR = 0.64;
-        for(var i = 0; i < spheres.length; i++){
-            let sphere = spheres[i];
-            var ballPos = new THREE.Vector3()
-            ballPos.copy(sphere.worldToLocal(this.pos.clone()))
-
-            if(ballPos.length() <= ballR + sphere.R){
-                count++;
-                ballPos.normalize()
-                var temp = new THREE.Vector3();
-                temp.copy(ballPos.clone().multiplyScalar(ballR + sphere.R))
-                this.pos.copy(sphere.localToWorld(temp))
-                this.n.copy(sphere.localToWorld(ballPos).sub(sphere.position).normalize());
-                if (this.nowIsFlyC && this.nowIsFlyP && this.nowIsFlyCy&& this.nowIsFlyS || sphere.ID == "Wall") {
-                    console.log("y")
-                        var tempV = new THREE.Vector3(0, 0, 0)
-            tempV.copy(this.vel.clone().projectOnVector(this.n).negate())
-            this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
-            this.vel.add(tempV.multiplyScalar(COR))
-          } else {
-            this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
-          }
-                 this.nowIsFlyS = false;
-            }
-        }
-         if (count == 0) {
-      this.nowIsFlyS = true;
-    }
-    }
   checkCylinder(cylinders){
         var count = 0;
         var COR = 0.64;
@@ -345,11 +252,14 @@ class Particle {
             var ballPos = new THREE.Vector3()
             ballPos.copy(cylinder.worldToLocal(this.pos.clone()))
 
-            if(ballPos.sub(cylinderPos).length() <= ballR + cylinder.R && Math.abs(cylinderPos.length()) <= cylinder.height / 2){
+            if(ballPos.sub(cylinderPos).length() <= this.r + cylinder.R && Math.abs(cylinderPos.length()) <= cylinder.height / 2){
+				if(this.ID == "player"){
+					this.hitSound.play()
+				}
                 count++;
                 ballPos.normalize()
                 var temp = new THREE.Vector3();
-                temp.copy(cylinderPos.clone().add(ballPos.clone().multiplyScalar(ballR + cylinder.R)))
+                temp.copy(cylinderPos.clone().add(ballPos.clone().multiplyScalar(this.r + cylinder.R)))
                 this.pos.copy(cylinder.localToWorld(temp))
                 this.n.copy(cylinder.localToWorld(ballPos).sub(cylinder.position).normalize());
                 if (this.nowIsFlyC && this.nowIsFlyP && this.nowIsFlyCy || cylinder.ID == "wall") {
@@ -373,7 +283,16 @@ class Particle {
       let wall = walls[i]
       let temp = new THREE.Vector3(0, 0, 0);
       temp.copy(wall.mesh.worldToLocal(this.pos.clone()))
-      if (temp.z <= 2.25 && temp.z >= -2.25 && Math.abs(temp.x) <= wall.len / 2 && temp.y <= 3.5 && temp.y >= -3.5) {
+	  var times = 3;
+	  if(this.ID == "player")
+	    wall.mesh.material.opacity = 1;
+	  if(temp.z <= (1.25 + this.r) * times  && temp.z >= (-1.25 - this.r) * times && Math.abs(temp.x) <= wall.len / 2 && this.ID == "player"){
+		wall.mesh.material.opacity = 0.5;
+	  }
+      if (temp.z <= 1.25 + this.r  && temp.z >= -1.25 - this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height && temp.y >= -wall.height) {
+		if(this.ID == "player"){
+			this.hitSound.play()
+		}
         let temp = new THREE.Vector3(0, 0, 0)
         this.n.copy(wall.normal);
         this.pos.copy(this.lastP)
@@ -394,9 +313,9 @@ class Particle {
 		let height = new THREE.Vector3();
 		height = floor.localToWorld(new THREE.Vector3(0,y,0)).y
 		
-		if(UV[0] >= 0 && UV[0] <= 1 && UV[1] >= 0 && UV[1] <= 1 && this.pos.y >= height - ballR && this.pos.y <= height + ballR){
+		if(UV[0] >= 0 && UV[0] <= 1 && UV[1] >= 0 && UV[1] <= 1 && this.pos.y >= height - this.r && this.pos.y <= height + this.r){
 			count++;
-			this.pos.set(this.pos.x, floor.heightFunc(this.pos.x, this.pos.z) + ballR, this.pos.z);
+			this.pos.set(this.pos.x, floor.heightFunc(this.pos.x, this.pos.z) + this.r, this.pos.z);
 			let temp = floor.inHeightFunc(this.pos.x,this.pos.z);
 			let normal = new THREE.Vector3(temp[0],1,temp[1])
 			this.n.copy(normal.normalize())
@@ -417,8 +336,7 @@ class Particle {
   }
   start(){
 	this.vel.set(0,0,0);
-	//this.pos.set(150,10,-130);
-	this.pos.set(0,1,0);
+	this.pos.set(0,1,10);
   }
 }
 export {Particle}

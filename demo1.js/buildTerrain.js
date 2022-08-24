@@ -1,18 +1,17 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {ParametricGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/geometries/ParametricGeometry.js';
-import {FinitePlane,Wall,Wall2} from './terrain.js'
-import {scene,ballR,renderer} from './main.js'
-var table,floor4,floor5;
+import {FinitePlane,Wall} from './terrain.js'
+import {scene,renderer} from './main.js'
+var table,floor5;
 
-var walls = [],wall2s = [],holes = [],cylinders = [],planes = [],curveds = [],spheres = [],floors = [];
+var pickables = [];
+var walls = [],holes = [],cylinders = [],planes = [],floors = [];
 
 function buildTerrain(){
 	buildPlane();
 	buildWalls();
 	buildholes();
 	buildCylinder();
-	buildSphere();
-	//buildCurveds();
 	buildfloors();
 }
 function buildPlane(){
@@ -24,163 +23,57 @@ function buildPlane(){
   
   var loader2 = new THREE.TextureLoader();
   loader2.setCrossOrigin('');
-  var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
-  texture2.wrapS = THREE.RepeatWrapping;
-  texture2.wrapT = THREE.RepeatWrapping;
-
-
-  var floor = new THREE.Mesh(new THREE.PlaneGeometry(52, 52), new THREE.ShaderMaterial({
-    uniforms: {
-      tex: {
-        type: 't',
-        value: texture2
-      },
-    },
-	side: THREE.DoubleSide,
-    vertexShader:[
-    "varying vec2 vUv;",
-    "varying vec4 wpos;",
-    "void main() {",
-		"wpos = modelMatrix * vec4(position,1.0);",
-        "vec4 epos = viewMatrix * wpos;",
-        "gl_Position = projectionMatrix * epos; " ,     
-    "}"
-	].join("\n"),
-    fragmentShader:[
-	"uniform sampler2D tex;",
-    "varying vec2 vUv;",
-    "varying vec4 wpos;",
-    "void main(){",
-    "    vec2 vUv = vec2(wpos.z, wpos.x);",
-    "    vUv = vUv*0.05;",
-    "     vec4 rgb = texture2D (tex, vUv);",
-    "     gl_FragColor = rgb;",
-    "}"
-	].join("\n")
-  }));
-  
+  var texture = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+ 
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide}));
+  floor.material.map.repeat.set( 3, 3 );
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = 0.02;
   floor.position.z = -5;
   floor.receiveShadow = true;
 
-  plane = new FinitePlane(new THREE.Vector3(0, 0, ballR), new THREE.Vector3(0, 0, 1), floor, 50 * 1.5, table);
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor, 50 * 1.5, table);
   plane.update()
   planes.push(plane);
-  
-  /*
-  var loader2 = new THREE.TextureLoader();
-  loader2.setCrossOrigin ('');
-  var texture2 = loader2.load ('https://i.imgur.com/AwpdGoQ.jpg');
-  var floor = new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide}));
-  floor.rotation.x = -Math.PI / 2;
-  floor.rotation.z = -Math.PI / 2;
-  floor.position.y = 0;
-  floor.position.z = -5;
-  floor.material.map.repeat.set( 3, 3 );
-  floor.material.map.wrapS = THREE.RepeatWrapping;
-  floor.material.map.wrapT = THREE.RepeatWrapping;
-  floor.receiveShadow = true;
-  
-  plane = new FinitePlane(new THREE.Vector3(0, 0, ballR), new THREE.Vector3(0, 0, 1), floor, 50 * 1.5, table);
-  plane.update()
-  planes.push(plane);
-  */
-  var color = new THREE.Color();
-  color.setHSL(1,0,0.8);
-  var circle1 = new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshPhongMaterial());
-  circle1.position.set(-15,0.2,0);
-  circle1.rotation.x = -Math.PI / 2;
-  circle1.material.color.copy(color)
-  circle1.receiveShadow = true;
-  
-  var circle2 = new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshPhongMaterial());
-  circle2.position.set(15,0.2,0);
-  circle2.rotation.x = -Math.PI / 2;
-  circle2.material.color.copy(color)
-  circle2.receiveShadow = true;
   
   var color2 = new THREE.Color();
   color2.setHSL(1,0,0.8);
   
-  var circle3 = new THREE.Mesh(new THREE.BoxGeometry(20,0.01,20),new THREE.MeshPhongMaterial({transparent: true,opacity:0.1}));
-  circle3.position.set(0,0.2,0);
-  circle3.material.color.copy(color2)
-  circle3.receiveShadow = true;
+  var box1 = new THREE.Mesh(new THREE.BoxGeometry(5,0.01,5),new THREE.MeshPhongMaterial({transparent: true,opacity:0.1}));
+  box1.position.set(0,0.2,10);
+  box1.material.color.copy(color2)
+  box1.receiveShadow = true;
 
-
-  var circle4 = new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshPhongMaterial());
-  circle4.position.set(80,0.3,-110);
-  circle4.rotation.x = -Math.PI / 2;
-  circle4.material.color.copy(color)
-  circle4.receiveShadow = true;
-  
-  var circle5 = new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshPhongMaterial());
-  circle5.position.set(80,0.3,-140);
-  circle5.rotation.x = -Math.PI / 2;
-  circle5.material.color.copy(color)
-  circle5.receiveShadow = true;
-
-  var circle6 = new THREE.Mesh(new THREE.BoxGeometry(20,0.01,20),new THREE.MeshPhongMaterial({transparent: true,opacity:0.1}));
-  circle6.position.set(80,0.3,-125);
-  circle6.material.color.copy(color2)
-  circle6.receiveShadow = true;
+  var box2 = new THREE.Mesh(new THREE.BoxGeometry(10,0.01,10),new THREE.MeshPhongMaterial({transparent: true,opacity:0.1}));
+  box2.position.set(80,0.3,-125);
+  box2.material.color.copy(color2)
+  box2.receiveShadow = true;
 
   
   
-  scene.add(circle1,circle2,circle3,circle4,circle5,circle6);
-  
-  let meshMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      tex: {
-        type: 't',
-        value: texture2
-      },
-      radius: {
-        type: 'f',
-        value: 2.576
-      },
-      hole: {
-          type: 'v3',
-        value: new THREE.Vector3() // default hole at (0,0,0)
-      }
-    },side: THREE.DoubleSide,
-    vertexShader:[
-	  "varying vec4 wpos;",
-	  "varying vec2 vUv;",
-	  "void main() {",
-		"vUv = uv;",
-		"wpos = modelMatrix * vec4(position,1.0);",
-			"vec4 epos = viewMatrix * wpos;",
-			"gl_Position = projectionMatrix * epos; ",       
-	  "}"
-	].join("\n"),
-    fragmentShader:[
-	  "varying vec4 wpos;",
-	  "varying vec2 vUv;",
-	  "uniform vec3 hole;",
-	  "uniform float radius;",
-	  "uniform sampler2D tex;",
-	  "void main() {",
-			"vec2 vUv = vec2(wpos.z, wpos.x);",
-			"vUv = vUv*0.05;",
-			" vec4 rgb = texture2D (tex, vUv);",
-		 "if (distance (hole,wpos.xyz) < radius)",
-			"discard;",
-		 "else",
-			 "gl_FragColor = rgb;",
-	 "}"
-	].join("\n")
-  });
-  floor4 = new THREE.Mesh(new THREE.PlaneGeometry(50, 50),meshMaterial);
-  floor4.rotation.x = -Math.PI / 2;
-  floor4.position.set(0,0,-55)
-  floor4.receiveShadow = true;
-  
-  plane = new FinitePlane(new THREE.Vector3(0, 0, ballR), new THREE.Vector3(0, 0, 1),floor4, 50 * 1.5, table);
+  scene.add(box1,box2);
+
+	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
+	texture2.wrapS = THREE.RepeatWrapping;
+	texture2.wrapT = THREE.RepeatWrapping;
+      
+	let loader3 = new THREE.TextureLoader();
+	loader3.crossOrigin = '';
+	var alpha = loader3.load('https://i.imgur.com/2Wwb27p.png');
+
+	var hole= new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.1,}));
+	hole.rotation.x=-Math.PI/2;  
+	hole.position.set(0,0,-55);
+	hole.rotation.z = Math.PI ;
+	hole.material.map.repeat.set(3, 3);
+	hole.receiveShadow = true;
+
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1),hole, 50 * 1.5, table);
   plane.update()
   planes.push(plane);
-
+  pickables.push(box1,box2,floor,hole)
 }
 function buildWalls(){
   for (var i = 0; i < 4; i++) {
@@ -204,6 +97,7 @@ function buildWalls(){
   walls[1].mesh.position.set(25, 2.5, -30)
   walls[2].mesh.position.set(0, 2.5, 20)
   walls[3].mesh.position.set(0, 2.5, -80)
+  walls[2].mesh.visible = false;
   
   for(var i = 0; i < 8; i++){
 	  if(i < 6){
@@ -282,33 +176,21 @@ function buildWalls(){
 		
 	const lineMesh = new THREE.Mesh( lineGeometry, lineMaterial ) ;
 	lineMesh.position.set(110,0,-101.25)
-
-	let x = new Wall2(60,10,new THREE.Vector3(0,0,1),lineMesh)
-	wall2s.push(x)
-	x.update();
 	
 	const lineGeometry2 = new THREE.ExtrudeGeometry( shape, extrudeSettings );
 	const lineMesh2 = new THREE.Mesh( lineGeometry2, lineMaterial ) ;
 	lineMesh2.position.set(110,0,-151.25)
-	let y = new Wall2(60,10,new THREE.Vector3(0,0,-1),lineMesh2)
-	wall2s.push(y)
-	y.update();
-	
+
 	const lineGeometry3 = new THREE.ExtrudeGeometry( shape, extrudeSettings );
 	const lineMesh3 = new THREE.Mesh( lineGeometry3, lineMaterial ) ;
 	lineMesh3.rotation.y = -Math.PI / 2;
 	lineMesh3.position.set(141.25,0,-180)
-	let z = new Wall2(60,10,new THREE.Vector3(0,0,-1),lineMesh3)
-	wall2s.push(z)
-	z.update();
 	
 	const lineGeometry4 = new THREE.ExtrudeGeometry( shape, extrudeSettings );
 	const lineMesh4 = new THREE.Mesh( lineGeometry4, lineMaterial );
 	lineMesh4.rotation.y = -Math.PI / 2;
 	lineMesh4.position.set(191.25,0,-180)
-	let w = new Wall2(60,10,new THREE.Vector3(0,0,-1),lineMesh4)
-	wall2s.push(w)
-	w.update();
+
 	scene.add( lineMesh,lineMesh2,lineMesh3,lineMesh4); 
 }
 function buildholes(){
@@ -358,13 +240,14 @@ function buildholes(){
     mesh2.inMeshFunc = inMeshFunc2;
     mesh2.meshDifFunc = meshDifFunc2;
     mesh2.rotation.x = -Math.PI/2
-    mesh2.position.set(10,-0.205,-60);
+    mesh2.position.set(0,-0.205,0);
     mesh2.ID = "hole";
 	mesh2.level = 1
 	mesh2.visible = false
+	var ballhole = new THREE.Group();
+	ballhole.add(mesh2);
 	holes.push(mesh2)
 
-	var ballhole = new THREE.Group();
 	const geometry4 = new THREE.CylinderGeometry( 2.576, 2.576, 6, 32,1,true);
 	var material = new THREE.MeshPhongMaterial( {color: 0x888888,side:THREE.DoubleSide}); 
 	var cylinder = new THREE.Mesh( geometry4, material );
@@ -389,7 +272,7 @@ function buildholes(){
 	holes.push(block)
 	ballhole.add(block)
 	scene.add(ballhole);
-	ballhole.position.set(10,0,-60);
+	ballhole.position.set(11.6,0,-66.3);
 
 	let mesh3 = new THREE.Mesh(geometry2, material);
 	scene.add(mesh3);
@@ -590,58 +473,6 @@ function buildCylinder(){
 	cylinders.push(class213)
 	
 }
-function buildSphere(){
-	renderer.autoClear = false;
-	const localPlane = new THREE.Plane(new THREE.Vector3(0, 1 ,0), 0.0);
-	/*
-	var sphere = new THREE.Mesh(new THREE.SphereGeometry(30,64),new THREE.MeshPhongMaterial({color:0x9D9D9D,clippingPlanes: [localPlane]}))
-	sphere.R = 30
-	sphere.position.set(0,-26,-55)
-	sphere.ID = "floor"
-	scene.add(sphere)
-	spheres.push(sphere)
-	
-  var sphere2 = new THREE.Mesh(new THREE.SphereGeometry(30,64),new THREE.MeshPhongMaterial({color:0x9D9D9D,clippingPlanes: [localPlane]}))
-	sphere2.R = 30
-	sphere2.position.set(80,-26,-70)
-	sphere2.ID = "floor"
-	scene.add(sphere2)
-	spheres.push(sphere2)
-	*/
-	
-}
-function buildCurveds(){
-	var meshFunc = function(u0, v0, pos) {
-    let x = u0 * 30
-    let z = v0 * 30
-    let y = Math.sin(Math.PI * u0) * 5
-    pos.set(x, y, z)
-
-  };
-  var geometry = new ParametricGeometry(meshFunc, 128, 128);
-  var material = new THREE.MeshNormalMaterial({
-    wireframe: false,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.5
-  });
-  var inMeshFunc = function(x, z) {
-    var u0 = x / 30;
-    var v0 = z / 30;
-
-    var ans = [u0, v0]
-    return ans;
-  }
-  let mesh = new THREE.Mesh(geometry, material);
-
-  //mesh.rotation.y = Math.PI /2
-  mesh.position.set(25, 0, -80);
-  scene.add(mesh);
-  mesh.squareSize = 10;
-  mesh.meshFunc = meshFunc;
-  mesh.inMeshFunc = inMeshFunc;
-  curveds.push(mesh)
-}
 function buildfloors(){
 	var heightFunc = function(x,z) {
 	  let K = 5;
@@ -693,10 +524,18 @@ function buildfloors(){
 	
 	var loader2 = new THREE.TextureLoader();
 	loader2.setCrossOrigin('');
+	var texture = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
+	
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	
 	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
+	
 	texture2.wrapS = THREE.RepeatWrapping;
 	texture2.wrapT = THREE.RepeatWrapping;
 	
+	var material = new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide});
+	/*
 	var material = new THREE.ShaderMaterial({
     uniforms: {
       tex: {
@@ -726,7 +565,7 @@ function buildfloors(){
     "}"
 	].join("\n")
   });
-  
+  */
 	var convertUV = function(x,z){
 		return [(x - 60) / 130,(z + 150) / 50]
 	}
@@ -736,6 +575,9 @@ function buildfloors(){
 	mesh.heightFunc = heightFunc;
 	mesh.inHeightFunc = inHeightFunc;
 	mesh.convertUV = convertUV;
+	mesh.material.map.repeat.set( 4, 4 );
+	mesh.receiveShadow = true;
+	
 	
 	var geometry2 = new ParametricGeometry(function(u0, v0, pos) {
 		let x = 140 + 50 * u0;
@@ -805,4 +647,4 @@ function buildfloors(){
 	floors.push(mesh,floor5)
 	scene.add(mesh,floor5)
 }
-export {buildTerrain,table,planes,walls,wall2s,cylinders,holes,curveds,spheres,floor4,floor5,floors}
+export {buildTerrain,table,planes,walls,cylinders,holes,floor5,floors,pickables}

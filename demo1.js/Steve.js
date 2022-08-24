@@ -2,19 +2,19 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {Line2} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/Line2.js';
 import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineMaterial.js';
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
-import {balls,texture,scene,camera} from './main.js';
-import {resetTheta,theta,spaceEffect,Power,beforeHit,ballMove} from './keyPressed.js'
+import {balls,scene,cameraOnPlayer,renderer,cameraForMouse} from './main.js';
+import {theta,beforeHit} from './mouseEvent.js'
 
 const WW = 4,HH = 12;
-var swing = false,isSwing = false,stand = true,follow=true,change = false,isChange = false;
+var swing = false,isSwing = false,change = false,isChange = false;
 var stop=true;
 var T = 1,count = 1;
 var matLine;
 var clock = new THREE.Clock();
 var ts = clock.getElapsedTime();
 var ts2 = clock.getElapsedTime();
-var ts3 = clock.getElapsedTime();
-var walkFin = false;
+
+var texture;
 
 (function() {
   Math.clamp = function(val, min, max) {
@@ -35,6 +35,8 @@ class Steve{
      this.temp2 = new THREE.Vector3(0,0,0);
 	 this.temp3 = new THREE.Vector3(0,0,0);
 	 this.direct = new THREE.Group();
+	 this.camera = new THREE.Group();
+	 this.lastPos = new THREE.Vector3(0,0,0);
      this.body = new THREE.Group();
      this.hands = new THREE.Group();
 	 this.footPath = new THREE.Group();
@@ -46,53 +48,35 @@ class Steve{
 	 this.target=null;
 	 this.puttPos=new THREE.Vector3(0,0,0);
 	 
-	 this.pose1 = {
-  lThigh: +theta,
-  rThigh: -theta,
-}
-     this.pose2 = {
-  lThigh: +Math.PI / 8 + theta,
-  rThigh: +Math.PI / 8 + theta
-}
-     this.keys = [
-  [0, this.pose1],
-  [0.5, this.pose2],
-  [1, this.pose2]
-];
-	 
-	 this.pose3 = {
-  lThigh: Math.PI / 2,
-  rThigh: Math.PI / 2
-}
-  this.pose4 = {
-  lThigh: Math.PI / 1.5,
-  rThigh: Math.PI / 1.5
-}
-  this.keys2 = [
-  [0, this.pose3],
-  [0.5, this.pose4],
-  [1, this.pose4]
-];
-	 
-	 this.pose5={
-	 lThigh: Math.PI/80*this.vel.length(),
-     rThigh: -Math.PI/80*this.vel.length()
-}
-     this.pose6 = {
-	 lThigh: -Math.PI/80*this.vel.length(),
-     rThigh: Math.PI/80*this.vel.length()
-}
-     this.keys3 = [
-  [0, this.pose5],
-  [0.5, this.pose6],
-  [1, this.pose5]
-];
-
-	 this.MAXSPEED = 30;
-     this.ARRIVAL_R = 30;
+	this.pose1 = {
+	  theta: -theta
+	}
+	this.pose2 = {
+	  theta: Math.PI / 15 + theta / 5
+	} 
+	this.pose3 = {
+	  theta: Math.PI / 2
+	}
+	this.pose4 = {
+	  theta: Math.PI / 1.5
+	}
+	this.torsoKeys = [
+	  [0, this.pose1],
+	  [0.5, this.pose2],
+	  [1, this.pose2]
+	];
+	this.headKeys = [
+	  [0, this.pose3],
+	  [0.5, this.pose4],
+	  [1, this.pose4]
+	];
    }
 
   buildsteve(){
+  var loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('');
+  texture = loader.load('http://i.imgur.com/dSQ0A9W.png');
+  
   this.head = this.buildHead(8, 8, 8);
   this.head.rotation.y = Math.PI / 2;
   this.torso = this.buildTorso(8, 12, 4);
@@ -105,7 +89,7 @@ class Steve{
   this.torso.position.set(0, HH, 0);
   this.lArm = this.buildLArm(4, 12, 4);
   this.hands.add(this.lArm);
-  this.lArm.position.set(0, HH, -11);
+  this.lArm.position.set(0, HH / 2 - 6, -(WW + WW / 2 + 3));
   
   this.lLeg = this.buildLLeg(4, 12, 4);
   this.body.add(this.lLeg);
@@ -117,7 +101,13 @@ class Steve{
 
   this.rArm = this.buildRArm(4, 12, 4);
   this.hands.add(this.rArm);
-  this.rArm.position.set(-1, HH - 2, 5);
+  this.rArm.position.set(0, HH / 2 - 6, WW + WW / 2 - 3);
+  
+  this.hands.position.y = 9.5;
+  this.hands.position.x = -0.5;
+	
+
+		
   
   var axis = new THREE.AxesHelper(50);
   //hands.add(axis);
@@ -128,12 +118,12 @@ class Steve{
 
   this.rArm.add(this.Puffer);
 
-  this.Puffer.position.y = -11.5;
+  this.Puffer.position.y = -11.2;
   this.Puffer.rotation.x = -Math.PI / 15
   this.Puffer.rotation.z = Math.PI / 8
   this.Puffer.position.z = -0.5
-  this.Puffer.position.x = 2
-  this.Puffer.visible = false;
+  this.Puffer.position.x = 1.8
+  this.Puffer.visible = true;
   //torso.rotation.x=-Math.PI/6;
 
   this.line =this.buildLine();
@@ -142,7 +132,7 @@ class Steve{
   
   this.body.position.set(-10, -1, 2);
   this.direct.add(this.body,this.line,this.arrow);
-  this.direct.position.set(-2, 0, 0);
+  //this.direct.position.set(-2, 1, 10);
 
   let hitPoint = new THREE.Mesh(new THREE.BoxGeometry(1, 1), new THREE.MeshNormalMaterial())
   hitPoint.position.set(0, 0, 1)
@@ -151,8 +141,11 @@ class Steve{
   this.body.visible = false;
   scene.add(this.direct);
   
-  this.direct.add(camera);
+  this.camera.add(cameraOnPlayer)
+  scene.add(this.camera);
+  //this.camera.position.set(-2,1,10)
   this.direct.visible = false;
+  this.resetPose()
   //////////////////////////////////////////////////////////
 }
   buildFootPrint(){
@@ -318,6 +311,7 @@ class Steve{
    //console.log(distance.length(),this.goal.clone().sub(this.begin).length())
    if(distance.length()>=this.goal.clone().sub(this.begin).length()){
 		stop=true;
+		renderer.render(scene, cameraForMouse);
 		this.left.material.opacity=0;
         this.right.material.opacity=0;
 		this.left2.material.opacity=0;
@@ -327,8 +321,8 @@ class Steve{
 		this.left4.material.opacity=0;
         this.right4.material.opacity=0;
 		this.direct.position.copy(balls[0].pos)
+		this.direct.rotation.copy(this.camera.rotation)
 		count=1;
-		walkFin = false;
 	}
 	else
 	{
@@ -337,90 +331,43 @@ class Steve{
 	  
   }
   update(dt){
+	matLine.resolution.set(window.innerWidth, window.innerHeight);
+	this.camera.position.copy(balls[0].pos)
 	if(stop==false){	  
      setTimeout(this.footUpdate.bind(this),100);
      stopTrue();
+	}
+	if(!swing && !change){
+		this.torso.rotation.x = -theta;
+		this.head.rotation.y = Math.PI / 2;
+	}
+	if(!swing && !change && !isChange && beforeHit){
+		this.body.visible = false;
 	}
 	if(!beforeHit && !swing){
 		this.body.visible = true
 		swing = true;
 		this.head.rotation.y = Math.PI / 2;
+		
 		this.pos.copy(balls[0].mesh.localToWorld(new THREE.Vector3(0, 0, 0)))
+		
 		this.direct.position.copy(this.pos)
 		
-		this.lLeg.rotation.x = Math.PI / 12;
-		this.rLeg.rotation.x = -Math.PI / 12;
-		this.rArm.rotation.x = Math.PI / 10;
-		this.lArm.rotation.x = -Math.PI / 10;
-		this.rArm.rotation.z = Math.PI / 5;
-		this.lArm.rotation.z = Math.PI / 5;
-
-		this.lArm.position.set(0, HH / 2 - 6, -(WW + WW / 2 + 3));
-		this.rArm.position.set(0, HH / 2 - 6, WW + WW / 2 - 3);
-
-		this.torso.rotation.z = -Math.PI / 4.5;
-
-		this.hands.position.y = 9.5;
-		this.hands.position.x = -0.5;
-		if (isSwing == false) {
-		    this.hands.rotation.x = -theta;
-		}
 		this.Puffer.visible = true;
 	}
-	if(swing){
-		if (isSwing == false) {
-			ts = clock.getElapsedTime();
-			isSwing = true;
-		}
-		let intKey = this.keyframe(clock.getElapsedTime(), T);
-		this.hands.rotation.x = intKey[0];
-		this.hands.rotation.x = intKey[1];
-	}
-	this.pose5.lThigh = -Math.PI/80* this.vel.length();
-	this.pose5.rThigh = Math.PI/80 * this.vel.length();
-	this.pose6.lThigh = Math.PI/80 * this.vel.length();
-	this.pose6.rThigh = -Math.PI/80* this.vel.length();
-  if (change == true) {
-    if (isChange == false) {
-      ts2 = clock.getElapsedTime();
-      isChange = true;
-    }
-    let intKey2 = this.keyframe2(clock.getElapsedTime(), T);
-    this.head.rotation.y = intKey2[0];
-    this.head.rotation.y = intKey2[1];
-  }
-
-
-  //theta = tcontrols.theta;
-  this.pose1.lThigh = +theta;
-  this.pose1.rThigh = -theta;
-  this.pose2.lThigh = Math.PI / 8 + theta;
-  this.pose2.rThigh = Math.PI / 8 + theta;
-
-   
+	this.changePose()
+	this.pose1.theta = -theta;
+	this.pose2.theta = Math.PI / 15 + theta / 5;
    }
-  keyframe3(t){
-  var s = ((t - ts3) % T) / T;
 
-  for (var i = 1; i < this.keys3.length; i++) {
-    if (this.keys3[i][0] > s) break;
-  }
-  // take i-1
-  var ii = i - 1;
-  var a = (s - this.keys3[ii][0]) / (this.keys3[ii + 1][0] - this.keys3[ii][0]);
-  let intKey3 = [this.keys3[ii][1].lThigh * (1 - a) + this.keys3[ii + 1][1].lThigh * a,
-            this.keys3[ii][1].rThigh * (1 - a) + this.keys3[ii + 1][1].rThigh * a
-  ];
-	return intKey3;
-}
-  keyframe2(t, T) {
-  var keys2=this.keys2;
+  headKeyframe2(t, T) {
+  var keys2=this.headKeys;
   if (t - ts2 > T) { // end of stand
     ts2 = t; // reset ts to start of walk
     change = false;
     isChange = false;
     // end of S2W: return last frame
-    return [this.pose4.lThigh,this.pose4.rThigh];
+    return this.pose4.theta;
   }
 
   var s = (t - ts2) / T;
@@ -430,20 +377,17 @@ class Steve{
   // take i-1
   var ii = i - 1;
   var a = (s - keys2[ii][0]) / (keys2[ii + 1][0] - keys2[ii][0]);
-  let intKey2 = [keys2[ii][1].lThigh * (1 - a) + keys2[ii + 1][1].lThigh * a,
-    keys2[ii][1].rThigh * (1 - a) + keys2[ii + 1][1].rThigh * a
-  ];
+  let intKey2 = keys2[ii][1].theta * (1 - a) + keys2[ii + 1][1].theta * a;
   return intKey2;
 }
-  keyframe(t, T) {
-  var keys=this.keys;
+  torsoKeyframe(t, T) {
+  var keys = this.torsoKeys;
   if (t - ts > T) { // end of stand
-    ts = t; // reset ts to start of walk
     swing = false
-    //isSwing = false;
+    isSwing = false;
     change = true;
     // end of S2W: return last frame
-    return [this.pose2.lThigh,this.pose2.rThigh];
+    return this.pose2.theta;
   }
 
   var s = (t - ts) / T;
@@ -453,12 +397,9 @@ class Steve{
   // take i-1
   var ii = i - 1;
   var a = (s - keys[ii][0]) / (keys[ii + 1][0] - keys[ii][0]);
-  let intKey = [keys[ii][1].lThigh * (1 - a) + keys[ii + 1][1].lThigh * a,
-    keys[ii][1].rThigh * (1 - a) + keys[ii + 1][1].rThigh * a
-  ];
+  let intKey = keys[ii][1].theta * (1 - a) + keys[ii + 1][1].theta * a;
   return intKey;
-} 
-   
+}  
  buildHead(WW, HH, DD) {
  let head = new THREE.Group();
   var geometry = new THREE.BufferGeometry();	
@@ -519,7 +460,6 @@ class Steve{
   mesh.rotation.y = -Math.PI / 2;
   return head;
 }
-
  buildLArm(WW,HH,DD) {
 	let lArm = new THREE.Group();
   var geometry = new THREE.BufferGeometry();	
@@ -835,7 +775,7 @@ class Steve{
   stick.position.y = -2.5
   this.putt.position.y = -8.5
   this.putt.rotation.y = Math.PI / 12;
-  this.putt.rotation.z = -Math.PI / 12;
+  this.putt.rotation.z = -Math.PI / 10;
   this.putt.position.x = 0.8;
   this.putt.position.z = -0.4;
 
@@ -919,29 +859,41 @@ class Steve{
 	scene.add(circles);
 	return circles;
   }
-  targetInducedForce(targetPos) { // seek
-    return targetPos.clone().sub(this.pos).setLength(this.MAXSPEED).sub(this.vel);
-  }
-
-  accumulateForce() {
-    if (this.target) 
-    	this.force.copy(this.targetInducedForce(this.target));
-  }
   start(){
 	this.direct.visible = true;
+	this.arrow.visible = false;
 	this.direct.position.copy(balls[0].pos);
+	this.camera.position.copy(balls[0].pos);
   }
-}
-function swingTrue(){
-	swing = true;
-}
-function standVerse(){
-	stand = !stand;
+  changePose(){
+	if(swing){
+		if (isSwing == false) {
+			ts = clock.getElapsedTime();
+			isSwing = true;
+		}
+		let intKey = this.torsoKeyframe(clock.getElapsedTime(), T);
+		this.torso.rotation.x = intKey;
+	}
+	if (change == true) {
+		if (isChange == false) {
+			ts2 = clock.getElapsedTime();
+			isChange = true;
+		}
+		let intKey = this.headKeyframe2(clock.getElapsedTime(), T);
+		this.head.rotation.y = intKey;
+	}
+  }
+  resetPose(){	
+	this.lLeg.rotation.x = Math.PI / 12;
+	this.rLeg.rotation.x = -Math.PI / 12;
+	this.rArm.rotation.x = Math.PI / 10;
+	this.lArm.rotation.x = -Math.PI / 10;
+	this.rArm.rotation.z = Math.PI / 5;
+	this.lArm.rotation.z = Math.PI / 5;
+	this.torso.rotation.z = -Math.PI / 4.5;
+  }
 }
 function stopTrue(){
 	stop= !stop;
 }
-function walkFinFalse(){
-	walkFin = false;
-}
-export {Steve,matLine,swingTrue,standVerse,follow,stand,swing,stop,stopTrue,walkFin,walkFinFalse}
+export {Steve,stop,stopTrue}
