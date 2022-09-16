@@ -2,7 +2,7 @@ import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {Line2} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/Line2.js';
 import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineMaterial.js';
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
-import {scene,cameraOnPlayer,renderer,cameraForMouse,cameraOnBall} from './render.js';
+import {scene,cameraOnPlayer,renderer,cameraOnBall} from './render.js';
 import {balls} from './main.js'
 import {theta,beforeHit} from './touchEvent.js'
 
@@ -128,7 +128,9 @@ class Steve{
   this.arrow.position.y = 1;
   
   this.body.position.set(-10, -1, 2);
-  this.direct.add(this.body,this.line,this.arrow,cameraOnBall);
+  var cameraGroup = new THREE.Group();
+  cameraGroup.add(cameraOnBall)
+  this.direct.add(this.body,this.line,this.arrow,cameraGroup);
   //this.direct.position.set(-2, 1, 10);
 
   let hitPoint = new THREE.Mesh(new THREE.BoxGeometry(1, 1), new THREE.MeshNormalMaterial())
@@ -234,7 +236,7 @@ class Steve{
 	  
 	  this.footPath.position.set(this.footPath.position.x+this.uv.x*6,0.1,this.footPath.position.z+this.uv.z*6)
 	  this.footPath.lookAt(this.begin.x,0,this.begin.z);
-	  if(count==1)
+	  if(count===1)
 	  {
 		this.left.material.opacity=0;
 		this.temp.copy(this.direct.position)		
@@ -244,7 +246,7 @@ class Steve{
         this.left2.material.opacity=0.8;
 	    this.right2.material.opacity=0;		
 	  }
-	  else if(count==2)
+	  else if(count===2)
 	  {
          this.left.material.opacity=1;
 		 this.right.material.opacity=0;
@@ -259,7 +261,7 @@ class Steve{
 	  }
      else
      {
-        if(this.left.material.opacity==1)
+        if(this.left.material.opacity===1)
 		{
 		   this.left.material.opacity=0;
 		   this.right.material.opacity=1;
@@ -308,7 +310,6 @@ class Steve{
    //console.log(distance.length(),this.goal.clone().sub(this.begin).length())
    if(distance.length()>=this.goal.clone().sub(this.begin).length()){
 		stop=true;
-		renderer.render(scene, cameraForMouse);
 		this.left.material.opacity=0;
         this.right.material.opacity=0;
 		this.left2.material.opacity=0;
@@ -317,7 +318,7 @@ class Steve{
         this.right3.material.opacity=0;
 		this.left4.material.opacity=0;
         this.right4.material.opacity=0;
-		this.direct.position.copy(balls[0].pos)
+		//this.direct.position.copy(balls[0].pos)
 		//this.direct.rotation.copy(this.camera.rotation)
 		count=1;
 		this.moveFin = true;
@@ -331,7 +332,7 @@ class Steve{
   update(dt){
 	matLine.resolution.set(window.innerWidth, window.innerHeight);
 	this.camera.position.copy(balls[0].pos)
-	if(stop==false){	  
+	if(stop === false){	  
      setTimeout(this.footUpdate.bind(this),100);
      stopTrue();
 	}
@@ -347,9 +348,9 @@ class Steve{
 		swing = true;
 		this.head.rotation.y = Math.PI / 2;
 		
-		this.pos.copy(balls[0].mesh.localToWorld(new THREE.Vector3(0, 0, 0)))
+		//this.pos.copy(balls[0].mesh.localToWorld(new THREE.Vector3(0, 0, 0)))
 		
-		this.direct.position.copy(this.pos)
+		//this.direct.position.copy(this.pos)
 		
 		this.Puffer.visible = true;
 	}
@@ -865,15 +866,15 @@ class Steve{
   }
   changePose(){
 	if(swing){
-		if (isSwing == false) {
+		if (isSwing === false) {
 			ts = clock.getElapsedTime();
 			isSwing = true;
 		}
 		let intKey = this.torsoKeyframe(clock.getElapsedTime(), T);
 		this.torso.rotation.x = intKey;
 	}
-	if (change == true) {
-		if (isChange == false) {
+	if (change === true) {
+		if (isChange === false) {
 			ts2 = clock.getElapsedTime();
 			isChange = true;
 		}

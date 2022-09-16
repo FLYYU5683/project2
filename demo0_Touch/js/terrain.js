@@ -21,9 +21,9 @@ class FinitePlane {
 
 class Wall {
   constructor(len,height, localN , type = 0) {
-	if(type == 0)
+	if(type === 0)
 		var geometry = new THREE.BoxGeometry(len, height, 2.5);
-	else if(type == 1){
+	else if(type === 1){
 		var geometry = new THREE.PlaneGeometry(len,height)
 	}
 	
