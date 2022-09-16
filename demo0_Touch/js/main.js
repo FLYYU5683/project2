@@ -1,13 +1,17 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {buildTerrain,table,planes,walls} from './buildTerrain.js';
+import {buildTerrain,table,planes,walls,class1Rotate} from './buildTerrain.js';
+import {obstacle1,obstacle2,obstacle3,car,car2} from './buildTerrain.js';
 import {Particle} from './Particle.js'
-import {buildCamAndSen,render,scene,start} from './render.js'
+import {buildCamAndSen,render,scene,sceneMap,start} from './render.js'
 import {Steve} from './Steve.js'
 import {touchStart,touchMove,touchEnd,touchEvent} from "./touchEvent.js"
 
 var steve,balls = [];
 var clock = new THREE.Clock();
 var backgroundMusic,hitSound;
+var wallchange=true;
+var wallchange2=true;
+var car1MoveSign = 1,car2MoveSign = -1;
 var inholeSound;
 function init() {
   //camera && sence
@@ -15,11 +19,12 @@ function init() {
   //light
   buildLight()
   //grid
-  /*
-  var gridXZ = new THREE.GridHelper(400, 40, 'red', 'white');
-  gridXZ.position.set(75,1,-80);
+  
+  var gridXZ = new THREE.GridHelper(600, 60, 'red', 'white');
+  //gridXZ.position.set(75,1,-80);
   gridXZ.position.y = 1
-  */
+  //scene.add(gridXZ);
+  
   //steve
   steve=new Steve(4,12);
   steve.buildsteve();
@@ -45,10 +50,9 @@ function init() {
 function animate() {
   //backgroundMusic.play();
   var dt = clock.getDelta();
+  class1Rotate.rotation.y += Math.PI / 80;
+  balls[0].update();
 
-  balls.forEach(function(b) {
-    b.update()
-  });
   table.updateMatrixWorld();
   steve.update(dt);
   if(!start)
@@ -66,7 +70,8 @@ function animate() {
   walls.forEach(function(b) {
     b.update()
   });
-  
+  wallMove()
+  carMove()
   render();
   requestAnimationFrame(animate);
 	
@@ -87,6 +92,7 @@ function buildLight(){
   light2.shadow.bias = -0.007
   
   scene.add(light2);
+  sceneMap.add(light2.clone());
   var dlshelper = new THREE.CameraHelper (light2.shadow.camera) 
   //scene.add ( dlshelper );
   
@@ -110,5 +116,50 @@ function buildBalls(){
   balls.push(ball2);
   
 }
-
+function wallMove(){
+  if(obstacle1.position.y>-15&&wallchange==true){
+    obstacle1.position.y-=0.1;
+  }
+  if(obstacle1.position.y<=-15&&wallchange==true){
+	obstacle1.position.y=-15;
+	wallchange=false;
+  }
+  if(obstacle1.position.y<3&&wallchange==false){
+    obstacle1.position.y+=0.1;
+  } 
+  if(obstacle1.position.y>=3&&wallchange==false)
+  { 
+    obstacle1.position.y=3;
+	wallchange=true;  
+  }
+  
+  if(obstacle2.position.y>3&&wallchange2==true){
+  obstacle2.position.y-=0.1;
+  obstacle3.position.y-=0.1;
+  }
+  if(obstacle2.position.y<=3&&wallchange2==true){
+	obstacle2.position.y=3;
+	obstacle3.position.y=3;
+	wallchange2=false;
+  }
+  if(obstacle2.position.y<21&&wallchange2==false){
+    obstacle2.position.y+=0.1;
+	obstacle3.position.y+=0.1;
+  } 
+  if(obstacle2.position.y>=21&&wallchange2==false)
+  { 
+    obstacle2.position.y=21;
+	obstacle3.position.y=21;
+	wallchange2=true;  
+  }
+  
+}
+function carMove(){
+  if(car.position.z < -350 || car.position.z > -250)
+	  car1MoveSign *= -1;
+  car.position.z += car1MoveSign * 0.5;
+  if(car2.position.z > -250 || car2.position.z <-350)
+	  car2MoveSign *= -1;
+  car2.position.z += car2MoveSign * 0.6;   
+}
 export {init,animate,steve,balls}

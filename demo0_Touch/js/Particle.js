@@ -1,9 +1,9 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {planes,holes,cylinders,walls,floors} from './buildTerrain.js';
 import {balls} from './main.js'
-import {scene,start} from './render.js'
+import {scene,start,HUDForInHole,level} from './render.js'
 import {countSwingReset} from './touchEvent.js'
-var level = 1
+var playOnce = true;
 class Particle {
   constructor(mesh,dt,id) {
 	  
@@ -29,8 +29,9 @@ class Particle {
 	this.nowIsFlyF = true;
     this.us = 6;
 	this.r = 1;
-	this.testRunInHole = false;
-
+	this.runInHole = false;
+	this.choose = true;
+	
     scene.add(this.mesh);
 
   }
@@ -41,6 +42,7 @@ class Particle {
 
     var velH = new THREE.Vector3(0, 0, 0);
     var velV = new THREE.Vector3(0, 0, 0);
+	
     rollingWS.copy(this.vel.clone().normalize().multiplyScalar(-this.force.dot(this.n)).multiplyScalar(this.m * this.delta * dtt))
     velH.copy(this.vel.clone().projectOnPlane(this.n));
     velV.copy(this.vel.clone().projectOnVector(this.n));	
@@ -56,12 +58,13 @@ class Particle {
 	this.mesh.rotateOnWorldAxis(this.n.clone().cross(this.vel).normalize(), this.theta);	
 
     this.vel.copy(velH.add(velV))
-	if(start)
+	if(start && this.choose)
 		this.vel.add(this.force.clone().multiplyScalar(this.m).multiplyScalar(dtt));
     this.pos.add(this.vel.clone().multiplyScalar(dtt));
 
 	  this.checkHole(holes)
 		if(this.inHole != true){
+
 			this.collidingPlane(planes);
 			
 			this.checkFloor(floors)
@@ -83,13 +86,13 @@ class Particle {
 			let temp = new THREE.Vector3(0,0,0)
 			temp.copy(hole.worldToLocal(this.pos.clone()))
 			
-			if(hole.ID == "hole" && temp.x * temp.x + temp.y * temp.y <= 2.52 * 2.52 && hole.level == level){
+			if(hole.ID === "hole" && temp.x * temp.x + temp.y * temp.y <= 2.52 * 2.52 && hole.level === level){
 				this.inHole = true;
 				this.nowIsFlyP = true;
 				this.nowIsFlyC = true;
 				this.nowIsFlyF = true;
 			}
-			else if (hole.ID == "hole" && temp.x * temp.x + temp.y * temp.y >= 2.52 * 2.52 && hole.level == level){
+			else if (hole.ID === "hole" && temp.x * temp.x + temp.y * temp.y >= 2.52 * 2.52 && hole.level === level){
 				this.inHole = false;
 			}
 			
@@ -99,10 +102,10 @@ class Particle {
       var ballLastPos = new THREE.Vector3(0, 0, 0);
       ballLastPos.copy(hole.worldToLocal(this.lastP.clone()));
 	  
-	  if(hole.ID == "hole")
+	  if(hole.ID === "hole")
 		var ans = hole.inMeshFunc(ballNowPos);
 	  
-      if (hole.ID == "wall") {
+      if (hole.ID === "wall") {
 		  
 		var cylinderPos = new THREE.Vector3()
 		cylinderPos.copy(new THREE.Vector3(0,hole.worldToLocal(balls[0].pos.clone()).y,0))
@@ -134,7 +137,7 @@ class Particle {
         this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
 		*/
       } 
-      if (ans <= 0 && hole.ID == "hole") {
+      if (ans <= 0 && hole.ID === "hole") {
 
         var dis = new THREE.Vector3(0, 0, 0)
         dis.copy(ballNowPos.clone().sub(ballLastPos).normalize().divideScalar(100))
@@ -149,7 +152,7 @@ class Particle {
         this.pos.copy(hole.localToWorld(ballLastPos.clone()));
         this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
       }
-	  if(hole.ID == "bottom"){
+	  if(hole.ID === "bottom"){
 		    const EPS = 1e-5;
 			const CR = 0;
 			const COR = 0.61;
@@ -167,40 +170,22 @@ class Particle {
 			}
 	  }
 	  if(this.inHole && temp.z <= -3){
-		/*
-		this.vel.set(0,0,0)
-		this.pos.set(0,1,10).
-		*/
-		if(this.ID == "player" && hole.ID == "hole"){
-			this.inholeSound.play();
-			//level++;
+		if(this.ID === "player" && hole.ID === "hole"){
+			if(this.choose)
+				this.inholeSound.play();
+			this.choose = false;
 			this.inHole = false;
 			this.nowIsFlyP = false;
 			this.nowIsFlyC = false;
 			this.nowIsFlyF = false;
 			
-			this.pos.set(0,1,10);
-			this.vel.set(0,0,0);
 			countSwingReset();
+			HUDForInHole();
 			
-			/*
-			if(level == 2){
-				alert("next level")
-				this.pos.set(80,1,-125);
-				this.vel.set(0,0,0)
-			}
-			if(level == 3){
-				level = 1;
-				alert(" Game Restart")
-				//hole.level = 1
-				this.pos.set(0,1,0);
-				this.vel.set(0,0,0);
-			}
-			*/
+			this.vel.set(0,0,0);
+			
 		}
-		if(this.ID == "predict"){
-			this.testRunInHole = true;
-		}
+		this.runInHole = true;
 	  }
     }
 	
@@ -235,7 +220,7 @@ class Particle {
         this.nowIsFlyP = false;
       }
     }
-    if (count == 0) {
+    if (count === 0) {
       this.nowIsFlyP = true;
     }
 
@@ -251,7 +236,7 @@ class Particle {
             ballPos.copy(cylinder.worldToLocal(this.pos.clone()))
 
             if(ballPos.sub(cylinderPos).length() <= this.r + cylinder.R && Math.abs(cylinderPos.length()) <= cylinder.height / 2){
-				if(this.ID == "player"){
+				if(this.ID === "player"){
 					this.hitSound.play()
 				}
                 count++;
@@ -260,7 +245,7 @@ class Particle {
                 temp.copy(cylinderPos.clone().add(ballPos.clone().multiplyScalar(this.r + cylinder.R)))
                 this.pos.copy(cylinder.localToWorld(temp))
                 this.n.copy(cylinder.localToWorld(ballPos).sub(cylinder.position).normalize());
-                if (this.nowIsFlyC && this.nowIsFlyP && this.nowIsFlyCy || cylinder.ID == "wall") {
+                if (this.nowIsFlyC && this.nowIsFlyP && this.nowIsFlyCy || cylinder.ID === "wall") {
                         var tempV = new THREE.Vector3(0, 0, 0)
             tempV.copy(this.vel.clone().projectOnVector(this.n).negate())
             this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
@@ -271,7 +256,7 @@ class Particle {
                  this.nowIsFlyCy = false;
             }
         }
-         if (count == 0) {
+         if (count === 0) {
       this.nowIsFlyCy = true;
     }
     }
@@ -282,14 +267,14 @@ class Particle {
       let temp = new THREE.Vector3(0, 0, 0);
       temp.copy(wall.mesh.worldToLocal(this.pos.clone()))
 	  var times = 3;
-	  if(wall.type == 0){
-		  if(this.ID == "player")
+	  if(wall.type === 0){
+		  if(this.ID === "player")
 			wall.mesh.material.opacity = 1;
-		  if(temp.z <= (1.25 + this.r) * times  && temp.z >= (-1.25 - this.r) * times && Math.abs(temp.x) <= wall.len / 2 && this.ID == "player"){
+		  if(temp.z <= (1.25 + this.r) * times  && temp.z >= (-1.25 - this.r) * times && Math.abs(temp.x) <= wall.len / 2 && this.ID === "player"){
 			wall.mesh.material.opacity = 0.5;
 		  }
 		  if (temp.z <= 1.25 + this.r  && temp.z >= -1.25 - this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
-			if(this.ID == "player"){
+			if(this.ID === "player"){
 				this.hitSound.play()
 			}
 			this.n.copy(wall.normal);
@@ -300,14 +285,14 @@ class Particle {
 			this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
 		  }
 	  }
-	  if(wall.type == 1){
-		if(this.ID == "player")
+	  if(wall.type === 1){
+		if(this.ID === "player")
 			wall.mesh.material.opacity = 1;
-		if(temp.z <= this.r * times  && temp.z >= this.r * times && Math.abs(temp.x) <= wall.len / 2 && this.ID == "player"){
+		if(temp.z <= this.r * times  && temp.z >= this.r * times && Math.abs(temp.x) <= wall.len / 2 && this.ID === "player"){
 			wall.mesh.material.opacity = 0.5;
 		}
 		if (temp.z <= this.r  && temp.z >= -this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
-			if(this.ID == "player"){
+			if(this.ID === "player"){
 				this.hitSound.play()
 			}
 			this.n.copy(wall.normal);
@@ -327,11 +312,11 @@ class Particle {
 		let UV = floor.convertUV(floor.worldToLocal(this.pos.clone()).x,floor.worldToLocal(this.pos.clone()).z)
 		let y = floor.heightFunc(this.pos.x, this.pos.z);
 		let height = new THREE.Vector3();
-		height = floor.localToWorld(new THREE.Vector3(0,y,0)).y
+		height = floor.localToWorld(new THREE.Vector3(0,y,0)).y + floor.y;
 		
 		if(UV[0] >= 0 && UV[0] <= 1 && UV[1] >= 0 && UV[1] <= 1 && this.pos.y >= height - this.r && this.pos.y <= height + this.r){
 			count++;
-			this.pos.set(this.pos.x, floor.heightFunc(this.pos.x, this.pos.z) + this.r, this.pos.z);
+			this.pos.set(this.pos.x, floor.heightFunc(this.pos.x, this.pos.z) + this.r + floor.y, this.pos.z);
 			let temp = floor.inHeightFunc(this.pos.x,this.pos.z);
 			let normal = new THREE.Vector3(temp[0],1,temp[1])
 			this.n.copy(normal.normalize())
@@ -346,7 +331,7 @@ class Particle {
 			this.nowIsFlyF = false;
 		}
 	}
-	if(count == 0){
+	if(count === 0){
 		this.nowIsFlyF = true;
 	}
   }
