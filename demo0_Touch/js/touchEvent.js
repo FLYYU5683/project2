@@ -255,6 +255,7 @@ function touchEvent(){
 		cameraMove = true;
 	  swing = false;
   }
+  console.log(cameraMove)
   if(ballMove === true && balls[0].vel.length() <= 0.7 / 5 && !cameraMove){
 	if(!inReplay)
 	  countSwing++;
@@ -271,6 +272,7 @@ function touchEvent(){
 	}
 	else{
 		steve.camera.rotation.y = steve.direct.rotation.y;
+		countAngle = 0
 		balls[0].runInHole = false;
 	}
   }
@@ -288,7 +290,7 @@ function touchEvent(){
 	countAngle -= Math.PI / 90;
 	rotateY -= Math.PI/90;
 	
-	if(Math.abs(countAngle - 0) <= Math.PI/45){
+	if(Math.abs(countAngle - 0) <= Math.PI/90){
 		steve.camera.rotation.y = steve.direct.rotation.y;
 		countAngle = 0
 		steve.moveFin = false
