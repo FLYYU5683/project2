@@ -288,16 +288,15 @@ function touchEvent(){
 	countAngle -= Math.PI / 90;
 	rotateY -= Math.PI/90;
 	
-	if(Math.abs(countAngle - 0) <= Math.PI/90){
+	if(Math.abs(countAngle - 0) <= Math.PI/45){
 		steve.camera.rotation.y = steve.direct.rotation.y;
 		countAngle = 0
 		steve.moveFin = false
-		
 	}
   }
 }
 function countSwingReset(){
-	countSwing = 0;
+	countSwing = 1;
 }
 function sliderMove(){
 	if(sliderGroup.onTop === true){
