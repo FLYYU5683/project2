@@ -4,7 +4,7 @@ import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lin
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level} from './render.js'
-import {steve,balls} from './main.js'
+import {steve,balls,writeObstaclePos,setObstaclePos} from './main.js'
 import {stop,stopTrue} from './Steve.js'
 
 var beforeHit = true;
@@ -24,7 +24,6 @@ var firstTouch = false;
 var startMove = false;
 var fingerNum = 0;
 var touchHUD = false;
-var countAngle = 0;
 var cameraMove = false;
 
 var isCharge = false;
@@ -47,6 +46,8 @@ function predictLine(){
 			colors.push(255,0,0)
 			if(balls[1].runInHole === true)
 				break;
+			if(positions.length >=500)
+				break
 		}while(balls[1].vel.length() > EPS && balls[1].pos.y >= -10);
 
 		for(var i = lineList.length; i > 0;i--){
@@ -186,7 +187,8 @@ function touchEnd(event){
 				playDatas[level].ballPos.push(balls[0].pos.clone())
 				playDatas[level].putt.push(steve.puttPos.clone())
 				playDatas[level].theta.push(theta)
-				
+				if(level === 2)
+					writeObstaclePos();
 				
 			}
 			else{
@@ -210,6 +212,12 @@ function touchEnd(event){
 	touchHUD = -1;
 }
 function touchEvent(){
+	if(level !== 3)
+		checkBallZ(balls[0].pos.z)
+	else
+		checkBallX(balls[0].pos.x)
+		
+	
    textureAnimate()
    sliderMove()
 	
@@ -255,8 +263,7 @@ function touchEvent(){
 		cameraMove = true;
 	  swing = false;
   }
-  console.log(cameraMove)
-  if(ballMove === true && balls[0].vel.length() <= 0.7 / 5 && !cameraMove){
+  if(ballMove === true && balls[0].vel.length() <= 0.7 / 3 && !cameraMove){
 	if(!inReplay)
 	  countSwing++;
 	ballMove = false
@@ -271,31 +278,44 @@ function touchEvent(){
 		stopTrue(); 
 	}
 	else{
-		steve.camera.rotation.y = steve.direct.rotation.y;
-		countAngle = 0
+		//steve.camera.rotation.y = steve.direct.rotation.y;
 		balls[0].runInHole = false;
 	}
   }
-  if(cameraMove){
-	steve.camera.rotation.y += Math.PI/90;
-	countAngle += Math.PI / 90;
-	rotateY += Math.PI/90;
-	if(Math.abs(countAngle - Math.PI/6*5) <= Math.PI/90){
+  if(steve.camera.rotation.y > Math.PI * 2)
+	steve.camera.rotation.y -= Math.PI * 2;
+  if(steve.camera.rotation.y < -Math.PI * 2)
+	steve.camera.rotation.y += Math.PI * 2;
+  if(ballMove){
+	  let temp = levelTrack[level-1][index].angle - steve.camera.rotation.y;
+	  //console.log(temp)
+	  if(temp >= Math.PI/90){
+		  steve.camera.rotation.y += Math.PI/90;
+	  }
+	  else if (temp <= -Math.PI/90){
+		  steve.camera.rotation.y -= Math.PI/90;
+	  }
+	  else{
 		cameraMove = false;
-	}	
+	  }
   }
+	//console.log(cameraMove)
   if(steve.moveFin && !ballMove){
-	  
-	steve.camera.rotation.y -= Math.PI/90;
-	countAngle -= Math.PI / 90;
-	rotateY -= Math.PI/90;
-	
-	if(Math.abs(countAngle - 0) <= Math.PI/90){
-		steve.camera.rotation.y = steve.direct.rotation.y;
-		countAngle = 0
-		steve.moveFin = false
-	}
+	//let temp = (levelTrack[level-1][index].angle < 0 ? levelTrack[level-1][index].angle + Math.PI / 2 : levelTrack[level-1][index].angle - Math.PI/2) - steve.camera.rotation.y;
+	let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
+	  if(temp >= Math.PI/90){
+		  steve.camera.rotation.y += Math.PI/90;
+	  }
+	  else if (temp <= -Math.PI/90){
+		  steve.camera.rotation.y -= Math.PI/90;
+	  }	
+	  else{
+			steve.direct.rotation.y = steve.camera.rotation.y;
+			steve.moveFin = false
+	  }	  
   }
+  
+  
 }
 function countSwingReset(){
 	countSwing = 1;
@@ -327,7 +347,25 @@ function turnRight(){
 function clamp(val, min, max){
 	return Math.min(Math.max(val, min), max);
 }
-
+function clamp2(val,min,max){
+	if(val > 0){
+		if(val < min){
+			return min
+		}
+		else if (val > max){
+			return max
+		}
+	}
+	else if (val < 0){
+		if(-val < min){
+			return -min
+		}
+		else if (-val > max){
+			return -max
+		}
+	}
+	return val
+}
 var playData1 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
 var playData2 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
 var playData3 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
@@ -351,12 +389,12 @@ function replay(){
 		steve.direct.rotation.y = playDatas[level].rotation[replayCount]
 		steve.puttPos.copy(playDatas[level].putt[replayCount])
 		theta = playDatas[level].theta[replayCount];
-			
+		if(level === 2)
+			setObstaclePos(replayCount)
 		beforeHit = false;
 		swing = true;
 		isCharge = false;
 		replayCount++;
-		
 		}
 	else {
 		sliderGroup.children[5].visible = true;
@@ -371,6 +409,71 @@ function replay(){
 function resetPlayData(level){
 	playDatas[level] = {power: [],rotation : [], ballPos: [], putt : [],theta : []}
 }
+
+var levelTrack = []
+var index = 0
+
+function setPos(){
+	
+	{
+		let pos = []
+		let temp = {pos : new THREE.Vector3(0,30, 20),angle : -Math.PI/2,angleBack:0}
+		let temp1 = {pos : new THREE.Vector3(0,30,-50),angle : -Math.PI/2,angleBack:0}
+		let temp2 = {pos : new THREE.Vector3(0,30,-60),angle : -Math.PI,angleBack:-Math.PI/2}
+		pos.push(temp,temp1,temp2);
+		levelTrack.push(pos)
+	}
+	{
+		let pos = [];
+		let temp = {pos : new THREE.Vector3(0,30, -120),angle : -Math.PI/2,angleBack:0}
+		let temp1 = {pos : new THREE.Vector3(0,30,-270),angle : -Math.PI/2,angleBack:0}
+		let temp2 = {pos : new THREE.Vector3(0,30,-275),angle : -Math.PI,angleBack:-Math.PI/2}
+		pos.push(temp,temp1,temp2);
+		levelTrack.push(pos)
+	}
+	{
+		let pos = [];
+		let temp = {pos : new THREE.Vector3(230,30, -300),angle : -Math.PI,angleBack: -Math.PI/2}
+		let temp1 = {pos : new THREE.Vector3(270,30, -300),angle : -Math.PI,angleBack: -Math.PI/2}
+		let temp2 = {pos : new THREE.Vector3(380,30,-300),angle : -Math.PI/2 * 3,angleBack:-Math.PI/2}
+		let temp3 = {pos : new THREE.Vector3(390,30,-300),angle : -Math.PI,angleBack:-Math.PI/2}
+		pos.push(temp,temp1,temp2,temp3);
+		levelTrack.push(pos)
+	}
+	
+	/*
+	for(var i = 10;i >= -50; i = i - 10)
+		pos.push(new THREE.Vector3(0,30,i))
+	pos.push(new THREE.Vector3(-40,30,10))
+	pos.push(new THREE.Vector3(-40,30,0))
+	pos.push(new THREE.Vector3(-40,30,-10))
+	pos.push(new THREE.Vector3(-40,30,-20))
+	pos.push(new THREE.Vector3(-40,30,-30))
+	pos.push(new THREE.Vector3(-40,30,-40))
+	pos.push(new THREE.Vector3(-40,30,-50))
+	
+	pos.push(new THREE.Vector3(-20,30,-70))
+	pos.push(new THREE.Vector3(-10,30,-90))
+	pos.push(new THREE.Vector3(0,30,-110))
+	*/
+	
+}
+function checkBallZ(ballZ){
+	for(var i = 0; i < levelTrack[level - 1].length; i++){
+		if(ballZ >= levelTrack[level - 1][i].pos.z){
+			index = i;
+			return;
+		}
+	}
+}
+function checkBallX(ballX){
+	for(var i = 0; i < levelTrack[level - 1].length; i++){
+		if(ballX <= levelTrack[level - 1][i].pos.x){
+			index = i;
+			return;
+		}
+	}
+}
 export {theta,beforeHit,useOrb,countSwingReset,countSwing}
 export {touchStart,touchMove,touchEnd,touchEvent}
-export {resetPlayData}
+export {resetPlayData,setPos}

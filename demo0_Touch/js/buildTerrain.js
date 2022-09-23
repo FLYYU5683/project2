@@ -18,11 +18,86 @@ function buildTerrain(){
 	buildholes();
 	buildCylinder();
 	buildfloors();
-
+	buildStoneWall();
+	
 	class1.position.z = 30;
 	class1Rotate.add(class1)
 	
 	sceneMap.add(class1Rotate)
+}
+function buildStoneWall(){
+	var stoneGeometry = new THREE.BoxGeometry(50,5,2.5);
+	var stoneGeometry2 = new THREE.BoxGeometry(100,5,2.5);
+	var loader = new THREE.TextureLoader();
+	var texture = loader.load('https://i.imgur.com/euhOAfo.jpg');
+	var stoneMaterial = new THREE.MeshPhongMaterial({
+      map: texture,side:THREE.DoubleSide})
+	var stoneWall1 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall1);
+	stoneWall1.position.set(-25,-2.51,-30);
+	stoneWall1.rotation.y = -Math.PI / 2;
+	
+	var stoneWall2 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall2);
+	stoneWall2.position.set(25,-2.51,-30);
+	stoneWall2.rotation.y = -Math.PI / 2;
+	
+	var stoneWall3 = new THREE.Mesh(stoneGeometry,stoneMaterial);
+	scene.add(stoneWall3);
+	stoneWall3.position.set(0,-2.51,20);
+	
+	var stoneWall4 = new THREE.Mesh(stoneGeometry,stoneMaterial);
+	scene.add(stoneWall4);
+	stoneWall4.position.set(0,-2.51,-80);
+	
+	//class2
+	
+	var stoneWall5 = new THREE.Mesh(stoneGeometry,stoneMaterial);
+	scene.add(stoneWall5);
+	stoneWall5.position.set(0,-2.51,-125);
+	
+	var stoneWall6 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall6);
+	stoneWall6.position.set(-25,-2.51,-175);
+	stoneWall6.rotation.y = -Math.PI / 2;
+	
+	var stoneWall7 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall7);
+	stoneWall7.position.set(-25,-2.51,-275);
+	stoneWall7.rotation.y = -Math.PI / 2;
+	
+	var stoneWall8 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall8);
+	stoneWall8.position.set(25,-2.51,-175);
+	stoneWall8.rotation.y = -Math.PI / 2;
+	
+	var stoneWall9 = new THREE.Mesh(stoneGeometry,stoneMaterial);
+	scene.add(stoneWall9);
+	stoneWall9.position.set(25,-2.51,-250);
+	stoneWall9.rotation.y = -Math.PI / 2;
+	
+	var stoneWall10 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall10);
+	stoneWall10.position.set(25,-2.51,-325);
+	
+	var stoneWall11 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall11);
+	stoneWall11.position.set(125,-2.51,-325);
+	
+	var stoneWall12 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
+	scene.add(stoneWall12);
+	stoneWall12.position.set(75,-2.51,-275);
+	
+	var stoneWall13 = new THREE.Mesh(stoneGeometry,stoneMaterial);
+	scene.add(stoneWall13);
+	stoneWall13.position.set(150,-2.51,-275);
+	
+	var stoneWall14 = new THREE.Mesh(stoneGeometry,stoneMaterial);
+	scene.add(stoneWall14);
+	stoneWall14.position.set(175,-2.51,-300);
+	stoneWall14.rotation.y = -Math.PI / 2;
+	
+	
 }
 function buildPlane(){
   let plane;
@@ -55,14 +130,8 @@ function buildPlane(){
   box1.position.set(0,0.2,10);
   box1.material.color.copy(color2)
   box1.receiveShadow = true;
-
-  var box2 = new THREE.Mesh(new THREE.BoxGeometry(10,0.01,10),new THREE.MeshPhongMaterial({transparent: true,opacity:0.1}));
-  box2.position.set(80,0.3,-125);
-  box2.material.color.copy(color2)
-  box2.receiveShadow = true;
   
-  scene.add(box1,box2);
-
+  scene.add(box1);
 	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
 	texture2.wrapS = THREE.RepeatWrapping;
 	texture2.wrapT = THREE.RepeatWrapping;
@@ -84,29 +153,12 @@ function buildPlane(){
 	 
 	class1.add(table.clone(),box1.clone())
 	//class2
-	var floor2 = new THREE.Mesh(new THREE.PlaneGeometry(50,150), new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide}));
-	floor2.material.map.repeat.set( 3, 3 );
-	floor2.rotation.x = -Math.PI / 2;
-	floor2.position.y = 0.02;
-	floor2.position.z = -200;
-	floor.receiveShadow = true;
-	  
-	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor2, 150 * 1.5, table);
-	plane.update()
-	planes.push(plane);
-	  
-	var floor3 = new THREE.Mesh(new THREE.PlaneGeometry(150,50), new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide}));
-	floor3.material.map.repeat.set( 3, 3 );
-	floor3.rotation.x = -Math.PI / 2;
-	floor3.position.y = 0.02;
-	floor3.position.z = -300;
-	floor3.position.x = 50;
-	floor.receiveShadow = true;
-	  
-	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor3, 150 * 1.5, table);
-	plane.update()
-	planes.push(plane);
-  
+	var box2 = new THREE.Mesh(new THREE.BoxGeometry(5,0.01,5),new THREE.MeshPhongMaterial({transparent: true,opacity:0.1}));
+	box2.position.set(0,0.3,-140);
+	box2.material.color.copy(color2)
+	box2.receiveShadow = true;
+	scene.add(box2);
+
     var hole2= new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.1,}));
 	hole2.rotation.x=-Math.PI/2;  
 	hole2.position.set(150,0,-300);
@@ -117,7 +169,7 @@ function buildPlane(){
 	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1),hole2, 50 * 1.5, table);
 	plane.update()
 	planes.push(plane);
-
+	
 	//class3
 
 	var floor6 = new THREE.Mesh(new THREE.PlaneGeometry(150,50), new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide}));
@@ -155,7 +207,23 @@ function buildPlane(){
 	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1),hole3, 50 * 1.5, table);
 	plane.update()
 	planes.push(plane);
-
+	
+	//big floor
+	var loader2 = new THREE.TextureLoader();
+    loader2.setCrossOrigin('');
+    var textureFloor = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
+    textureFloor.wrapS = THREE.RepeatWrapping;
+    textureFloor.wrapT = THREE.RepeatWrapping;
+	
+	var bigfloor = new THREE.Mesh(new THREE.PlaneGeometry(5000,5000), new THREE.MeshPhongMaterial({map: textureFloor,side:THREE.DoubleSide}));
+	bigfloor.material.map.repeat.set( 500, 500 );
+	bigfloor.rotation.x = -Math.PI / 2;
+	bigfloor.position.y = -4.5;
+	bigfloor.receiveShadow = true;
+	  
+	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), bigfloor, 150 * 1.5, table);
+	plane.update()
+	planes.push(plane);
 }
 function buildWalls(){
   for (var i = 0; i < 4; i++) {
@@ -230,7 +298,8 @@ function buildWalls(){
   walls[13].mesh.position.set(125,5.5,-150);
   walls[14].mesh.position.set(140,5.5,-165);
   walls[15].mesh.position.set(190,5.5,-165);
-
+  for(var i = 4; i <= 15 ;i++)
+	  walls[i].mesh.visible = false
   //時間性關卡:抬升牆壁 class 2
   for(var i = 0; i < 3; i++){
 	  if(i < 1){
@@ -844,7 +913,7 @@ function buildCylinder(){
 	cylinders.push(pillar4)
 	
 	class1.add(pillar1.clone(),pillar2.clone(),pillar3.clone(),pillar4.clone())
-	
+	/*
 	var class21 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	class21.R = 2;
 	class21.height = 6
@@ -952,7 +1021,7 @@ function buildCylinder(){
 	class213.castShadow = true;
 	scene.add(class213)
 	cylinders.push(class213)
-	
+	*/
 	//第二關柱子
 	var class31 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	class31.R = 2;
@@ -1208,50 +1277,56 @@ function buildCylinder(){
 }
 function buildfloors(){
 	var heightFunc = function(x,z) {
-	  let K = 5;
-	  let a = 165;
-	  let aa = 190;
-	  let aaa = 140;
-	  let b = -125;
-	  let bb = -100;
-	  let bbb = -150;
-	  let w = 30;
-	  return 1 * Math.exp(
-		-(x - a) * (x - a) / w / w - (z - b) * (z - b) / w / w)
-			+ K * Math.exp(
-		-(x - aa) * (x - aa) / w / w - (z - bb) * (z - bb) / w / w)
-		    +  K * Math.exp(
-		-(x - aaa) * (x - aaa) / w / w - (z - bbb) * (z - bbb) / w / w)
-		+  K * Math.exp(
-		-(x - aaa) * (x - aaa) / w / w - (z - bb) * (z - bb) / w / w)
-		+  K * Math.exp(
-		-(x - aa) * (x - aa) / w / w - (z - bbb) * (z - bbb) / w / w)
+	  let K1 = 5,p1x = -15,p1z = -260,w1 = 15;
+	  let K2 = 5, p2x = 15, p2z = -260, w2 = 15;
+	  let K3 = 5, p3x = 50, p3z = -280, w3 = 15;
+	  let K4 = 5, p4x = 50, p4z = -320, w4 = 15;
+	  let K5 = 2, p5x = 20, p5z = -290, w5 = 10;
+	  let K6 = 2, p6x = 20, p6z = -310, w6 = 10;
+	  let K7 = 2, p7x = -20, p7z = -290, w7 = 10;
+	  let K8 = 2, p8x = -20, p8z = -310, w8 = 10;
+	  
+	  return K1 * Math.exp(
+		-(x - p1x) * (x - p1x) / w1 / w1 - (z - p1z) * (z - p1z) / w1 / w1) + K2 * Math.exp(
+		-(x - p2x) * (x - p2x) / w2 / w2 - (z - p2z) * (z - p2z) / w2 / w2) + K3 * Math.exp(
+		-(x - p3x) * (x - p3x) / w3 / w3 - (z - p3z) * (z - p3z) / w3 / w3) + K4 * Math.exp(
+		-(x - p4x) * (x - p4x) / w4 / w4 - (z - p4z) * (z - p4z) / w4 / w4) - K5 * Math.exp(
+		-(x - p5x) * (x - p5x) / w5 / w5 - (z - p5z) * (z - p5z) / w5 / w5) - K6 * Math.exp(
+		-(x - p6x) * (x - p6x) / w6 / w6 - (z - p6z) * (z - p6z) / w6 / w6) - K7 * Math.exp(
+		-(x - p7x) * (x - p7x) / w7 / w7 - (z - p7z) * (z - p7z) / w7 / w7) - K8 * Math.exp(
+		-(x - p8x) * (x - p8x) / w8 / w8 - (z - p8z) * (z - p8z) / w8 / w8)
 	}
 	var inHeightFunc = function(x,z){
-		let K = 5;
-		let a = 165;
-		let aa = 190;
-		let aaa = 140;
-		let b = -125;
-		let bb = -100;
-		let bbb = -150;
-		let w = 30;
-		return [- 1 * Math.exp(
-		-(x - a) * (x - a) / w / w - (z - b) * (z - b) / w / w) * (-2 * ((x - a) / w) / w ) + - K * Math.exp(
-		-(x - aa) * (x - aa) / w / w - (z - bb) * (z - bb) / w / w) * (-2 * ((x - aa) / w) / w ) + - K * Math.exp(
-		-(x - aaa) * (x - aaa) / w / w - (z - bbb) * (z - bbb) / w / w) * (-2 * ((x - aaa) / w) / w ) + - K * Math.exp(
-		-(x - aaa) * (x - aaa) / w / w - (z - bb) * (z - bb) / w / w) * (-2 * ((x - aaa) / w) / w ) + - K * Math.exp(
-		-(x - aa) * (x - aa) / w / w - (z - bbb) * (z - bbb) / w / w) * (-2 * ((x - aa) / w) / w ) ,-K * Math.exp(
-		-(x - a) * (x - a) / w / w - (z - b) * (z - b) / w / w) * (-2 * ((z - b) / w) / w ) + - K * Math.exp(
-		-(x - aa) * (x - aa) / w / w - (z - bb) * (z - bb) / w / w) * (-2 * ((z - bb) / w) / w ) + - K * Math.exp(
-		-(x - aaa) * (x - aaa) / w / w - (z - bbb) * (z - bbb) / w / w) * (-2 * ((z - bbb) / w) / w )+ - K * Math.exp(
-		-(x - aaa) * (x - aaa) / w / w - (z - bb) * (z - bb) / w / w) * (-2 * ((z - bb) / w) / w )+ - K * Math.exp(
-		-(x - aa) * (x - aa) / w / w - (z - bbb) * (z - bbb) / w / w) * (-2 * ((z - bbb) / w) / w ) ]
+	  let K1 = 5,p1x = -15,p1z = -260,w1 = 15;
+	  let K2 = 5, p2x = 15, p2z = -260, w2 = 15;
+	  let K3 = 5, p3x = 50, p3z = -280, w3 = 15;
+	  let K4 = 5, p4x = 50, p4z = -320, w4 = 15;
+	  let K5 = 2, p5x = 20, p5z = -290, w5 = 10;
+	  let K6 = 2, p6x = 20, p6z = -310, w6 = 10;
+	  let K7 = 2, p7x = -20, p7z = -290, w7 = 10;
+	  let K8 = 2, p8x = -20, p8z = -310, w8 = 10;
+		return [- K1 * Math.exp(
+		-(x - p1x) * (x - p1x) / w1 / w1 - (z - p1z) * (z - p1z) / w1 / w1) * (-2 * ((x - p1x) / w1) / w1 ) - K2 * Math.exp(
+		-(x - p2x) * (x - p2x) / w2 / w2 - (z - p2z) * (z - p2z) / w2 / w2) * (-2 * ((x - p2x) / w2) / w2 ) - K3 * Math.exp(
+		-(x - p3x) * (x - p3x) / w3 / w3 - (z - p3z) * (z - p3z) / w3 / w3) * (-2 * ((x - p3x) / w3) / w3 ) - K4 * Math.exp(
+		-(x - p4x) * (x - p4x) / w4 / w4 - (z - p4z) * (z - p4z) / w4 / w4) * (-2 * ((x - p4x) / w4) / w4 ) + K5 * Math.exp(
+		-(x - p5x) * (x - p5x) / w5 / w5 - (z - p5z) * (z - p5z) / w5 / w5) * (-2 * ((x - p5x) / w5) / w5 ) + K6 * Math.exp(
+		-(x - p6x) * (x - p6x) / w6 / w6 - (z - p6z) * (z - p6z) / w6 / w6) * (-2 * ((x - p6x) / w6) / w6 ) + K7 * Math.exp(
+		-(x - p7x) * (x - p7x) / w7 / w7 - (z - p7z) * (z - p7z) / w7 / w7) * (-2 * ((x - p7x) / w7) / w7 ) + K8 * Math.exp(
+		-(x - p8x) * (x - p8x) / w8 / w8 - (z - p8z) * (z - p8z) / w8 / w8) * (-2 * ((x - p8x) / w8) / w8 ) ,-K1 * Math.exp(
+		-(x - p1x) * (x - p1x) / w1 / w1 - (z - p1z) * (z - p1z) / w1 / w1) * (-2 * ((z - p1z) / w1) / w1 ) - K2 * Math.exp(
+		-(x - p2x) * (x - p2x) / w2 / w2 - (z - p2z) * (z - p2z) / w2 / w2) * (-2 * ((z - p2z) / w2) / w2 ) - K3 * Math.exp(
+		-(x - p3x) * (x - p3x) / w3 / w3 - (z - p3z) * (z - p3z) / w3 / w3) * (-2 * ((z - p3z) / w3) / w3 ) - K4 * Math.exp(
+		-(x - p4x) * (x - p4x) / w4 / w4 - (z - p4z) * (z - p4z) / w4 / w4) * (-2 * ((z - p4z) / w4) / w4 ) + K5 * Math.exp(
+		-(x - p5x) * (x - p5x) / w5 / w5 - (z - p5z) * (z - p5z) / w5 / w5) * (-2 * ((z - p5z) / w5) / w5 ) + K6 * Math.exp(
+		-(x - p6x) * (x - p6x) / w6 / w6 - (z - p6z) * (z - p6z) / w6 / w6) * (-2 * ((z - p6z) / w6) / w6 ) + K7 * Math.exp(
+		-(x - p7x) * (x - p7x) / w7 / w7 - (z - p7z) * (z - p7z) / w7 / w7) * (-2 * ((z - p7z) / w7) / w7 ) + K8 * Math.exp(
+		-(x - p8x) * (x - p8x) / w8 / w8 - (z - p8z) * (z - p8z) / w8 / w8) * (-2 * ((z - p8z) / w8) / w8 )]
 	}
 	
 	var geometry = new ParametricGeometry(function(u0, v0, pos) {
-		let x = 60 + 130 * u0;
-		let z = -150 + 50 * v0;
+		let x = -25 + 50 * u0;
+		let z = -325 + 200 * v0;
 		pos.set(x, heightFunc(x, z), z);
 	}, 40, 40);
 	
@@ -1262,19 +1337,14 @@ function buildfloors(){
 	texture.wrapS = THREE.RepeatWrapping;
 	texture.wrapT = THREE.RepeatWrapping;
 	
-	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
-	
-	texture2.wrapS = THREE.RepeatWrapping;
-	texture2.wrapT = THREE.RepeatWrapping;
-	
 	var material = new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide});
 
 	var convertUV = function(x,z){
-		return [(x - 60) / 130,(z + 150) / 50]
+		return [(x + 25) / 50,(z + 325) / 200]
 	}
 	
 	var mesh = new THREE.Mesh(geometry, material);
-	mesh.y = -20
+	mesh.y = 0
 	mesh.heightFunc = heightFunc;
 	mesh.inHeightFunc = inHeightFunc;
 	mesh.convertUV = convertUV;
@@ -1283,12 +1353,12 @@ function buildfloors(){
 	
 	
 	var geometry2 = new ParametricGeometry(function(u0, v0, pos) {
-		let x = 140 + 50 * u0;
-		let z = -230 + 80 * v0;
+		let x = 25 + 100 * u0;
+		let z = -325 + 50 * v0;
 		pos.set(x, heightFunc(x, z), z);
 	}, 40, 40);
 	var convertUV2 = function(x,z){
-		return [(x - 140) / 50,(z + 230) / 80]
+		return [(x - 25) / 100,(z + 325) / 50]
 	}
 
 	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
@@ -1306,6 +1376,7 @@ function buildfloors(){
 	
 	floors.push(mesh,floor5)
 	scene.add(mesh,floor5)
+	
 	//class 3
 	var geometry3 = new ParametricGeometry(function(u0, v0, pos) {
 		let x = 225 + 50 * u0;

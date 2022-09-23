@@ -19,6 +19,7 @@ var levelChangeButton = new THREE.Group();
 var isOver = false;
 var levelPos =  [new THREE.Vector3(0,1,10),new THREE.Vector3(0,2,-135),new THREE.Vector3(250,81,-300)]
 var level = 1;
+var sign1,sign2,sign3;
 function render() {
   var WW = window.innerWidth;
   var HH = window.innerHeight;
@@ -45,18 +46,23 @@ function render() {
 	}
   }
     renderer.render(sceneHUD, cameraHUD);
+
 }
 function buildCamAndSen(){
 		
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2( 0x21384f, 0.0050,1000);
-  scene.background = new THREE.Color( 0x21384f );
+  var textureLoader = new THREE.TextureLoader();
+  var texture = textureLoader.load('https://i.imgur.com/JHaU4X4.jpg');
+  scene.background = texture;
+  //scene.fog = new THREE.FogExp2( 0x21384f, 0.0050,1000);
+  //scene.background = new THREE.Color( 0x21384f );
   sceneHUD = new THREE.Scene();
   sceneMap = new THREE.Scene();
   sceneMap.background = new THREE.Color( 0x21384f );
 
   var amblight = new THREE.AmbientLight(0x255483); // soft white light
   scene.add(amblight);
+  amblight.intensity=0.1
 
   renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -102,6 +108,60 @@ function buildCamAndSen(){
   //startButton.visible = false////////////////////////////////////////////////////////////////////////////////////////////////////////
   sceneHUD.add(startButton)
   buildHUD()
+  
+  //洞標
+	let loader1 = new THREE.TextureLoader();
+  loader1.crossOrigin = '';
+  var texture1 = loader1.load('https://i.imgur.com/E3yqlrK.png');
+
+  var texMat1 = new THREE.MeshBasicMaterial({
+    map: texture1,
+    //transparent: true
+    alphaTest: 0.5,
+	side:THREE.DoubleSide
+  });
+
+	sign1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat1);
+	sign1.position.set(20,5,20);
+	sign1.rotation.y = -Math.PI / 9
+	scene.add(sign1);
+  
+  
+  let loader2 = new THREE.TextureLoader();
+  loader2.crossOrigin = '';
+  var texture2 = loader2.load('https://i.imgur.com/62bVwfm.png');
+
+  var texMat2 = new THREE.MeshBasicMaterial({
+    map: texture2,
+    //transparent: true
+    alphaTest: 0.5,
+	side:THREE.DoubleSide
+  });
+
+	sign2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat2);
+	sign2.position.set(20,5,-125);
+	sign2.rotation.y = -Math.PI / 9
+	scene.add(sign2);
+  
+  
+  let loader4 = new THREE.TextureLoader();
+  loader4.crossOrigin = '';
+  var texture4 = loader3.load('https://i.imgur.com/gGw3I9S.png');
+
+  var texMat3 = new THREE.MeshBasicMaterial({
+    map: texture4,
+    //transparent: true
+    alphaTest: 0.5,
+	side:THREE.DoubleSide
+  });
+
+	sign3 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat3);
+	sign3.position.set(230,85,-280);
+	sign3.rotation.y = -Math.PI / 2 - Math.PI / 9;
+	scene.add(sign3);
+  
+  
+  
 }
 function buildHUD(){
 	////計分板
@@ -404,7 +464,7 @@ function HUDPress(){
 			startButton.visible = false
 		}
 	}
-	console.log(touch.x,touch.y);
+	//console.log(touch.x,touch.y);
 	if(start === true && isOver === false){
 		///Camera按鈕
 		if(touch.x >= 0.6 && touch.y >= 0.84){
