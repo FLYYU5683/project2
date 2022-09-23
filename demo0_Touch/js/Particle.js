@@ -338,6 +338,7 @@ class Particle {
   start(){
 	this.vel.set(0,0,0);
 	this.pos.set(0,1,10);
+	//this.pos.set(230,81,-300); level 3
   }
 }
 export {Particle}

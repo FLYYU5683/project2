@@ -5,6 +5,7 @@ import {Particle} from './Particle.js'
 import {buildCamAndSen,render,scene,sceneMap,start} from './render.js'
 import {Steve} from './Steve.js'
 import {touchStart,touchMove,touchEnd,touchEvent} from "./touchEvent.js"
+import {setPos} from "./touchEvent.js"
 
 var steve,balls = [];
 var clock = new THREE.Clock();
@@ -13,6 +14,7 @@ var wallchange=true;
 var wallchange2=true;
 var car1MoveSign = 1,car2MoveSign = -1;
 var inholeSound;
+var sceneDatas = []
 function init() {
   //camera && sence
   buildCamAndSen()
@@ -32,7 +34,7 @@ function init() {
   //balls
   buildBalls()
   //terrain
-  buildTerrain()
+  buildTerrain() 
   //set touchEvent
   document.addEventListener('touchstart', touchStart, false );
   document.addEventListener('touchmove', touchMove, false );
@@ -46,9 +48,14 @@ function init() {
   balls[0].hitSound = hitSound;
   balls[0].inholeSound = inholeSound;
   
+  
+  //////
+  setPos();
+  /////
 }
 function animate() {
   //backgroundMusic.play();
+  //console.log(sceneDatas)
   var dt = clock.getDelta();
   class1Rotate.rotation.y += Math.PI / 80;
   balls[0].update();
@@ -162,4 +169,20 @@ function carMove(){
 	  car2MoveSign *= -1;
   car2.position.z += car2MoveSign * 0.6;   
 }
-export {init,animate,steve,balls}
+function writeObstaclePos(){
+	var temp = []
+	temp.push(obstacle1.position.clone(),obstacle2.position.clone(),obstacle3.position.clone(),car.position.clone(),car2.position.clone(),wallchange,wallchange2,car1MoveSign,car2MoveSign)
+	sceneDatas.push(temp);
+}
+function setObstaclePos(index){
+	obstacle1.position.copy(sceneDatas[index][0])
+	obstacle2.position.copy(sceneDatas[index][1])
+	obstacle3.position.copy(sceneDatas[index][2])
+	car.position.copy(sceneDatas[index][3])
+	car2.position.copy(sceneDatas[index][4])
+	wallchange = sceneDatas[index][5]
+	wallchange2 = sceneDatas[index][6]
+	car1MoveSign = sceneDatas[index][7]
+	car2MoveSign = sceneDatas[index][8]
+}
+export {init,animate,steve,balls,writeObstaclePos,setObstaclePos}
