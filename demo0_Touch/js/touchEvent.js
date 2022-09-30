@@ -3,7 +3,7 @@ import {Line2} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/Line
 import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineMaterial.js';
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level} from './render.js'
+import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level,isOver,HUDForInHole} from './render.js'
 import {steve,balls,writeObstaclePos,setObstaclePos} from './main.js'
 import {stop,stopTrue} from './Steve.js'
 
@@ -27,6 +27,9 @@ var touchHUD = false;
 var cameraMove = false;
 
 var isCharge = false;
+
+var fovVal = 40,fovX = 0;
+
 function predictLine(){
 	if(!cancelCharge){
 		
@@ -160,12 +163,12 @@ function touchMove(event){
 		}
 	}
 	if(touchHUD === 1){
-		var x = ((event.touches[0].pageX / window.innerWidth) * 2 - 1) * 10;
-		x = clamp(x,-7.5,7.5)
-		cameraSlider.position.x = x ;
+		fovX = ((event.touches[0].pageX / window.innerWidth) * 2 - 1) * 10;
+		fovX = clamp(fovX,-7.5,7.5)
+		cameraSlider.position.x = fovX ;
 		
-		steve.camera.children[0].fov = 50 + x * 2;
-		steve.direct.children[3].children[0].fov = 50 + x * 2;
+		steve.camera.children[0].fov = fovVal + fovX * 2;
+		steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
 		
 		steve.camera.children[0].updateProjectionMatrix();
 		steve.direct.children[3].children[0].updateProjectionMatrix();
@@ -216,8 +219,6 @@ function touchEvent(){
 		checkBallZ(balls[0].pos.z)
 	else
 		checkBallX(balls[0].pos.x)
-		
-	
    textureAnimate()
    sliderMove()
 	
@@ -267,8 +268,8 @@ function touchEvent(){
 	if(!inReplay)
 	  countSwing++;
 	ballMove = false
+	
 	steve.direct.position.copy(balls[0].pos)
-
 	steve.body.visible = false;
 	if(balls[0].runInHole !== true && !inReplay)
 	{
@@ -288,7 +289,13 @@ function touchEvent(){
 	steve.camera.rotation.y += Math.PI * 2;
   if(ballMove){
 	  let temp = levelTrack[level-1][index].angle - steve.camera.rotation.y;
-	  //console.log(temp)
+	  if(fovVal <= 60)
+		fovVal += 1
+	  steve.camera.children[0].fov = fovVal + fovX * 2
+	  steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
+	  steve.camera.children[0].updateProjectionMatrix();
+	  steve.direct.children[3].children[0].updateProjectionMatrix();
+		
 	  if(temp >= Math.PI/90){
 		  steve.camera.rotation.y += Math.PI/90;
 	  }
@@ -303,6 +310,13 @@ function touchEvent(){
   if(steve.moveFin && !ballMove){
 	//let temp = (levelTrack[level-1][index].angle < 0 ? levelTrack[level-1][index].angle + Math.PI / 2 : levelTrack[level-1][index].angle - Math.PI/2) - steve.camera.rotation.y;
 	let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
+	if(fovVal >= 40)
+		fovVal -= 1
+	steve.camera.children[0].fov = fovVal + fovX * 2
+	steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
+	steve.camera.children[0].updateProjectionMatrix();
+	steve.direct.children[3].children[0].updateProjectionMatrix();
+	
 	  if(temp >= Math.PI/90){
 		  steve.camera.rotation.y += Math.PI/90;
 	  }
@@ -347,25 +361,6 @@ function turnRight(){
 function clamp(val, min, max){
 	return Math.min(Math.max(val, min), max);
 }
-function clamp2(val,min,max){
-	if(val > 0){
-		if(val < min){
-			return min
-		}
-		else if (val > max){
-			return max
-		}
-	}
-	else if (val < 0){
-		if(-val < min){
-			return -min
-		}
-		else if (-val > max){
-			return -max
-		}
-	}
-	return val
-}
 var playData1 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
 var playData2 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
 var playData3 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
@@ -373,6 +368,7 @@ var playDatas = [playData1,playData2,playData3]
 var inReplay = false,swing = false;
 var replayCount = 0;
 var mode = -1;
+var repalyEnd = true;
 function replay(){
 	if(mode === 1){
 		replayCount = playDatas[level].power.length - 1;
@@ -403,7 +399,8 @@ function replay(){
 		steve.theta = theta;
 		inReplay = false;
 		replayCount = 0;
-		
+		if(mode === 2)
+			repalyEnd = true;
 	}
 }
 function resetPlayData(level){
@@ -474,6 +471,21 @@ function checkBallX(ballX){
 		}
 	}
 }
+function replayAll(){
+	inReplay = true;
+	mode = 2
+	repalyEnd = false;
+	steve.camera.rotation.y = levelTrack[level - 1][0].angleBack;
+}
+function resetCameraAngle(){
+	steve.camera.rotation.y = levelTrack[level - 1][0].angleBack;
+	steve.direct.rotation.y = steve.camera.rotation.y
+}
+function inHoleBreak(){
+	fovVal = 40;
+	stopTrue();
+}
 export {theta,beforeHit,useOrb,countSwingReset,countSwing}
 export {touchStart,touchMove,touchEnd,touchEvent}
-export {resetPlayData,setPos}
+export {resetPlayData,setPos,replayAll,resetCameraAngle,inHoleBreak}
+export {fovX}
