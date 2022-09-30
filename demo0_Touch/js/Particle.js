@@ -180,7 +180,8 @@ class Particle {
 			this.nowIsFlyF = false;
 			
 			countSwingReset();
-			HUDForInHole();
+			if(!this.choose)
+				HUDForInHole();
 			
 			this.vel.set(0,0,0);
 			

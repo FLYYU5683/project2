@@ -1,11 +1,13 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {buildTerrain,table,planes,walls,class1Rotate} from './buildTerrain.js';
+import {buildTerrain,table1,table2,table3,planes,walls} from './buildTerrain.js';
+import {class1Rotate,class2Rotate,class3Rotate} from './buildTerrain.js';
 import {obstacle1,obstacle2,obstacle3,car,car2} from './buildTerrain.js';
 import {Particle} from './Particle.js'
 import {buildCamAndSen,render,scene,sceneMap,start} from './render.js'
 import {Steve} from './Steve.js'
 import {touchStart,touchMove,touchEnd,touchEvent} from "./touchEvent.js"
 import {setPos} from "./touchEvent.js"
+//import {setPortal} from "./portal.js"
 
 var steve,balls = [];
 var clock = new THREE.Clock();
@@ -47,20 +49,24 @@ function init() {
   hitSound.volume = 1;
   balls[0].hitSound = hitSound;
   balls[0].inholeSound = inholeSound;
-  
-  
+  //set portal
+  //setPortal();
   //////
   setPos();
   /////
 }
 function animate() {
   //backgroundMusic.play();
-  //console.log(sceneDatas)
   var dt = clock.getDelta();
-  class1Rotate.rotation.y += Math.PI / 80;
-  balls[0].update();
+  class1Rotate.rotation.y += Math.PI / 160/2 ;
+  class2Rotate.rotation.y += Math.PI / 160/2 ;
+  class3Rotate.rotation.y += Math.PI / 160/2 ;
 
-  table.updateMatrixWorld();
+
+  table1.updateMatrixWorld();
+  table2.updateMatrixWorld();
+  table3.updateMatrixWorld();
+  
   steve.update(dt);
   if(!start)
   {
@@ -70,6 +76,7 @@ function animate() {
 	touchEvent();
     balls[0].mesh.visible=true;
   }
+  balls[0].update();
   planes.forEach(function(b) {
     b.update()
   });
