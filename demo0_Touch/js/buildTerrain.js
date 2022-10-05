@@ -328,18 +328,27 @@ function buildWalls(){
   for(var i = 4; i <= 15 ;i++)
 	  walls[i].mesh.visible = false
   //時間性關卡:抬升牆壁 class 2
+   var clippingPlanes = new THREE.Plane(new THREE.Vector3(0,1,0), 0.0);
   for(var i = 0; i < 3; i++){
 	  if(i < 1){
 		let x = new Wall(20,15,new THREE.Vector3(0,0,1));
 		x.update();
+		//console.log(x);
+		x.mesh.material.clippingPlanes = [clippingPlanes]
+		x.mesh.material.clipShadows =  true;
 		walls.push(x)
+		
 	  }
 	  else{
-	  let x = new Wall(13,15,new THREE.Vector3(0,0,1))
-	  x.update();
-	  walls.push(x);
+		let x = new Wall(13,15,new THREE.Vector3(0,0,1))
+		x.update();
+		x.mesh.material.clippingPlanes = [clippingPlanes]
+		x.mesh.material.clipShadows =  true;
+		walls.push(x);
+		
 	  }	  
   }
+   
    walls[16].mesh.position.set(0, 3, -30)
    walls[17].mesh.position.set(16.5, -15, -30)
    walls[18].mesh.position.set(-16.5, -15, -30)
@@ -349,11 +358,15 @@ function buildWalls(){
 	  if(i ==0){
 		let x = new Wall(20,2.5,new THREE.Vector3(0,0,1),1);
 		x.update();
+		x.mesh.material.clippingPlanes = [clippingPlanes]
+		x.mesh.material.clipShadows =  true;
 		walls.push(x)
 	  }
       else{
         let x = new Wall(2.5,15,new THREE.Vector3(0,0,1),1);
 		x.update();
+		x.mesh.material.clippingPlanes = [clippingPlanes]
+		x.mesh.material.clipShadows =  true;
 		walls.push(x)
       }	   
   }
@@ -370,10 +383,14 @@ function buildWalls(){
 	  if(i <2){
 		let x = new Wall(13,2.5,new THREE.Vector3(0,0,1),1);
 		x.update();
+		x.mesh.material.clippingPlanes = [clippingPlanes]
+		x.mesh.material.clipShadows =  true;
 		walls.push(x)
 	  }
       else{
         let x = new Wall(2.5,15,new THREE.Vector3(0,0,1),1);
+		x.mesh.material.clippingPlanes = [clippingPlanes]
+		x.mesh.material.clipShadows =  true;
 		x.update();
 		walls.push(x)
       }	   
@@ -403,11 +420,15 @@ function buildWalls(){
   for (var i = 0; i < 4; i++) {
     if (i < 2) {
       let x = new Wall(15,10, new THREE.Vector3(0, 0, -1),1);
-      x.update();
+	  x.mesh.material.clippingPlanes = [clippingPlanes]
+	  x.mesh.material.clipShadows =  true;	  
+	  x.update();
       walls.push(x);
     }
 	else {
       let x = new Wall(5,10, new THREE.Vector3(0, 0, -1),1);
+      x.mesh.material.clippingPlanes = [clippingPlanes]
+	  x.mesh.material.clipShadows =  true;
       x.update();
       walls.push(x);
     }
@@ -448,11 +469,15 @@ function buildWalls(){
     if (i < 2) {
       let x = new Wall(15,10, new THREE.Vector3(0, 0, -1),1);
       x.update();
+	  x.mesh.material.clippingPlanes = [clippingPlanes]
+	  x.mesh.material.clipShadows =  true;
       walls.push(x);
     }
 	else {
       let x = new Wall(5,10, new THREE.Vector3(0, 0, -1),1);
       x.update();
+	  x.mesh.material.clippingPlanes = [clippingPlanes]
+	  x.mesh.material.clipShadows =  true;
       walls.push(x);
     }
   }

@@ -264,6 +264,8 @@ class Particle {
   checkWall(walls) {
     const COR = 0.64;
     for (var i = 0; i < walls.length; i++) {
+		if(this.ID === "predict" && i > 15 && i < 36)
+			continue;
       let wall = walls[i]
       let temp = new THREE.Vector3(0, 0, 0);
       temp.copy(wall.mesh.worldToLocal(this.pos.clone()))
