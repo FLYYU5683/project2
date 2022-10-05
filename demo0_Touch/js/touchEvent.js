@@ -219,8 +219,8 @@ function touchEvent(){
 		checkBallZ(balls[0].pos.z)
 	else
 		checkBallX(balls[0].pos.x)
-   textureAnimate()
-   sliderMove()
+    textureAnimate()
+    sliderMove()
 	
     if(inReplay && !ballMove && !swing){
 	  replay()
@@ -255,7 +255,8 @@ function touchEvent(){
       vel.copy(new THREE.Vector3(temp.x, 0, temp.z)).normalize();
       vel.multiplyScalar(steve.power*8);
       balls[0].vel.copy(vel)
-      ballMove = true;
+	  setTimeout(function(){if(balls[0].vel.length() >= 0.7 / 3) ballMove = true;},1000);
+      //ballMove = true;
 	  power = 0;
 	  steve.power = 0;
 	  beforeHit = true;
@@ -283,10 +284,12 @@ function touchEvent(){
 		balls[0].runInHole = false;
 	}
   }
+  
   if(steve.camera.rotation.y > Math.PI * 2)
 	steve.camera.rotation.y -= Math.PI * 2;
   if(steve.camera.rotation.y < -Math.PI * 2)
 	steve.camera.rotation.y += Math.PI * 2;
+
   if(ballMove){
 	  let temp = levelTrack[level-1][index].angle - steve.camera.rotation.y;
 	  if(fovVal <= 60)
@@ -306,7 +309,6 @@ function touchEvent(){
 		cameraMove = false;
 	  }
   }
-	//console.log(cameraMove)
   if(steve.moveFin && !ballMove){
 	//let temp = (levelTrack[level-1][index].angle < 0 ? levelTrack[level-1][index].angle + Math.PI / 2 : levelTrack[level-1][index].angle - Math.PI/2) - steve.camera.rotation.y;
 	let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
@@ -357,6 +359,9 @@ function turnLeft(){
 function turnRight(){
 	steve.camera.rotation.y -= Math.PI / 720
 	steve.direct.rotation.y -= Math.PI / 720
+}
+function setCameraMove(){
+	cameraMove = true;
 }
 function clamp(val, min, max){
 	return Math.min(Math.max(val, min), max);

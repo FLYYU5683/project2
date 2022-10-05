@@ -43,10 +43,15 @@ function init() {
   document.addEventListener('touchend', touchEnd, false );
   //set sound
   backgroundMusic = document.getElementById('backgroundMusic')
+  backgroundMusic.muted = false;
+  backgroundMusic.play()
   hitSound = document.getElementById('hit')
+  hitSound.muted = false;
   inholeSound = document.getElementById('inhole')
+  inholeSound.muted  = false;
   backgroundMusic.volume = 0.2;
   hitSound.volume = 1;
+  console.log(hitSound);
   balls[0].hitSound = hitSound;
   balls[0].inholeSound = inholeSound;
   //set portal
