@@ -9,6 +9,8 @@ import {touchStart,touchMove,touchEnd,touchEvent} from "./touchEvent.js"
 import {setPos} from "./touchEvent.js"
 //import {setPortal} from "./portal.js"
 
+import {BufferLoader,loadSounds,context} from "./soundTest.js"
+
 var steve,balls = [];
 var clock = new THREE.Clock();
 var backgroundMusic,hitSound;
@@ -17,8 +19,18 @@ var wallchange2=true;
 var car1MoveSign = 1,car2MoveSign = -1;
 var inholeSound;
 var sceneDatas = []
+
+var soundSource;
+var RhythmSample = function () {
+    loadSounds(this, {
+        hit: './sound/hit.mp3',
+        inHole: './sound/inhole.wav',
+    });
+};
 function init() {
   //camera && sence
+  soundSource = new RhythmSample();
+  
   buildCamAndSen()
   //light
   buildLight()
@@ -44,14 +56,13 @@ function init() {
   //set sound
   backgroundMusic = document.getElementById('backgroundMusic')
   backgroundMusic.muted = false;
-  backgroundMusic.play()
+
   hitSound = document.getElementById('hit')
   hitSound.muted = false;
   inholeSound = document.getElementById('inhole')
   inholeSound.muted  = false;
   backgroundMusic.volume = 0.2;
   hitSound.volume = 1;
-  console.log(hitSound);
   balls[0].hitSound = hitSound;
   balls[0].inholeSound = inholeSound;
   //set portal
@@ -62,6 +73,8 @@ function init() {
 }
 function animate() {
   //backgroundMusic.play();
+  playSound2(soundSource.hit)
+
   var dt = clock.getDelta();
   class1Rotate.rotation.y += Math.PI / 160/2 ;
   class2Rotate.rotation.y += Math.PI / 160/2 ;
@@ -197,4 +210,26 @@ function setObstaclePos(index){
 	car1MoveSign = sceneDatas[index][7]
 	car2MoveSign = sceneDatas[index][8]
 }
-export {init,animate,steve,balls,writeObstaclePos,setObstaclePos}
+function playSound2(buffer) {
+    var gainNode = context.createGain();
+    var source = context.createBufferSource();
+    source.buffer = buffer;
+
+    // Connect source to a gain node
+    source.connect(gainNode);
+    // Connect gain node to destination
+    gainNode.connect(context.destination);
+
+    var gainval = 1;
+    gainNode.gain.value = gainval;
+
+    //source[source.start ? 'start' : 'noteOn'](time);
+	source.start()
+    
+    /////////////////////////////////
+    // source.start (when, in seconds) 
+    // The 'when' parameter defines when the play will start. 
+    // If 'when' represents a time in the past, the play will start immediately.
+    // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode/start
+}
+export {init,animate,steve,balls,writeObstaclePos,setObstaclePos,soundSource}
