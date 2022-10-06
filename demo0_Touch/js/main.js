@@ -224,8 +224,8 @@ function playSound2(buffer) {
     var gainval = 1;
     gainNode.gain.value = gainval;
 
-    //source[source.start ? 'start' : 'noteOn'](time);
-	source.start()
+    source[source.start ? 'start' : 'noteOn']();
+	//source.start()
     
     /////////////////////////////////
     // source.start (when, in seconds) 
