@@ -54,6 +54,7 @@ function init() {
   document.addEventListener('touchmove', touchMove, false );
   document.addEventListener('touchend', touchEnd, false );
   //set sound
+
   backgroundMusic = document.getElementById('backgroundMusic')
   backgroundMusic.muted = false;
 
