@@ -28,6 +28,7 @@ var RhythmSample = function () {
     });
 };
 function init() {
+  window.ontouchstart = function (e){ e.preventDefault()};
   //camera && sence
   soundSource = new RhythmSample();
   
