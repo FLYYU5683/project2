@@ -9,6 +9,7 @@ body:focus{
 	margin:0;
 	padding:0;
 	user-select: none;
+	-webkit-user-select: none;
 }
 body {
 	font-size: 16px;
@@ -16,6 +17,7 @@ body {
 	margin:0;
 	padding:0;
 	user-select: none;
+	-webkit-user-select: none;
 }
 @media screen and (-webkit-min-device-pixel-ratio:0) {
     select,
@@ -56,8 +58,8 @@ body {
 </audio>
 
 <script type="module">
-
 import {init,animate} from "./js/main.js";
+//javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
 init();
 animate();
 

@@ -20,7 +20,7 @@ class FinitePlane {
 }
 
 class Wall {
-  constructor(len,height, localN , type = 0) {
+  constructor(len,height, localN , type = 0, color = 0xA23400) {
 	if(type === 0)
 		var geometry = new THREE.BoxGeometry(len, height, 2.5);
 	else if(type === 1){
@@ -28,7 +28,7 @@ class Wall {
 	}
 	
     var material = new THREE.MeshPhongMaterial({
-      color: 0xA23400,
+      color: color,
       shininess: 200,
       transparent: true,
       opacity: 1

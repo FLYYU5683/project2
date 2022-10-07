@@ -24,8 +24,8 @@ function setPortal() {
     map: leftPortalTexture.texture
   }));
   
-  let temp = 0.005;
-  leftPortal.position.set(0,50,300)
+  let temp = 1;
+  leftPortal.position.set(0,45.5,-120)
   leftPortal.scale.set(temp, temp, temp);
   scene.add(leftPortal);
 
@@ -33,16 +33,19 @@ function setPortal() {
   rightPortal = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({
     map: rightPortalTexture.texture
   }));
-  rightPortal.position.set(0,50,-125.1)
-  rightPortal.rotation.y = -Math.PI
+  rightPortal.position.set(100,45.5,225.1)
+  rightPortal.rotation.y = -Math.PI / 2
+  //rightPortal.rotation.y = -Math.PI
   rightPortal.scale.set(temp, temp, temp);
   scene.add(rightPortal);
+  
 }
 
 function renderPortal(thisPortalMesh, otherPortalMesh, thisPortalTexture,camera) {
 
   // set the portal camera position to be reflected about the portal plane
-  thisPortalMesh.worldToLocal(reflectedPosition.copy(camera.position));
+  let Vector = new THREE.Vector3(camera.position.x,camera.position.y + 0, camera.position.z)
+  thisPortalMesh.worldToLocal(reflectedPosition.copy(Vector));
   reflectedPosition.x *= -1.0;
   reflectedPosition.z *= -1.0;
 	
@@ -66,7 +69,7 @@ function renderPortal(thisPortalMesh, otherPortalMesh, thisPortalTexture,camera)
   if (renderer.autoClear === false) renderer.clear();
   thisPortalMesh.visible = false; // hide this portal from its own rendering
   
-  renderer.render(scene, portalCamera);
+	renderer.render(scene, portalCamera);
   
   thisPortalMesh.visible = true; // re-enable this portal's visibility for general rendering
 	
@@ -77,7 +80,7 @@ var sign = 1;
 var temp = 0.005;
 
 function portalsRenderer(camera,move) {
-	
+	/*
   if(!move){
 	if(temp < 0 || temp > 1)
 	  sign *= -1;
@@ -86,7 +89,7 @@ function portalsRenderer(camera,move) {
 	leftPortal.scale.set(temp, temp, temp);
 	rightPortal.scale.set(temp, temp, temp);
   }
-  
+  */
   
 
   // save the original camera properties
