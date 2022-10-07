@@ -341,15 +341,19 @@ function sliderMove(){
 		if(sliderGroup.position.y < -8.5){
 			sliderGroup.position.y += 0.2;
 		}
-		else
+		else{
+			sliderGroup.children[2].rotation.x = Math.PI;
 			sliderGroup.position.y = -8.5
+		}
 	}
 	else{
 		if(sliderGroup.position.y > -11.5){
 			sliderGroup.position.y -= 0.2;
 		}
-		else
+		else{
+			sliderGroup.children[2].rotation.x = 0;			
 			sliderGroup.position.y = -11.5
+		}
 	}
 }
 function turnLeft(){

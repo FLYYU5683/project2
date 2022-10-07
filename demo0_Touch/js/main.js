@@ -28,7 +28,9 @@ var RhythmSample = function () {
     });
 };
 function init() {
+	
   window.ontouchstart = function (e){ e.preventDefault()};
+  
   //camera && sence
   soundSource = new RhythmSample();
   
@@ -75,7 +77,6 @@ function init() {
 }
 function animate() {
   //backgroundMusic.play();
-  playSound2(soundSource.hit)
 
   var dt = clock.getDelta();
   class1Rotate.rotation.y += Math.PI / 160/2 ;
@@ -211,27 +212,5 @@ function setObstaclePos(index){
 	wallchange2 = sceneDatas[index][6]
 	car1MoveSign = sceneDatas[index][7]
 	car2MoveSign = sceneDatas[index][8]
-}
-function playSound2(buffer) {
-    var gainNode = context.createGain();
-    var source = context.createBufferSource();
-    source.buffer = buffer;
-
-    // Connect source to a gain node
-    source.connect(gainNode);
-    // Connect gain node to destination
-    gainNode.connect(context.destination);
-
-    var gainval = 1;
-    gainNode.gain.value = gainval;
-
-    source[source.start ? 'start' : 'noteOn']();
-	//source.start()
-    
-    /////////////////////////////////
-    // source.start (when, in seconds) 
-    // The 'when' parameter defines when the play will start. 
-    // If 'when' represents a time in the past, the play will start immediately.
-    // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode/start
 }
 export {init,animate,steve,balls,writeObstaclePos,setObstaclePos,soundSource}
