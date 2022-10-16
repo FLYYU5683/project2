@@ -1,32 +1,10 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {planes,holes,cylinders,walls,floors} from './buildTerrain.js';
-import {balls,soundSource} from './main.js'
+import {planes,holes,cylinders,walls,floors,arcWalls} from './buildTerrain.js';
+import {balls,context,hitSoundBuffer,inholeSoundBuffer} from './main.js'
 import {scene,start,HUDForInHole,level} from './render.js'
 import {countSwingReset} from './touchEvent.js'
-import {BufferLoader,loadSounds,context} from "./soundTest.js"
 var playOnce = true;
-function playSound2(buffer) {
-    var gainNode = context.createGain();
-    var source = context.createBufferSource();
-    source.buffer = buffer;
 
-    // Connect source to a gain node
-    source.connect(gainNode);
-    // Connect gain node to destination
-    gainNode.connect(context.destination);
-
-    var gainval = 1;
-    gainNode.gain.value = gainval;
-
-    //source[source.start ? 'start' : 'noteOn'](time);
-	source.start()
-    
-    /////////////////////////////////
-    // source.start (when, in seconds) 
-    // The 'when' parameter defines when the play will start. 
-    // If 'when' represents a time in the past, the play will start immediately.
-    // https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode/start
-}
 class Particle {
   constructor(mesh,dt,id) {
     this.vel = new THREE.Vector3(0, 0, 0);
@@ -92,8 +70,11 @@ class Particle {
 			this.checkFloor(floors)
 
 			this.checkWall(walls)
+			
+			this.checkArcWall(arcWalls)
 
 			this.checkCylinder(cylinders)
+			
 		
 		}
     this.lastP.copy(this.pos);
@@ -194,7 +175,7 @@ class Particle {
 	  if(this.inHole && temp.z <= -3){
 		if(this.ID === "player" && hole.ID === "hole"){
 			if(this.choose)
-				playSound2(soundSource.inHole)//this.inholeSound.play();
+				this.play(inholeSoundBuffer)//playSound2(soundSource.inHole)//this.inholeSound.play();
 			this.choose = false;
 			this.inHole = false;
 			this.nowIsFlyP = false;
@@ -260,7 +241,7 @@ class Particle {
 
             if(ballPos.sub(cylinderPos).length() <= this.r + cylinder.R && Math.abs(cylinderPos.length()) <= cylinder.height / 2){
 				if(this.ID === "player"){
-					playSound2(soundSource.hit) // this.hitSound.play()
+					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
 				}
                 count++;
                 ballPos.normalize()
@@ -283,49 +264,52 @@ class Particle {
       this.nowIsFlyCy = true;
     }
     }
-  checkWall(walls) {
+  checkWall(allWalls) {
     const COR = 0.64;
-    for (var i = 0; i < walls.length; i++) {
-		if(this.ID === "predict" && i > 15 && i < 36)
-			continue;
-      let wall = walls[i]
-      let temp = new THREE.Vector3(0, 0, 0);
-      temp.copy(wall.mesh.worldToLocal(this.pos.clone()))
-	  var times = 3;
-	  if(wall.type === 0){
-		  if(this.ID === "player")
-			wall.mesh.material.opacity = 1;
-		  if(temp.z <= (1.25 + this.r) * times  && temp.z >= (-1.25 - this.r) * times && Math.abs(temp.x) <= wall.len / 2 && this.ID === "player"){
-			wall.mesh.material.opacity = 0.5;
+    for (var k = 0; k < allWalls.length; k++) {
+		let walls = allWalls[k]
+		for(var i = 0; i < walls.length; i++){
+			if(this.ID === "predict" && i > 15 && i < 36)
+				continue;
+		  let wall = walls[i]
+		  let temp = new THREE.Vector3(0, 0, 0);
+		  temp.copy(wall.mesh.worldToLocal(this.pos.clone()))
+		  var times = 3;
+		  if(wall.type === 0){
+			  if(this.ID === "player")
+				wall.mesh.material.opacity = 1;
+			  if(temp.z <= (1.25 + this.r) * times  && temp.z >= (-1.25 - this.r) * times && Math.abs(temp.x) <= wall.len / 2 && this.ID === "player"){
+				wall.mesh.material.opacity = 0.5;
+			  }
+			  if (temp.z <= 1.25 + this.r  && temp.z >= -1.25 - this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
+				if(this.ID === "player"){
+					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
+				}
+				this.n.copy(wall.normal);
+				if(temp.z < 0)
+					this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,-1.25 - this.r)));
+				else
+					this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,1.25 + this.r)));
+				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
+			  }
 		  }
-		  if (temp.z <= 1.25 + this.r  && temp.z >= -1.25 - this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
-			if(this.ID === "player"){
-				playSound2(soundSource.hit) // this.hitSound.play()
+		  if(wall.type === 1){
+			if(this.ID === "player")
+				wall.mesh.material.opacity = 1;
+			if(temp.z <= this.r * times  && temp.z >= this.r * times && Math.abs(temp.x) <= wall.len / 2 && this.ID === "player"){
+				wall.mesh.material.opacity = 0.5;
 			}
-			this.n.copy(wall.normal);
-			if(temp.z < 0)
-				this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,-1.25 - this.r)));
-			else
-				this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,1.25 + this.r)));
-			this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
+			if (temp.z <= this.r  && temp.z >= -this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
+				if(this.ID === "player"){
+					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
+				}
+				this.n.copy(wall.normal);
+				this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,this.r)));
+				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
+			  }  
+			  
 		  }
-	  }
-	  if(wall.type === 1){
-		if(this.ID === "player")
-			wall.mesh.material.opacity = 1;
-		if(temp.z <= this.r * times  && temp.z >= this.r * times && Math.abs(temp.x) <= wall.len / 2 && this.ID === "player"){
-			wall.mesh.material.opacity = 0.5;
 		}
-		if (temp.z <= this.r  && temp.z >= -this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
-			if(this.ID === "player"){
-				playSound2(soundSource.hit) // this.hitSound.play()
-			}
-			this.n.copy(wall.normal);
-			this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,this.r)));
-			this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
-		  }  
-		  
-	  }
     }
 
   }
@@ -360,12 +344,62 @@ class Particle {
 		this.nowIsFlyF = true;
 	}
   }
+  checkArcWall(arcWalls){
+	const COR = 0.64;
+		for(var i = 0; i < arcWalls.length; i++){
+			//console.log(arcWalls[i])
+		  let arcWall = arcWalls[i].children[0]
+		  let arcWallPos = new THREE.Vector3(0, 0, 0);
+		  arcWallPos.copy(new THREE.Vector3(0,arcWall.worldToLocal(this.pos.clone()).y,0))
+		  let ballPos = new THREE.Vector3()
+          ballPos.copy(arcWall.worldToLocal(this.pos.clone()))
+		  
+		  let angle;
+		  
+		  if(ballPos.x < 0)
+			angle = Math.PI * 2 - arcWallPos.clone().add(new THREE.Vector3(0,0,1)).angleTo(ballPos);
+		  else
+			angle = arcWallPos.clone().add(new THREE.Vector3(0,0,1)).angleTo(ballPos)
+		
+		  let inAngle = angle >= arcWall.thetaStart ?  angle <= arcWall.thetaLength + arcWall.thetaStart ? true: false : false;
+		  
+		  var times = 5;
+		  let norV = arcWallPos.clone().sub(ballPos);
+			if(this.ID === "player")
+				arcWalls[i].children.forEach(function (b){b.material.opacity = 1})
+			if(norV.length() >= arcWall.R - this.r * times && Math.abs(arcWallPos.length()) <= arcWall.height / 2 && inAngle && this.ID === "player"){
+				arcWalls[i].children.forEach(function (b){b.material.opacity = 0.5})
+			}
+            if(norV.length() >= arcWall.R - this.r && norV.length() <= arcWall.R && Math.abs(arcWallPos.length()) <= arcWall.height / 2 && inAngle){
+				if(this.ID === "player"){
+					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
+				}
+				
+                norV.normalize();
+                var temp = new THREE.Vector3();
+                temp.copy(arcWallPos.clone().sub(norV.clone().multiplyScalar(arcWall.R - this.r)))
+                this.pos.copy(arcWall.localToWorld(temp))
+				
+                this.n.copy(arcWall.localToWorld(arcWallPos).sub(this.pos).normalize());
+                var tempV = new THREE.Vector3(0, 0, 0)
+				tempV.copy(this.vel.clone().projectOnVector(this.n).negate())
+				this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
+				this.vel.add(tempV.multiplyScalar(COR))
+				
+            }
+		}
+  }
   start(){
 	this.vel.set(0,0,0);
-	this.pos.set(0,1,10);
+	this.pos.set(0,1,40);
 	//this.pos.set(230,81,-300); level 3
   }
-  
+  play(audioBuffer) {
+    const source = context.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(context.destination);
+    source.start();
+  }
 }
 
 export {Particle}

@@ -45,7 +45,7 @@ var sceneLoading,cameraLoading;
 var inLoading = false;
 var loadingOpened = false
 var loadingClosing = false;
-var chooseHoles;
+var chooseHoles,whichHoles;
 function render() {
   renderer.setScissorTest(false);
   var WW = window.innerWidth;
@@ -104,8 +104,8 @@ function buildCamAndSen(){
   //scene.background = new THREE.Color( 0x21384f );
   sceneHUD = new THREE.Scene();
   sceneMap = new THREE.Scene();
+  sceneMap.background = texture;
   sceneLoading = new THREE.Scene();
-  sceneMap.background = new THREE.Color( 0x21384f );
 
   var amblight = new THREE.AmbientLight(0x255483); // soft white light
   scene.add(amblight);
@@ -175,10 +175,10 @@ function buildCamAndSen(){
 	side:THREE.DoubleSide
   });
 
-	sign1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat1);
-	sign1.position.set(20,5,20);
-	sign1.rotation.y = -Math.PI / 9
-	scene.add(sign1);
+  sign1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat1);
+  sign1.position.set(-10,5,50);
+  sign1.rotation.y = Math.PI / 9
+  scene.add(sign1);
   
   
   let loader2 = new THREE.TextureLoader();
@@ -193,8 +193,8 @@ function buildCamAndSen(){
   });
 
 	sign2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat2);
-	sign2.position.set(20,5,-125);
-	sign2.rotation.y = -Math.PI / 9
+	sign2.position.set(-10,5,-125);
+	sign2.rotation.y = Math.PI / 9
 	scene.add(sign2);
   
   
@@ -210,8 +210,8 @@ function buildCamAndSen(){
   });
 
 	sign3 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat3);
-	sign3.position.set(230,85,-280);
-	sign3.rotation.y = -Math.PI / 2 - Math.PI / 9;
+	sign3.position.set(230,85,-310);
+	sign3.rotation.y = -Math.PI / 2 + Math.PI / 9;
 	scene.add(sign3);
   
   
@@ -645,7 +645,7 @@ function HUDPress(){
 	    if(start === false){
 			start = true;
 			startButton.visible = false
-			switchCamera = 1
+			switchCamera = 1;
 			chooseLevelButton.visible = true;
 		}
 	}
@@ -675,6 +675,7 @@ function HUDPress(){
 	}
 	if(start && modeChose && levelChose && !inLoading){
 		if(isOver === false){
+			
 			///Camera按鈕
 			if(touch.x >= 0.6 && touch.y >= 0.84){
 				if(!isOpen){
@@ -962,6 +963,7 @@ function setState(){
 }
 function parAndHole(){
 	chooseHoles = [];
+	whichHoles = [];
     let h1loader= new THREE.TextureLoader();
         var h1texture = h1loader.load("https://i.imgur.com/AseSAh2.png")
         var h1Material = new THREE.MeshBasicMaterial({
@@ -974,6 +976,7 @@ function parAndHole(){
         h1Button.position.set(0,7.5,0);
         h1Button.visible=false;
         chooseHoles.push(h1Button);
+        whichHoles.push(h1Button);
         
         
     let h2loader= new THREE.TextureLoader();
@@ -988,6 +991,7 @@ function parAndHole(){
         h2Button.position.set(0,7.5,0);
         h2Button.visible=false;
         chooseHoles.push(h2Button);
+        whichHoles.push(h2Button);
         
     
     let h3loader= new THREE.TextureLoader();
@@ -1002,8 +1006,14 @@ function parAndHole(){
         h3Button.position.set(0,7.5,0);
         h3Button.visible=false;
         chooseHoles.push(h3Button);
+        whichHoles.push(h3Button);
     for (let k = 0; k < chooseHoles.length; k++)
 		sceneHUD.add(chooseHoles[k]);
+    for (let k = 0; k < whichHoles.length; k++){
+		whichHoles[k].scale.set(0.5,0.5,0.5)
+		whichHoles[k].position.set(7.4,8.7)
+		sceneHUD.add(whichHoles[k]);
+	}
 }
 export {buildCamAndSen,textureAnimate,HUDPress,start,cameraButtons,cameraSlider,sliderGroup}
 export {cameraOrbit,cameraOnPlayer,cameraOnBall}

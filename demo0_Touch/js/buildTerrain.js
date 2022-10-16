@@ -5,7 +5,10 @@ import {FinitePlane,Wall} from './terrain.js'
 import {scene,sceneMap,renderer} from './render.js'
 var table1,table2,table3;
 
-var walls = [],holes = [],cylinders = [],planes = [],floors = [];
+var walls = [],holes = [],cylinders = [],planes = [],floors = [],arcWalls = [];
+
+var level1Walls = [] , level2Walls = [] ,level3Walls = []
+
 var class1 = new THREE.Group(),class1Rotate = new THREE.Group();
 var class2 = new THREE.Group(),class2Rotate = new THREE.Group();
 var class3 = new THREE.Group(),class3Rotate = new THREE.Group();
@@ -19,19 +22,21 @@ function buildTerrain(){
 	buildPlane();
 	buildWalls();
 	buildholes();
-	buildCylinder();
+	buildPillar();
 	buildfloors();
 	buildStoneWall();
-	
+	buildArcWalls()
+	walls.push(level1Walls,level2Walls,level3Walls)
 	class1.position.z = 30;
-	class1Rotate.add(class1)
+	scene.add(class1)
+	class1Rotate.add(class1.clone())
 	
 	class2.position.z = 300;
-	class2Rotate.add(class2)
+	class2Rotate.add(class2.clone())
 	
 	class3.position.x = -350
 	class3.position.z = 300;
-	class3Rotate.add(class3)
+	class3Rotate.add(class3.clone())
 	class3Rotate.position.y = -50;
 	
 	sceneMap.add(class1Rotate,class2Rotate,class3Rotate)
@@ -47,24 +52,31 @@ function buildStoneWall(){
 	var stoneMaterial = new THREE.MeshPhongMaterial({
       map: texture,side:THREE.DoubleSide})
 	var stoneWall1 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
-	scene.add(stoneWall1);
 	stoneWall1.position.set(-25,-2.51,-30);
 	stoneWall1.rotation.y = -Math.PI / 2;
 	
 	var stoneWall2 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
-	scene.add(stoneWall2);
-	stoneWall2.position.set(25,-2.51,-30);
+	stoneWall2.position.set(75,-2.51,-30);
 	stoneWall2.rotation.y = -Math.PI / 2;
 	
 	var stoneWall3 = new THREE.Mesh(stoneGeometry,stoneMaterial);
-	scene.add(stoneWall3);
 	stoneWall3.position.set(0,-2.51,20);
 	
 	var stoneWall4 = new THREE.Mesh(stoneGeometry,stoneMaterial);
-	scene.add(stoneWall4);
-	stoneWall4.position.set(0,-2.51,-80);
-	class1.add(stoneWall1.clone(),stoneWall2.clone(),stoneWall3.clone(),stoneWall4.clone())
+	stoneWall4.position.set(50,-2.51,20);
 	
+	var arcStoneWall1 = new THREE.Mesh(new THREE.CylinderGeometry(51.25,51.25,5,32,32,true,Math.PI/2,Math.PI),stoneMaterial)
+	arcStoneWall1.position.set(25,-2.5,-80)
+	
+	var arcStoneWall2 = new THREE.Mesh(new THREE.CylinderGeometry(48.75,48.75,5,32,32,true,Math.PI/2,Math.PI),stoneMaterial)
+	arcStoneWall2.position.set(25,-2.5,-80)
+	
+	let mesh = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI),stoneMaterial);
+	mesh.rotation.x = -Math.PI /2;
+	mesh.position.set(25,0,-80)
+	
+	
+	class1.add(stoneWall1,stoneWall2,stoneWall3,stoneWall4,arcStoneWall1,arcStoneWall2,mesh)
 	//class2
 	
 	var stoneWall5 = new THREE.Mesh(stoneGeometry,stoneMaterial);
@@ -152,6 +164,35 @@ function buildPlane(){
   plane.update()
   planes.push(plane);
   
+  let floor2 = createMultiMaterialObject(ground, [material2, material1]);
+  floor2.rotation.x = -Math.PI / 2;
+  floor2.position.set(0,0.02,-55)
+  floor2.receiveShadow = true;
+
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor2, 50 * 1.5, table1);
+  plane.update()
+  planes.push(plane);
+
+  let floor3 = createMultiMaterialObject(ground, [material2, material1]);
+  floor3.rotation.x = -Math.PI / 2;
+  floor3.position.set(50,0.02,-55)
+  floor3.receiveShadow = true;
+
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor3, 50 * 1.5, table1);
+  plane.update()
+  planes.push(plane);
+  
+  //let circleFloor = createMultiMaterialObject(ground, [material2, material1]);
+  let circleFloor = new THREE.Mesh(new THREE.CircleGeometry(50,32,0,Math.PI), new THREE.MeshBasicMaterial({color: 0x006000,side: THREE.DoubleSide}));
+  circleFloor.rotation.x = -Math.PI / 2;
+  circleFloor.position.set(25,0.01,-80);
+  circleFloor.receiveShadow = true;
+
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), circleFloor, 100 , table1);
+  plane.update()
+  planes.push(plane);
+  
+  
   var color2 = new THREE.Color();
   color2.setHSL(1,0,0.8);
   
@@ -160,29 +201,30 @@ function buildPlane(){
   box1.material.color.copy(color2)
   box1.receiveShadow = true;
   
-  scene.add(box1);
 	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
 	texture2.wrapS = THREE.RepeatWrapping;
 	texture2.wrapT = THREE.RepeatWrapping;
       
 	let loader3 = new THREE.TextureLoader();
 	loader3.crossOrigin = '';
-	var alpha = loader2.load('https://i.imgur.com/2U0VlK0.png');
+	var alpha = loader2.load('https://i.imgur.com/d8LnKPK.png');
 	var alphaFirst = loader2.load('https://i.imgur.com/4wunOkl.png');
 	let materialForFirstHole = new THREE.MeshBasicMaterial({color: 0x006000,side:THREE.DoubleSide,alphaMap:alphaFirst,alphaTest: 0.5,})
 	
 
 	let materialForHole = new THREE.MeshBasicMaterial({color: 0x006000,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.5,})
-    let hole = createMultiMaterialObject(ground, [materialForFirstHole, material1]);
+    let hole = createMultiMaterialObject(ground, [materialForHole, material1]);
 	hole.rotation.x=-Math.PI/2;  
-	hole.position.set(0,0,-55);
+	hole.rotation.z=-Math.PI;  
+	hole.position.set(50,0,-5);
 	hole.receiveShadow = true;
 
 	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1),hole, 50 * 1.5, table1);
 	plane.update()
 	planes.push(plane);
 	 
-	class1.add(table1.clone(),box1.clone())
+	class1.add(table1,box1)
+	
 	//class2
 	table2 = new THREE.Group();
 	scene.add(table2);
@@ -271,79 +313,29 @@ function buildPlane(){
 }
 function buildWalls(){
   for (var i = 0; i < 4; i++) {
-    if (i < 2) {
+    if (i < 3) {
       let x = new Wall(100,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level1Walls.push(x);
     }
 	else {
       let x = new Wall(50,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level1Walls.push(x);
     }
   }
   
-  walls[0].mesh.rotation.y = -Math.PI / 2;
-  walls[1].mesh.rotation.y = Math.PI / 2;
-  walls[3].mesh.rotation.y = Math.PI;
+  level1Walls[0].mesh.rotation.y = -Math.PI / 2;
+  level1Walls[1].mesh.rotation.y = Math.PI / 2;
+  level1Walls[2].mesh.rotation.y = -Math.PI / 2;
+  level1Walls[3].mesh.rotation.y = Math.PI;
 
-  walls[0].mesh.position.set(-25, 2.5, -30)
-  walls[1].mesh.position.set(25, 2.5, -30)
-  walls[2].mesh.position.set(0, 2.5, 20)
-  walls[3].mesh.position.set(0, 2.5, -80)
-  walls[2].mesh.visible = false;
+  level1Walls[0].mesh.position.set(-25, 2.5, -30)
+  level1Walls[1].mesh.position.set(25, 2.5, -30)
+  level1Walls[2].mesh.position.set(75, 2.5, -30)
+  level1Walls[3].mesh.position.set(50, 2.5, 20)
   for(var i = 0; i < 4; i++)
-	class1.add(walls[i].mesh.clone())
-  
-  for(var i = 0; i < 8; i++){
-	  if(i < 6){
-		let x = new Wall(50,5,new THREE.Vector3(0,0,-1));
-		x.update();
-		walls.push(x)
-	  }
-	  else{
-		let x = new Wall(50,10,new THREE.Vector3(0,0,-1));
-		x.update();
-		walls.push(x)		  
-	  }
-  }
-  walls[4].mesh.rotation.y = -Math.PI / 2;
-  walls[5].mesh.rotation.y = -Math.PI / 2;
-  walls[6].mesh.rotation.y = Math.PI / 2;
-  walls[7].mesh.rotation.y = Math.PI;
-  walls[8].mesh.rotation.y = Math.PI;
-  
-  walls[4].mesh.position.set(60,2.5,-125)
-  walls[5].mesh.position.set(140,2.5,-205)
-  walls[6].mesh.position.set(190,2.5,-205)
-  walls[7].mesh.position.set(85,2.5,-100)
-  walls[8].mesh.position.set(85,2.5,-150)
-  walls[9].mesh.position.set(165,2.5,-230)
-
-  walls[10].mesh.rotation.y = Math.PI / 2;
-  walls[10].mesh.position.set(190,5,-125);
-  walls[11].mesh.position.set(165,5,-100);
-  for(var i = 0; i < 4; i++){
-	  let x = new Wall(32,4,new THREE.Vector3(0,0,-1))
-	  x.update();
-	  x.mesh.visible = false;
-	  walls.push(x);	  
-  }
-  walls[12].mesh.rotation.z = Math.PI/20;
-  walls[13].mesh.rotation.z = -Math.PI/20;
-  walls[14].mesh.rotation.z = -Math.PI/20;
-  walls[15].mesh.rotation.z = Math.PI/20;
-  
-  walls[13].mesh.rotation.y = Math.PI;
-  walls[14].mesh.rotation.y = Math.PI / 2;
-  walls[15].mesh.rotation.y = -Math.PI / 2;
-  
-  walls[12].mesh.position.set(125,5.5,-100);
-  walls[13].mesh.position.set(125,5.5,-150);
-  walls[14].mesh.position.set(140,5.5,-165);
-  walls[15].mesh.position.set(190,5.5,-165);
-  for(var i = 4; i <= 15 ;i++)
-	  walls[i].mesh.visible = false
+	class1.add(level1Walls[i].mesh)
   //時間性關卡:抬升牆壁 class 2
    var clippingPlanes = new THREE.Plane(new THREE.Vector3(0,1,0), 0.0);
   for(var i = 0; i < 3; i++){
@@ -353,7 +345,7 @@ function buildWalls(){
 		//console.log(x);
 		x.mesh.material.clippingPlanes = [clippingPlanes]
 		x.mesh.material.clipShadows =  true;
-		walls.push(x)
+		level2Walls.push(x)
 		
 	  }
 	  else{
@@ -361,14 +353,14 @@ function buildWalls(){
 		x.update();
 		x.mesh.material.clippingPlanes = [clippingPlanes]
 		x.mesh.material.clipShadows =  true;
-		walls.push(x);
+		level2Walls.push(x);
 		
 	  }	  
   }
    
-   walls[16].mesh.position.set(0, 3, -30)
-   walls[17].mesh.position.set(16.5, -15, -30)
-   walls[18].mesh.position.set(-16.5, -15, -30)
+   level2Walls[0].mesh.position.set(0, 3, -30)
+   level2Walls[1].mesh.position.set(16.5, -15, -30)
+   level2Walls[2].mesh.position.set(-16.5, -15, -30)
    
      
    for(var i = 0; i < 3; i++){
@@ -377,23 +369,23 @@ function buildWalls(){
 		x.update();
 		x.mesh.material.clippingPlanes = [clippingPlanes]
 		x.mesh.material.clipShadows =  true;
-		walls.push(x)
+		level2Walls.push(x)
 	  }
       else{
         let x = new Wall(2.5,15,new THREE.Vector3(0,0,1),1);
 		x.update();
 		x.mesh.material.clippingPlanes = [clippingPlanes]
 		x.mesh.material.clipShadows =  true;
-		walls.push(x)
+		level2Walls.push(x)
       }	   
   }
-  walls[19].mesh.position.set(0, 10.6, -30)
-  walls[19].mesh.rotation.x = -Math.PI / 2; 
-  walls[20].mesh.position.set(10, 3, -30)
-  walls[20].mesh.rotation.y = Math.PI / 2;
-  walls[21].mesh.position.set(-10, 3, -30)
-  walls[21].mesh.rotation.y = -Math.PI / 2;
-  obstacle1.add(walls[16].mesh,walls[19].mesh,walls[20].mesh,walls[21].mesh); 
+  level2Walls[3].mesh.position.set(0, 10.6, -30)
+  level2Walls[3].mesh.rotation.x = -Math.PI / 2; 
+  level2Walls[4].mesh.position.set(10, 3, -30)
+  level2Walls[4].mesh.rotation.y = Math.PI / 2;
+  level2Walls[5].mesh.position.set(-10, 3, -30)
+  level2Walls[5].mesh.rotation.y = -Math.PI / 2;
+  obstacle1.add(level2Walls[0].mesh,level2Walls[3].mesh,level2Walls[4].mesh,level2Walls[5].mesh); 
   scene.add(obstacle1);
   
   for(var i = 0; i < 6; i++){
@@ -402,31 +394,31 @@ function buildWalls(){
 		x.update();
 		x.mesh.material.clippingPlanes = [clippingPlanes]
 		x.mesh.material.clipShadows =  true;
-		walls.push(x)
+		level2Walls.push(x)
 	  }
       else{
         let x = new Wall(2.5,15,new THREE.Vector3(0,0,1),1);
 		x.mesh.material.clippingPlanes = [clippingPlanes]
 		x.mesh.material.clipShadows =  true;
 		x.update();
-		walls.push(x)
+		level2Walls.push(x)
       }	   
   }
-  walls[22].mesh.position.set(16.5, -7.4, -30)
-  walls[22].mesh.rotation.x = -Math.PI / 2;
-  walls[24].mesh.position.set(22.5, -15, -30)
-  walls[24].mesh.rotation.y = Math.PI / 2;
-  walls[25].mesh.position.set(10, -15, -30)
-  walls[25].mesh.rotation.y = -Math.PI / 2;
-  obstacle2.add(walls[17].mesh,walls[22].mesh,walls[24].mesh,walls[25].mesh); 
+  level2Walls[6].mesh.position.set(16.5, -7.4, -30)
+  level2Walls[6].mesh.rotation.x = -Math.PI / 2;
+  level2Walls[8].mesh.position.set(22.5, -15, -30)
+  level2Walls[8].mesh.rotation.y = Math.PI / 2;
+  level2Walls[9].mesh.position.set(10, -15, -30)
+  level2Walls[9].mesh.rotation.y = -Math.PI / 2;
+  obstacle2.add(level2Walls[1].mesh,level2Walls[6].mesh,level2Walls[8].mesh,level2Walls[9].mesh); 
   scene.add(obstacle2);
-  walls[23].mesh.position.set(-16.5, -7.4, -30)
-  walls[23].mesh.rotation.x = -Math.PI / 2;
-  walls[26].mesh.position.set(-10, -15, -30)
-  walls[26].mesh.rotation.y = Math.PI / 2;
-  walls[27].mesh.position.set(-22.5, -15, -30)
-  walls[27].mesh.rotation.y = -Math.PI / 2;  
-  obstacle3.add(walls[18].mesh,walls[23].mesh,walls[26].mesh,walls[27].mesh); 
+  level2Walls[7].mesh.position.set(-16.5, -7.4, -30)
+  level2Walls[7].mesh.rotation.x = -Math.PI / 2;
+  level2Walls[10].mesh.position.set(-10, -15, -30)
+  level2Walls[10].mesh.rotation.y = Math.PI / 2;
+  level2Walls[11].mesh.position.set(-22.5, -15, -30)
+  level2Walls[11].mesh.rotation.y = -Math.PI / 2;  
+  obstacle3.add(level2Walls[2].mesh,level2Walls[7].mesh,level2Walls[10].mesh,level2Walls[11].mesh); 
   scene.add(obstacle3);
   obstacle1.position.z =-200;
   obstacle2.position.z =-200;
@@ -440,14 +432,14 @@ function buildWalls(){
 	  x.mesh.material.clippingPlanes = [clippingPlanes]
 	  x.mesh.material.clipShadows =  true;	  
 	  x.update();
-      walls.push(x);
+      level2Walls.push(x);
     }
 	else {
       let x = new Wall(5,10, new THREE.Vector3(0, 0, -1),1);
       x.mesh.material.clippingPlanes = [clippingPlanes]
 	  x.mesh.material.clipShadows =  true;
       x.update();
-      walls.push(x);
+      level2Walls.push(x);
     }
   }
   
@@ -462,24 +454,24 @@ function buildWalls(){
   carmesh.position.set(0,2.5,-3)
   
   car.add(carmesh);
-  car.add(walls[28].mesh);
-  car.add(walls[29].mesh);
-  car.add(walls[30].mesh);
-  car.add(walls[31].mesh);
+  car.add(level2Walls[12].mesh);
+  car.add(level2Walls[13].mesh);
+  car.add(level2Walls[14].mesh);
+  car.add(level2Walls[15].mesh);
   //car.rotation.y = -Math.PI / 2;
   car.position.set(75,2.5,-300)
   
   scene.add(car);
   
   
-  walls[28].mesh.rotation.y = -Math.PI / 2;
-  walls[29].mesh.rotation.y = Math.PI / 2;
-  walls[31].mesh.rotation.y = Math.PI;
+  level2Walls[12].mesh.rotation.y = -Math.PI / 2;
+  level2Walls[13].mesh.rotation.y = Math.PI / 2;
+  level2Walls[15].mesh.rotation.y = Math.PI;
 
-  walls[28].mesh.position.set(-2.5, 2.5, -3)
-  walls[29].mesh.position.set(2.5, 2.5, -3)
-  walls[30].mesh.position.set(0, 2.5, 4.5)
-  walls[31].mesh.position.set(0, 2.5, -10.5)
+  level2Walls[12].mesh.position.set(-2.5, 2.5, -3)
+  level2Walls[13].mesh.position.set(2.5, 2.5, -3)
+  level2Walls[14].mesh.position.set(0, 2.5, 4.5)
+  level2Walls[15].mesh.position.set(0, 2.5, -10.5)
   
   car2 = new THREE.Group();
   for (var i = 0; i < 4; i++) {
@@ -488,14 +480,14 @@ function buildWalls(){
       x.update();
 	  x.mesh.material.clippingPlanes = [clippingPlanes]
 	  x.mesh.material.clipShadows =  true;
-      walls.push(x);
+      level2Walls.push(x);
     }
 	else {
       let x = new Wall(5,10, new THREE.Vector3(0, 0, -1),1);
       x.update();
 	  x.mesh.material.clippingPlanes = [clippingPlanes]
 	  x.mesh.material.clipShadows =  true;
-      walls.push(x);
+      level2Walls.push(x);
     }
   }
   
@@ -503,80 +495,80 @@ function buildWalls(){
   carmesh2.position.set(0,2.5,-3)
   
   car2.add(carmesh2);
-  car2.add(walls[32].mesh);
-  car2.add(walls[33].mesh);
-  car2.add(walls[35].mesh);
-  car2.add(walls[34].mesh);
+  car2.add(level2Walls[16].mesh);
+  car2.add(level2Walls[17].mesh);
+  car2.add(level2Walls[19].mesh);
+  car2.add(level2Walls[18].mesh);
   //car.rotation.y = -Math.PI / 2;
   car2.position.set(125,2.5,-300)
   
   scene.add(car2);
   
   
-  walls[32].mesh.rotation.y = -Math.PI / 2;
-  walls[33].mesh.rotation.y = Math.PI / 2;
-  walls[35].mesh.rotation.y = Math.PI;
+  level2Walls[16].mesh.rotation.y = -Math.PI / 2;
+  level2Walls[17].mesh.rotation.y = Math.PI / 2;
+  level2Walls[19].mesh.rotation.y = Math.PI;
 
-  walls[32].mesh.position.set(-2.5, 2.5, -3)
-  walls[33].mesh.position.set(2.5, 2.5, -3)
-  walls[34].mesh.position.set(0, 2.5, 4.5)
-  walls[35].mesh.position.set(0, 2.5, -10.5)
+  level2Walls[16].mesh.position.set(-2.5, 2.5, -3)
+  level2Walls[17].mesh.position.set(2.5, 2.5, -3)
+  level2Walls[18].mesh.position.set(0, 2.5, 4.5)
+  level2Walls[19].mesh.position.set(0, 2.5, -10.5)
   
   //第二關
    for (var i = 0; i < 3; i++) {
     if (i < 2) {
       let x = new Wall(50,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level2Walls.push(x);
     }
 	else {
       let x = new Wall(200,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level2Walls.push(x);
     }
   }
-  walls[37].mesh.rotation.y = -Math.PI / 2;
-  walls[38].mesh.rotation.y = -Math.PI / 2;
+  level2Walls[21].mesh.rotation.y = -Math.PI / 2;
+  level2Walls[22].mesh.rotation.y = -Math.PI / 2;
 
-  walls[36].mesh.position.set(0, 2.5, -125)
-  walls[37].mesh.position.set(175, 2.5, -300)
-  walls[38].mesh.position.set(-25, 2.5, -225)
+  level2Walls[20].mesh.position.set(0, 2.5, -125)
+  level2Walls[21].mesh.position.set(175, 2.5, -300)
+  level2Walls[22].mesh.position.set(-25, 2.5, -225)
   
-  walls[36].mesh.visible = false;
+  level2Walls[20].mesh.visible = false;
   
   
   let x = new Wall(95,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
-  walls[39].mesh.position.set(22.5, 2.5, -325)
+      level2Walls.push(x);
+  level2Walls[23].mesh.position.set(22.5, 2.5, -325)
   
   
   x = new Wall(150,5, new THREE.Vector3(0, 0, -1));
   x.update();
-  walls.push(x);
-  walls[40].mesh.rotation.y = -Math.PI / 2;
-  walls[40].mesh.position.set(25, 2.5, -200)
+  level2Walls.push(x);
+  level2Walls[24].mesh.rotation.y = -Math.PI / 2;
+  level2Walls[24].mesh.position.set(25, 2.5, -200)
   
   for (var i = 0; i < 3; i++) {
       let x = new Wall(42.5,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level2Walls.push(x);
   }
-  walls[41].mesh.position.set(100, 2.5, -275)
-  walls[42].mesh.position.set(47.5, 2.5, -275)
-  walls[43].mesh.position.set(152.5, 2.5, -275)
+  level2Walls[25].mesh.position.set(100, 2.5, -275)
+  level2Walls[26].mesh.position.set(47.5, 2.5, -275)
+  level2Walls[27].mesh.position.set(152.5, 2.5, -275)
   
   
   for (var i = 0; i < 2; i++) {
       let x = new Wall(42.5,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level2Walls.push(x);
   }
-  walls[44].mesh.position.set(100, 2.5, -325)
-  walls[45].mesh.position.set(152.5, 2.5, -325)
+  level2Walls[28].mesh.position.set(100, 2.5, -325)
+  level2Walls[29].mesh.position.set(152.5, 2.5, -325)
   class2.add(obstacle1.clone(),obstacle2.clone(),obstacle3.clone(),car.clone(),car2.clone())
-  for (var i = 36; i <= 45; i++)
-	class2.add(walls[i].mesh.clone());
+  for (var i = 0; i <= 9; i++)
+	class2.add(level2Walls[i].mesh.clone());
 
   //class 3
   
@@ -585,68 +577,68 @@ function buildWalls(){
 	 if (i < 4) {
       let x = new Wall(50,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level3Walls.push(x);
     }
      else if(i>=4&&i<6)
      {
        let x = new Wall(100,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level3Walls.push(x);
      }
      else{
        let x = new Wall(150,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level3Walls.push(x);
 	 }		 
    }
-   walls[46].mesh.rotation.y = -Math.PI / 2;
-   walls[47].mesh.rotation.y = -Math.PI / 2;
-   walls[52].mesh.rotation.z = -Math.PI / 2/3;
-   walls[53].mesh.rotation.z = -Math.PI / 2/3;
+   level3Walls[0].mesh.rotation.y = -Math.PI / 2;
+   level3Walls[1].mesh.rotation.y = -Math.PI / 2;
+   level3Walls[6].mesh.rotation.z = -Math.PI / 2/3;
+   level3Walls[7].mesh.rotation.z = -Math.PI / 2/3;
    
-   walls[46].mesh.position.set(225, 82.5, -300);
-   walls[47].mesh.position.set(504.8,7.5,-300);
-   walls[48].mesh.position.set(250,82.5,-325);
-   walls[49].mesh.position.set(250.8,82.5,-275);
-   walls[50].mesh.position.set(454.8,7.5,-325);
-   walls[51].mesh.position.set(454.8,7.5,-275);
-   walls[52].mesh.position.set(339.8,45,-325);
-   walls[53].mesh.position.set(339.8,45,-275);
+   level3Walls[0].mesh.position.set(225, 82.5, -300);
+   level3Walls[1].mesh.position.set(504.8,7.5,-300);
+   level3Walls[2].mesh.position.set(250,82.5,-325);
+   level3Walls[3].mesh.position.set(250.8,82.5,-275);
+   level3Walls[4].mesh.position.set(454.8,7.5,-325);
+   level3Walls[5].mesh.position.set(454.8,7.5,-275);
+   level3Walls[6].mesh.position.set(339.8,45,-325);
+   level3Walls[7].mesh.position.set(339.8,45,-275);
    
    
-   walls[46].mesh.visible = false;
+   level3Walls[0].mesh.visible = false;
    
     for(var i=0;i<6;i++)
    {
 	 if (i < 2) {
       let x = new Wall(30,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level3Walls.push(x);
     }
 	else
 	{
 	  let x = new Wall(2.5,5,new THREE.Vector3(0,0,1),1);
 	  x.update();
-	  walls.push(x)
+	  level3Walls.push(x)
 	}
    }
-   walls[54].mesh.position.set(0, 3, 0)
-   walls[55].mesh.position.set(0, 3, 0)    
-   walls[56].mesh.position.set(-15, 3, 0)
-   walls[56].mesh.rotation.y = -Math.PI / 2;
-   walls[57].mesh.position.set(-15, 3, 0)
-   walls[57].mesh.rotation.y = -Math.PI / 2;
-   walls[58].mesh.position.set(15, 3, 0)
-   walls[58].mesh.rotation.y = Math.PI / 2;
-   walls[59].mesh.position.set(15, 3, 0)
-   walls[59].mesh.rotation.y = Math.PI / 2;
+   level3Walls[8].mesh.position.set(0, 3, 0)
+   level3Walls[9].mesh.position.set(0, 3, 0)    
+   level3Walls[10].mesh.position.set(-15, 3, 0)
+   level3Walls[10].mesh.rotation.y = -Math.PI / 2;
+   level3Walls[11].mesh.position.set(-15, 3, 0)
+   level3Walls[11].mesh.rotation.y = -Math.PI / 2;
+   level3Walls[12].mesh.position.set(15, 3, 0)
+   level3Walls[12].mesh.rotation.y = Math.PI / 2;
+   level3Walls[13].mesh.position.set(15, 3, 0)
+   level3Walls[13].mesh.rotation.y = Math.PI / 2;
    
   var separator1=new THREE.Group();
   var separator2=new THREE.Group();
   
-  separator1.add(walls[54].mesh,walls[56].mesh,walls[58].mesh); 
+  separator1.add(level3Walls[8].mesh,level3Walls[10].mesh,level3Walls[12].mesh); 
   scene.add(separator1);
-  separator2.add(walls[55].mesh,walls[57].mesh,walls[59].mesh); 
+  separator2.add(level3Walls[9].mesh,level3Walls[11].mesh,level3Walls[13].mesh); 
   scene.add(separator2);
   
   
@@ -660,35 +652,35 @@ function buildWalls(){
 	 if (i < 2) {
       let x = new Wall(15,5, new THREE.Vector3(0, 0, -1));
       x.update();
-      walls.push(x);
+      level3Walls.push(x);
     }
 	else
 	{
 	  let x = new Wall(2.5,5,new THREE.Vector3(0,0,1),1);
 	  x.update();
-	  walls.push(x)
+	  level3Walls.push(x)
 	}
    }
-   walls[60].mesh.position.set(0, 3, 0)
-   walls[61].mesh.position.set(0, 3, 0)    
-   walls[62].mesh.position.set(-7.5, 3, 0)
-   walls[62].mesh.rotation.y = -Math.PI / 2;
-   walls[63].mesh.position.set(7.5, 3, 0)
-   walls[63].mesh.rotation.y = Math.PI / 2;
+   level3Walls[14].mesh.position.set(0, 3, 0)
+   level3Walls[15].mesh.position.set(0, 3, 0)    
+   level3Walls[16].mesh.position.set(-7.5, 3, 0)
+   level3Walls[16].mesh.rotation.y = -Math.PI / 2;
+   level3Walls[17].mesh.position.set(7.5, 3, 0)
+   level3Walls[17].mesh.rotation.y = Math.PI / 2;
    
    var separator3=new THREE.Group();
-    separator3.add(walls[60].mesh,walls[62].mesh); 
+    separator3.add(level3Walls[14].mesh,level3Walls[16].mesh); 
     scene.add(separator3);
 	separator3.position.set(430,4,-283)
 	separator3.rotation.y=-Math.PI/2;
 	
     var separator4=new THREE.Group();
-    separator4.add(walls[61].mesh,walls[63].mesh); 
+    separator4.add(level3Walls[15].mesh,level3Walls[17].mesh); 
     scene.add(separator4);
 	separator4.position.set(430,4,-317)
 	separator4.rotation.y=-Math.PI/2;
-	for(var i = 46; i <= 53; i++)
-	  class3.add(walls[i].mesh.clone());
+	for(var i = 0; i <= 7; i++)
+	  class3.add(level3Walls[i].mesh.clone());
 	class3.add(separator1.clone(),separator2.clone(),separator3.clone(),separator4.clone())
   
 /*
@@ -816,10 +808,10 @@ function buildholes(){
 	block.normal = new THREE.Vector3(0,1,0);
 	holes.push(block)
 	ballhole.add(block)
-	scene.add(ballhole);
-	ballhole.position.set(10.2,0,-65.4);
+	//ballhole.position.set(39.5,0,5);
+	ballhole.position.set(50,0,-4.5);
 	
-	class1.add(ballhole.clone())
+	class1.add(ballhole)
 /*   
 	let mesh3 = new THREE.Mesh(geometry2, material);
 	scene.add(mesh3);
@@ -892,7 +884,7 @@ function buildholes(){
 	holes.push(block2)
 	ballhole2.add(block2)
 	scene.add(ballhole2);
-	ballhole2.position.set(149,0,-300.5);
+	ballhole2.position.set(149.6,0,-300);
 	
 	class2.add(ballhole2.clone())
 	//class3
@@ -936,31 +928,17 @@ function buildholes(){
 	class3.add(ballhole3.clone())
 	
 }
-function buildCylinder(){
+function buildPillar(){
 	
 	renderer.autoClear = false;
 	const localPlane = new THREE.Plane(new THREE.Vector3(0, 1 ,0), 0.0);
-	
-	/*
-	var cylinder = new THREE.Mesh(new THREE.CylinderGeometry(20,20,50,64),new THREE.MeshPhongMaterial({color:0x9D9D9D,clippingPlanes: [localPlane]}));
-	cylinder.R = 20;
-	cylinder.height = 50;
-	cylinder.rotation.x = Math.PI/2;
-	cylinder.rotation.z = Math.PI/2;
-	cylinder.position.z = -20;
-	cylinder.position.y = -17;
-	cylinder.ID = "floor"
-	scene.add(cylinder)
-	cylinders.push(cylinder);
-	*/
-	
+
 	var pillarC11 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	pillarC11.R = 2;
 	pillarC11.height = 6
 	pillarC11.position.set(25,3,20);
 	pillarC11.ID = "wall"
 	pillarC11.castShadow = true;
-	scene.add(pillarC11)
 	cylinders.push(pillarC11)
 
 	var pillarC12 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
@@ -969,7 +947,6 @@ function buildCylinder(){
 	pillarC12.position.set(-25,3,20);
 	pillarC12.ID = "wall"
 	pillarC12.castShadow = true;
-	scene.add(pillarC12)
 	cylinders.push(pillarC12)
 	
 	var pillarC13 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
@@ -978,7 +955,6 @@ function buildCylinder(){
 	pillarC13.position.set(-25,3,-80);
 	pillarC13.ID = "wall"
 	pillarC13.castShadow = true;
-	scene.add(pillarC13)
 	cylinders.push(pillarC13)
 	
 	var pillarC14 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
@@ -987,10 +963,25 @@ function buildCylinder(){
 	pillarC14.position.set(25,3,-80);
 	pillarC14.ID = "wall"
 	pillarC14.castShadow = true;
-	scene.add(pillarC14)
 	cylinders.push(pillarC14)
 	
-	class1.add(pillarC11.clone(),pillarC12.clone(),pillarC13.clone(),pillarC14.clone())
+	var pillarC15 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
+	pillarC15.R = 2;
+	pillarC15.height = 6
+	pillarC15.position.set(75,3,20);
+	pillarC15.ID = "wall"
+	pillarC15.castShadow = true;
+	cylinders.push(pillarC15)
+	
+	var pillarC16 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
+	pillarC16.R = 2;
+	pillarC16.height = 6
+	pillarC16.position.set(75,3,-80);
+	pillarC16.ID = "wall"
+	pillarC16.castShadow = true;
+	cylinders.push(pillarC16)
+	
+	class1.add(pillarC11,pillarC12,pillarC13,pillarC14,pillarC15,pillarC16)
 	/*
 	var class21 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	class21.R = 2;
@@ -1509,6 +1500,35 @@ function buildfloors(){
 	class3.add(floor4.clone())
 	
 }
+function buildArcWalls(){
+	let group = new THREE.Group();
+	let material = new THREE.MeshPhongMaterial({color:0xA23400,side:THREE.DoubleSide,transparent: true,opacity: 1})
+	var arcWallC11 = new THREE.Mesh(new THREE.CylinderGeometry(48.75,48.75,5,32,32,true,Math.PI/2,Math.PI),material);
+	arcWallC11.R = 48.75;
+	arcWallC11.height = 5
+	arcWallC11.position.set(25,2.5,-80);
+	arcWallC11.castShadow = true;
+	arcWallC11.thetaStart = Math.PI/2;
+	arcWallC11.thetaLength = Math.PI;
+	
+	var arcWallC12 = new THREE.Mesh(new THREE.CylinderGeometry(51.25,51.25,5,32,32,true,Math.PI/2,Math.PI),material);
+	arcWallC12.position.set(25,2.5,-80);
+	arcWallC12.castShadow = true;
+	
+	let mesh = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI), material );
+	mesh.rotation.x = -Math.PI /2;
+	mesh.position.set(25,5,-80)
+
+	let mesh2 = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI), material );
+	mesh2.rotation.x = -Math.PI /2;
+	mesh2.position.set(25,0,-80)
+	
+	group.add(arcWallC11,arcWallC12,mesh,mesh2)
+	arcWalls.push(group);
+	class1.add(group)
+	
+	
+}
 function setClassVisible(level){
 		class1Rotate.visible = false;
 		class2Rotate.visible = false;
@@ -1521,6 +1541,6 @@ function setClassVisible(level){
 	else if(level === 3)
 		class3Rotate.visible = true;
 }
-export {buildTerrain,table1,table2,table3,planes,walls,cylinders,holes,floors}
+export {buildTerrain,table1,table2,table3,planes,walls,cylinders,holes,floors,arcWalls}
 export {class1Rotate,class2Rotate,class3Rotate,setClassVisible}
 export {obstacle1,obstacle2,obstacle3,car,car2}

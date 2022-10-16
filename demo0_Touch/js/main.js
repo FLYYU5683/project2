@@ -7,9 +7,6 @@ import {buildCamAndSen,render,scene,sceneMap,start} from './render.js'
 import {Steve} from './Steve.js'
 import {touchStart,touchMove,touchEnd,touchEvent} from "./touchEvent.js"
 import {setPos} from "./touchEvent.js"
-//import {setPortal} from "./portal.js"
-
-import {BufferLoader,loadSounds,context} from "./soundTest.js"
 
 var steve,balls = [];
 var clock = new THREE.Clock();
@@ -20,20 +17,13 @@ var car1MoveSign = 1,car2MoveSign = -1;
 var inholeSound;
 var sceneDatas = []
 
-var soundSource;
-var RhythmSample = function () {
-    loadSounds(this, {
-        hit: './sound/hit.mp3',
-        inHole: './sound/inhole.wav',
-    });
-};
+var hitSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/hit.mp3", inHoleSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/inhole.wav";
+var hitSoundBuffer,inholeSoundBuffer;
+const context = new AudioContext();
+
 function init() {
-	
   window.ontouchstart = function (e){ e.preventDefault()};
-  
   //camera && sence
-  soundSource = new RhythmSample();
-  
   buildCamAndSen()
   //light
   buildLight()
@@ -56,21 +46,19 @@ function init() {
   document.addEventListener('touchstart', touchStart, false );
   document.addEventListener('touchmove', touchMove, false );
   document.addEventListener('touchend', touchEnd, false );
-  //set sound
-
-  backgroundMusic = document.getElementById('backgroundMusic')
-  backgroundMusic.muted = false;
-
-  hitSound = document.getElementById('hit')
-  hitSound.muted = false;
-  inholeSound = document.getElementById('inhole')
-  inholeSound.muted  = false;
-  backgroundMusic.volume = 0.2;
-  hitSound.volume = 1;
-  balls[0].hitSound = hitSound;
-  balls[0].inholeSound = inholeSound;
-  //set portal
-  //setPortal();
+  //setSound
+  window.fetch(hitSound)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => {
+      hitSoundBuffer = audioBuffer;
+  });
+  window.fetch(inHoleSound)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => {
+      inholeSoundBuffer = audioBuffer;
+  });
   //////
   setPos();
   /////
@@ -103,7 +91,7 @@ function animate() {
   });
 
   walls.forEach(function(b) {
-    b.update()
+    b.forEach(function(c){c.update()})
   });
   wallMove()
   carMove()
@@ -213,4 +201,5 @@ function setObstaclePos(index){
 	car1MoveSign = sceneDatas[index][7]
 	car2MoveSign = sceneDatas[index][8]
 }
-export {init,animate,steve,balls,writeObstaclePos,setObstaclePos,soundSource}
+export {init,animate,steve,balls,writeObstaclePos,setObstaclePos}
+export {hitSoundBuffer,inholeSoundBuffer,context}
