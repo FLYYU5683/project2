@@ -175,10 +175,10 @@ function buildCamAndSen(){
 	side:THREE.DoubleSide
   });
 
-	sign1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat1);
-	sign1.position.set(-10,5,20);
-	sign1.rotation.y = Math.PI / 9
-	scene.add(sign1);
+  sign1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat1);
+  sign1.position.set(-10,5,50);
+  sign1.rotation.y = Math.PI / 9
+  scene.add(sign1);
   
   
   let loader2 = new THREE.TextureLoader();
@@ -645,7 +645,7 @@ function HUDPress(){
 	    if(start === false){
 			start = true;
 			startButton.visible = false
-			switchCamera = 1
+			switchCamera = 1;
 			chooseLevelButton.visible = true;
 		}
 	}
