@@ -31,7 +31,7 @@ class Particle {
 	this.r = 1;
 	this.runInHole = false;
 	this.choose = true;
-	
+	this.useG = true;
     scene.add(this.mesh);
 
   }
@@ -58,7 +58,7 @@ class Particle {
 	this.mesh.rotateOnWorldAxis(this.n.clone().cross(this.vel).normalize(), this.theta);	
 
     this.vel.copy(velH.add(velV))
-	if(start && this.choose)
+	if(start && this.choose && this.useG)
 		this.vel.add(this.force.clone().multiplyScalar(this.m).multiplyScalar(dtt));
     this.pos.add(this.vel.clone().multiplyScalar(dtt));
 

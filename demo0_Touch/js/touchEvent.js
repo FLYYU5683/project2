@@ -3,7 +3,7 @@ import {Line2} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/Line
 import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineMaterial.js';
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level,isOver,HUDForInHole} from './render.js'
+import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level,isOver,HUDForInHole,vec} from './render.js'
 import {steve,balls,writeObstaclePos,setObstaclePos} from './main.js'
 import {stop,stopTrue} from './Steve.js'
 
@@ -91,7 +91,7 @@ function touchStart(event){
 function touchMove(event){
 
 	event.preventDefault();
-	if(firstTouch && touchHUD === 0){
+	if(firstTouch && touchHUD === 0 && !ballMove){
 		if(!startMove){
 			fingerNum = event.touches.length;
 			startMove = true;
@@ -99,6 +99,7 @@ function touchMove(event){
 		if(startMove && fingerNum != event.touches.length){
 			cancelMove = true;
 		}
+		
 		if(!cancelMove){
 			if(fingerNum === 1){
 				isCharge = true;
@@ -113,12 +114,6 @@ function touchMove(event){
 				steve.power = power;
 				power = Math.floor(power)
 				theta = power / 10 / 2.5;
-				/*
-				var angle = new THREE.Vector3(1,0,0).angleTo(vector)
-				
-				steve.camera.rotation.y = angle - Math.PI / 2 + rotateY;
-				steve.direct.rotation.y = angle - Math.PI / 2 + rotateY;
-				*/
 				for(var i = 0; i < steve.arrow.children.length; i++)
 					steve.arrow.children[i].visible = false;
 				for(var i = 0;i < 9 + power; i++)
@@ -143,6 +138,7 @@ function touchMove(event){
 				rotateX += y
 				steve.camera.rotation.x += y;
 				steve.direct.children[3].rotation.x += y;
+				
 				if(steve.camera.rotation.x < -1){
 					rotateX = -1;
 					steve.camera.rotation.x = -1;
@@ -151,13 +147,14 @@ function touchMove(event){
 					rotateX = 0.53;
 					steve.camera.rotation.x = 0.53;
 				}
+				
 				if(steve.direct.children[3].rotation.x < -1){
 					rotateX = -1;
 					steve.direct.children[3].rotation.x = -1;
 				}
 				else if (steve.direct.children[3].rotation.x > 0.53){
 					rotateX = 0.53;
-					steve.direct.children[3].rotation.x = 0.53;
+				steve.direct.children[3].rotation.x = 0.53;
 				}
 			}
 		}
@@ -172,6 +169,11 @@ function touchMove(event){
 		
 		steve.camera.children[0].updateProjectionMatrix();
 		steve.direct.children[3].children[0].updateProjectionMatrix();
+	}
+	if(touchHUD === 7){
+		balls[0].pos.add(vec);
+		steve.direct.position.add(vec);
+		steve.camera.position.add(vec);
 	}
 }
 function touchEnd(event){
@@ -215,6 +217,10 @@ function touchEnd(event){
 	touchHUD = -1;
 }
 function touchEvent(){
+	//console.log(cameraOnPlayer.localToWorld(new THREE.Vector3(0,0,0)))
+	steve.camera.children[0].updateProjectionMatrix();
+	//console.log(steve.camera.position)
+	
 	if(level !== 3)
 		checkBallZ(balls[0].pos.z)
 	else
@@ -494,7 +500,15 @@ function inHoleBreak(){
 	fovVal = 40;
 	stopTrue();
 }
+var signAndVector = []
+var sign;
+function moveMode(vec,inSign){
+	sign = inSign;
+	vector.copy(vec);
+	console.log(vector)
+	//signAndVector.push(vec,sign)
+}
 export {theta,beforeHit,useOrb,countSwingReset,countSwing}
 export {touchStart,touchMove,touchEnd,touchEvent}
 export {resetPlayData,setPos,replayAll,resetCameraAngle,inHoleBreak}
-export {fovX}
+export {fovX,moveMode}
