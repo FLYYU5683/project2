@@ -25,6 +25,7 @@ function buildTerrain(){
 	buildPillar();
 	buildfloors();
 	buildStoneWall();
+	buildClass3Wall();
 	buildArcWalls()
 	walls.push(level1Walls,level2Walls,level3Walls)
 	class1.position.z = 30;
@@ -34,8 +35,9 @@ function buildTerrain(){
 	class2.position.z = 300;
 	class2Rotate.add(class2.clone())
 	
-	class3.position.x = -350
-	class3.position.z = 300;
+	class3.position.set(3500,0,-3000);
+	scene.add(class3);
+	
 	class3Rotate.add(class3.clone())
 	class3Rotate.position.y = -50;
 	
@@ -154,7 +156,13 @@ function buildPlane(){
   });
   let ground = new THREE.PlaneGeometry(50, 50)
   
-  let floor = createMultiMaterialObject(ground, [material2, material1]);
+  //let floor = createMultiMaterialObject(ground, [material2, material1]);
+  let floor = new THREE.Mesh(ground, new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+  }));
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = 0.02;
   floor.position.z = -5;
@@ -164,7 +172,13 @@ function buildPlane(){
   plane.update()
   planes.push(plane);
   
-  let floor2 = createMultiMaterialObject(ground, [material2, material1]);
+  //let floor2 = createMultiMaterialObject(ground, [material2, material1]);
+  let floor2 = new THREE.Mesh(ground, new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+  }));
   floor2.rotation.x = -Math.PI / 2;
   floor2.position.set(0,0.02,-55)
   floor2.receiveShadow = true;
@@ -173,7 +187,13 @@ function buildPlane(){
   plane.update()
   planes.push(plane);
 
-  let floor3 = createMultiMaterialObject(ground, [material2, material1]);
+  //let floor3 = createMultiMaterialObject(ground, [material2, material1]);
+  let floor3 = new THREE.Mesh(ground, new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+  }));
   floor3.rotation.x = -Math.PI / 2;
   floor3.position.set(50,0.02,-55)
   floor3.receiveShadow = true;
@@ -213,7 +233,8 @@ function buildPlane(){
 	
 
 	let materialForHole = new THREE.MeshBasicMaterial({color: 0x006000,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.5,})
-    let hole = createMultiMaterialObject(ground, [materialForHole, material1]);
+    //let hole = createMultiMaterialObject(ground, [materialForHole, material1]);
+	let hole = new THREE.Mesh(ground,materialForHole)
 	hole.rotation.x=-Math.PI/2;  
 	hole.rotation.z=-Math.PI;  
 	hole.position.set(50,0,-5);
@@ -236,7 +257,8 @@ function buildPlane(){
 	box2.receiveShadow = true;
 	scene.add(box2);
 
-	let hole2 = createMultiMaterialObject(ground, [materialForHole, material1]);
+	//let hole2 = createMultiMaterialObject(ground, [materialForHole, material1]);
+	let hole2 = new THREE.Mesh(ground,materialForHole)
     //var hole2= new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.1,}));
 	hole2.rotation.x=-Math.PI/2;  
 	hole2.position.set(150,0,-300);
@@ -250,48 +272,32 @@ function buildPlane(){
 	class2.add(table2.clone(),box2.clone())
 	
 	//class3
-	
 	table3 = new THREE.Group();
 	scene.add(table3);
-	table3.updateMatrixWorld()
+	table3.updateMatrixWorld()	
 	
-	var floor6 = new THREE.Mesh(new THREE.PlaneGeometry(150,50), new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide}));
-	floor6.material.map.repeat.set( 3, 3 );
-	floor6.rotation.x = -Math.PI / 2;
-	floor6.rotation.y = Math.PI / 2/3;
-	floor6.position.y = 42.5;
-	floor6.position.z = -300;
-	floor6.position.x = 339.8;
-	floor6.receiveShadow = true;
+	let groundCircle = new THREE.CircleGeometry(22.5, 32,0,Math.PI/2)
 	  
-	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor6, 150 * 1.5, table3);
-	plane.update()
-	planes.push(plane);
-	  
-	var floor7 = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide}));
-	floor7.material.map.repeat.set( 3, 3 );
-	floor7.rotation.x = -Math.PI / 2;
-	floor7.position.y = 5;
-	floor7.position.z = -300;
-	floor7.position.x = 429.8;
-	floor7.receiveShadow = true;
-	  
-	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor7, 150 * 1.5, table3);
-	plane.update()
-	planes.push(plane);
+	let floor31 = new THREE.Mesh(groundCircle,material2);
+	floor31.rotation.x = -Math.PI / 2;
+	floor31.position.set(325,79.9,-223.75)
+	floor31.receiveShadow = true;
 
-	var hole3= new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.5,}));
-	hole3.rotation.x=-Math.PI/2;  
-	hole3.position.set(479.8,5,-300);
-	hole3.rotation.z = Math.PI/2 ;
-	hole3.material.map.repeat.set(3, 3);
-	hole3.receiveShadow = true;
-
-	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1),hole3, 50 * 1.5, table3);
+	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor31, 20, table3);
 	plane.update()
-	planes.push(plane);
-	
-	class3.add(table3.clone())
+	planes.push(plane);	
+		
+	let floor32 = new THREE.Mesh(new THREE.CircleGeometry(22.5,32,Math.PI/2,Math.PI/2),material2);
+	floor32.rotation.x = -Math.PI / 2;
+	floor32.rotation.z = Math.PI;
+	floor32.position.set(325,79.9,-326.25)
+	floor32.receiveShadow = true;
+
+	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor32, 20, table3);
+	plane.update()
+	planes.push(plane);	
+		
+	class3.add(table3);
 	
 	//big floor
 	var loader2 = new THREE.TextureLoader();
@@ -571,117 +577,11 @@ function buildWalls(){
 	class2.add(level2Walls[i].mesh.clone());
 
   //class 3
-  
-  for(var i=0;i<8;i++)
-   {
-	 if (i < 4) {
-      let x = new Wall(50,5, new THREE.Vector3(0, 0, -1));
-      x.update();
-      level3Walls.push(x);
-    }
-     else if(i>=4&&i<6)
-     {
-       let x = new Wall(100,5, new THREE.Vector3(0, 0, -1));
-      x.update();
-      level3Walls.push(x);
-     }
-     else{
-       let x = new Wall(150,5, new THREE.Vector3(0, 0, -1));
-      x.update();
-      level3Walls.push(x);
-	 }		 
-   }
-   level3Walls[0].mesh.rotation.y = -Math.PI / 2;
-   level3Walls[1].mesh.rotation.y = -Math.PI / 2;
-   level3Walls[6].mesh.rotation.z = -Math.PI / 2/3;
-   level3Walls[7].mesh.rotation.z = -Math.PI / 2/3;
-   
-   level3Walls[0].mesh.position.set(225, 82.5, -300);
-   level3Walls[1].mesh.position.set(504.8,7.5,-300);
-   level3Walls[2].mesh.position.set(250,82.5,-325);
-   level3Walls[3].mesh.position.set(250.8,82.5,-275);
-   level3Walls[4].mesh.position.set(454.8,7.5,-325);
-   level3Walls[5].mesh.position.set(454.8,7.5,-275);
-   level3Walls[6].mesh.position.set(339.8,45,-325);
-   level3Walls[7].mesh.position.set(339.8,45,-275);
-   
-   
-   level3Walls[0].mesh.visible = false;
-   
-    for(var i=0;i<6;i++)
-   {
-	 if (i < 2) {
-      let x = new Wall(30,5, new THREE.Vector3(0, 0, -1));
-      x.update();
-      level3Walls.push(x);
-    }
-	else
-	{
-	  let x = new Wall(2.5,5,new THREE.Vector3(0,0,1),1);
-	  x.update();
-	  level3Walls.push(x)
-	}
-   }
-   level3Walls[8].mesh.position.set(0, 3, 0)
-   level3Walls[9].mesh.position.set(0, 3, 0)    
-   level3Walls[10].mesh.position.set(-15, 3, 0)
-   level3Walls[10].mesh.rotation.y = -Math.PI / 2;
-   level3Walls[11].mesh.position.set(-15, 3, 0)
-   level3Walls[11].mesh.rotation.y = -Math.PI / 2;
-   level3Walls[12].mesh.position.set(15, 3, 0)
-   level3Walls[12].mesh.rotation.y = Math.PI / 2;
-   level3Walls[13].mesh.position.set(15, 3, 0)
-   level3Walls[13].mesh.rotation.y = Math.PI / 2;
-   
-  var separator1=new THREE.Group();
-  var separator2=new THREE.Group();
-  
-  separator1.add(level3Walls[8].mesh,level3Walls[10].mesh,level3Walls[12].mesh); 
-  scene.add(separator1);
-  separator2.add(level3Walls[9].mesh,level3Walls[11].mesh,level3Walls[13].mesh); 
-  scene.add(separator2);
-  
-  
-  separator1.position.set(390,12.5,-290)
-  separator1.rotation.z=-Math.PI/2/3;
-  separator2.position.set(390,12.5,-310)
-  separator2.rotation.z=-Math.PI/2/3;
-  
-  for(var i=0;i<4;i++)
-   {
-	 if (i < 2) {
-      let x = new Wall(15,5, new THREE.Vector3(0, 0, -1));
-      x.update();
-      level3Walls.push(x);
-    }
-	else
-	{
-	  let x = new Wall(2.5,5,new THREE.Vector3(0,0,1),1);
-	  x.update();
-	  level3Walls.push(x)
-	}
-   }
-   level3Walls[14].mesh.position.set(0, 3, 0)
-   level3Walls[15].mesh.position.set(0, 3, 0)    
-   level3Walls[16].mesh.position.set(-7.5, 3, 0)
-   level3Walls[16].mesh.rotation.y = -Math.PI / 2;
-   level3Walls[17].mesh.position.set(7.5, 3, 0)
-   level3Walls[17].mesh.rotation.y = Math.PI / 2;
-   
-   var separator3=new THREE.Group();
-    separator3.add(level3Walls[14].mesh,level3Walls[16].mesh); 
-    scene.add(separator3);
-	separator3.position.set(430,4,-283)
-	separator3.rotation.y=-Math.PI/2;
-	
-    var separator4=new THREE.Group();
-    separator4.add(level3Walls[15].mesh,level3Walls[17].mesh); 
-    scene.add(separator4);
-	separator4.position.set(430,4,-317)
-	separator4.rotation.y=-Math.PI/2;
-	for(var i = 0; i <= 7; i++)
-	  class3.add(level3Walls[i].mesh.clone());
-	class3.add(separator1.clone(),separator2.clone(),separator3.clone(),separator4.clone())
+  let temp;
+  temp = buildClass3Wall();
+  for(var k = 0; k < temp.length; k++){
+	level3Walls.push(temp[k]);
+  }
   
 /*
   const shape = new THREE.Shape();
@@ -728,6 +628,41 @@ function buildWalls(){
 
 	scene.add( lineMesh,lineMesh2,lineMesh3,lineMesh4); 
 */
+}
+function buildClass3Wall(){
+	let class3wall = [];
+	
+	for(var i=0;i<3;i++)
+   {
+      let x = new Wall(100,5, new THREE.Vector3(0, 0, -1));
+      x.update();
+      class3wall.push(x);
+   }
+   class3wall[0].mesh.rotation.y = -Math.PI / 2;
+   
+   class3wall[0].mesh.position.set(225, 82.5, -275);
+   class3wall[1].mesh.position.set(275,82.5,-325);
+   class3wall[2].mesh.position.set(275,82.5,-225);
+   
+   for(var i=0;i<6;i++)
+   {
+      let x = new Wall(200,5, new THREE.Vector3(0, 0, -1));
+      x.update();
+      class3wall.push(x);
+   }
+   
+   class3wall[3].mesh.position.set(425, 82.5, -250);
+   class3wall[4].mesh.position.set(425,82.5,-300);
+   class3wall[5].mesh.position.set(425, 42.5, -250);
+   class3wall[6].mesh.position.set(425,42.5,-200);
+   class3wall[7].mesh.position.set(425, 42.5, -300);
+   class3wall[8].mesh.position.set(425,42.5,-350);
+   
+	for(var i = 0; i <=8; i++)
+	  class3.add(class3wall[i].mesh);
+  
+   return class3wall;
+	
 }
 function buildholes(){
 	
@@ -889,43 +824,7 @@ function buildholes(){
 	class2.add(ballhole2.clone())
 	//class3
 
-	let mesh3 = new THREE.Mesh(geometry2, material);
-	scene.add(mesh3);
-	mesh3.meshFunc = meshFunc2;
-    mesh3.inMeshFunc = inMeshFunc2;
-    mesh3.meshDifFunc = meshDifFunc2;
-    mesh3.rotation.x = -Math.PI/2
-    mesh3.position.set(491.05,-4.795,-288.45);
-    mesh3.ID = "hole";
-	mesh3.level = 3;
-	mesh3.visible = false
-	holes.push(mesh3)
 	
- 	var ballhole3 = new THREE.Group();
-
-	var cylinder3 = new THREE.Mesh( geometry4, material );
-	cylinder3.castShadow = true;
-	cylinder3.receiveShadow = true;
-	cylinder3.position.y = -2.2;
-	cylinder3.ID = "wall";
-	cylinder3.r = 2.576;
-	cylinder3.height = 4.4;
-	holes.push(cylinder3);
-	
-	ballhole3.add(cylinder3);
-	
-	const block3 = new THREE.Mesh( geometry, material2);
-	
-	block3.position.y=-4.4;
-	block3.ID = "bottom";
-	block3.r = 2.576
-	block3.normal = new THREE.Vector3(0,1,0);
-	holes.push(block3)
-	ballhole3.add(block3)
-	scene.add(ballhole3);
-	ballhole3.position.set(491.05,5,-288.45);  	
-	
-	class3.add(ballhole3.clone())
 	
 }
 function buildPillar(){
@@ -1229,124 +1128,38 @@ function buildPillar(){
 	pillarC31.position.set(225,83,-325);
 	pillarC31.ID = "wall"
 	pillarC31.castShadow = true;
-	scene.add(pillarC31)
+
 	cylinders.push(pillarC31)
 	
 	var pillarC32 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	pillarC32.R = 2;
 	pillarC32.height = 6
-	pillarC32.position.set(225,83,-275);
+	pillarC32.position.set(225,83,-225);
 	pillarC32.ID = "wall"
 	pillarC32.castShadow = true;
-	scene.add(pillarC32)
+
 	cylinders.push(pillarC32)
 	
 	var pillarC33 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	pillarC33.R = 2;
 	pillarC33.height = 6
-	pillarC33.position.set(275,83,-325);
+	pillarC33.position.set(325,83,-325);
 	pillarC33.ID = "wall"
 	pillarC33.castShadow = true;
-	scene.add(pillarC33)
+
 	cylinders.push(pillarC33)
 	
 	var pillarC34 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	pillarC34.R = 2;
 	pillarC34.height = 6
-	pillarC34.position.set(275,83,-275);
+	pillarC34.position.set(325,83,-225);
 	pillarC34.ID = "wall"
 	pillarC34.castShadow = true;
-	scene.add(pillarC34)
+
 	cylinders.push(pillarC34)
 	
-	var pillarC35 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC35.R = 2;
-	pillarC35.height = 6
-	pillarC35.position.set(404.8,8,-275);
-	pillarC35.ID = "wall"
-	pillarC35.castShadow = true;
-	scene.add(pillarC35)
-	cylinders.push(pillarC35)
+	class3.add(pillarC31,pillarC32,pillarC33,pillarC34)
 	
-	var pillarC36 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC36.R = 2;
-	pillarC36.height = 6
-	pillarC36.position.set(404.8,8,-325);
-	pillarC36.ID = "wall"
-	pillarC36.castShadow = true;
-	scene.add(pillarC36)
-	cylinders.push(pillarC36)
-	
-	var pillarC37 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC37.R = 2;
-	pillarC37.height = 6
-	pillarC37.position.set(504.8,8,-275);
-	pillarC37.ID = "wall"
-	pillarC37.castShadow = true;
-	scene.add(pillarC37)
-	cylinders.push(pillarC37)
-	
-	var pillarC38 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC38.R = 2;
-	pillarC38.height = 6
-	pillarC38.position.set(504.8,8,-275);
-	pillarC38.ID = "wall"
-	pillarC38.castShadow = true;
-	scene.add(pillarC38)
-	cylinders.push(pillarC38)
-	
-	var pillarC39 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC39.R = 3;
-	pillarC39.height = 6
-	pillarC39.position.set(310,63,-310);
-	pillarC39.rotation.z=-Math.PI/2/3;
-	pillarC39.ID = "wall"
-	pillarC39.castShadow = true;
-	scene.add(pillarC39)
-	cylinders.push(pillarC39)
-	
-	var pillarC310 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC310.R = 3;
-	pillarC310.height = 6
-	pillarC310.position.set(310,63,-290);
-	pillarC310.rotation.z=-Math.PI/2/3;
-	pillarC310.ID = "wall"
-	pillarC310.castShadow = true;
-	scene.add(pillarC310)
-	cylinders.push(pillarC310)
-	
-	var pillarC311 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC311.R = 3;
-	pillarC311.height = 6
-	pillarC311.position.set(330,51.5,-300);
-	pillarC311.rotation.z=-Math.PI/2/3;
-	pillarC311.ID = "wall"
-	pillarC311.castShadow = true;
-	scene.add(pillarC311)
-	cylinders.push(pillarC311)
-	
-	var pillarC312 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC312.R = 3;
-	pillarC312.height = 6
-	pillarC312.position.set(330,51.5,-316);
-	pillarC312.rotation.z=-Math.PI/2/3;
-	pillarC312.ID = "wall"
-	pillarC312.castShadow = true;
-	scene.add(pillarC312)
-	cylinders.push(pillarC312)
-	
-	var pillarC313 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	pillarC313.R = 3;
-	pillarC313.height = 6
-	pillarC313.position.set(330,51.5,-284);
-	pillarC313.rotation.z=-Math.PI/2/3;
-	pillarC313.ID = "wall"
-	pillarC313.castShadow = true;
-	scene.add(pillarC313)
-	cylinders.push(pillarC313)
-
-	class3.add(pillarC31.clone(),pillarC32.clone(),pillarC33.clone(),pillarC34.clone(),pillarC35.clone(),pillarC36.clone(),pillarC37.clone())
-	class3.add(pillarC38.clone(),pillarC39.clone(),pillarC310.clone(),pillarC311.clone(),pillarC312.clone(),pillarC313.clone())
 }
 function buildfloors(){
 	
@@ -1428,7 +1241,8 @@ function buildfloors(){
 		return [(x + 25) / 50,(z + 325) / 200]
 	}
 	
-	let mesh = createMultiMaterialObject(geometry, [materialGround, materialLight1]);
+	//let mesh = createMultiMaterialObject(geometry, [materialGround, materialLight1]);
+	let mesh = new THREE.Mesh(geometry, materialGround);
 	mesh.y = 0
 	mesh.heightFunc = heightFunc;
 	mesh.inHeightFunc = inHeightFunc;
@@ -1453,7 +1267,8 @@ function buildfloors(){
         opacity: 0.7
 	});
 	
-	let floor5 = createMultiMaterialObject(geometry2, [materialGround, materialLight2]);
+	//let floor5 = createMultiMaterialObject(geometry2, [materialGround, materialLight2]);
+	let floor5 = new THREE.Mesh(geometry2,materialGround);
 	
 	//floor5 = new THREE.Mesh(geometry2, new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide}));
 	
@@ -1471,12 +1286,12 @@ function buildfloors(){
 	
 
 	var geometry3 = new ParametricGeometry(function(u0, v0, pos) {
-		let x = 225 + 50 * u0;
-		let z = -325 + 50 * v0;
+		let x = 225 + 100 * u0;
+		let z = -325 + 100 * v0;
 		pos.set(x, heightFunc(x, z)+80, z);
 	}, 40, 40);
 	var convertUV3 = function(x,z){
-		return [(x - 225) / 50,(z + 325) / 50]
+		return [(x - 225) / 100,(z + 325) /100]
 	}
 	
   var textureTest3 = loader2.load('https://i.imgur.com/Gpeoj0a.png');  
@@ -1486,8 +1301,8 @@ function buildfloors(){
         transparent: true,
         opacity: 0.7
   });
-	let floor4 = createMultiMaterialObject(geometry3, [materialGround, materialLight3]);
-	//var floor4 = new THREE.Mesh(geometry3, new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide}));
+	//let floor4 = createMultiMaterialObject(geometry3, [materialGround, materialLight3]);
+	var floor4 = new THREE.Mesh(geometry3,materialGround);
     //floor4.material.map.repeat.set( 3, 3 );
     floor4.y = 80;
     floor4.receiveShadow = true;
@@ -1496,11 +1311,77 @@ function buildfloors(){
 	floor4.convertUV = convertUV3;
 
 	floors.push(floor4)
-	scene.add(floor4)
-	class3.add(floor4.clone())
+
+	class3.add(floor4)
+	
+	
+	var geometry4 = new ParametricGeometry(function(u0, v0, pos) {
+		let x = 325 + 200 * u0;
+		let z = -300 + 50 * v0;
+		pos.set(x, heightFunc(x, z)+80, z);
+	}, 40, 40);
+	var convertUV4 = function(x,z){
+		return [(x - 325) / 200,(z + 300) /50]
+	}
+	
+	//let floor6 = createMultiMaterialObject(geometry4, [materialGround, materialLight3]);
+	var floor6 = new THREE.Mesh(geometry4,materialGround);
+    floor6.y = 80;
+    floor6.receiveShadow = true;
+	floor6.heightFunc = heightFunc;
+	floor6.inHeightFunc = inHeightFunc;
+	floor6.convertUV = convertUV4;
+
+	floors.push(floor6)
+
+	class3.add(floor6)
+	
+	var geometry5 = new ParametricGeometry(function(u0, v0, pos) {
+		let x = 325 + 200 * u0;
+		let z = -250 + 50 * v0;
+		pos.set(x, heightFunc(x, z)+40, z);
+	}, 40, 40);
+	var convertUV5 = function(x,z){
+		return [(x - 325) / 200,(z + 250) /50]
+	}
+	
+	//let floor7 = createMultiMaterialObject(geometry5, [materialGround, materialLight3]);
+	var floor7 = new THREE.Mesh(geometry5,materialGround);
+    floor7.y = 40;
+    floor7.receiveShadow = true;
+	floor7.heightFunc = heightFunc;
+	floor7.inHeightFunc = inHeightFunc;
+	floor7.convertUV = convertUV5;
+
+	floors.push(floor7)
+
+	class3.add(floor7)
+	
+	
+	var geometry6 = new ParametricGeometry(function(u0, v0, pos) {
+		let x = 325 + 200 * u0;
+		let z = -350 + 50 * v0;
+		pos.set(x, heightFunc(x, z)+40, z);
+	}, 40, 40);
+	var convertUV6 = function(x,z){
+		return [(x - 325) / 200,(z + 350) /50]
+	}
+	
+	//let floor8 = createMultiMaterialObject(geometry6, [materialGround, materialLight3]);
+	var floor8 = new THREE.Mesh(geometry6,materialGround);
+    floor8.y = 40;
+    floor8.receiveShadow = true;
+	floor8.heightFunc = heightFunc;
+	floor8.inHeightFunc = inHeightFunc;
+	floor8.convertUV = convertUV6;
+
+	floors.push(floor8)
+
+	class3.add(floor8)
 	
 }
 function buildArcWalls(){
+	
 	let group = new THREE.Group();
 	let material = new THREE.MeshPhongMaterial({color:0xA23400,side:THREE.DoubleSide,transparent: true,opacity: 1})
 	var arcWallC11 = new THREE.Mesh(new THREE.CylinderGeometry(48.75,48.75,5,32,32,true,Math.PI/2,Math.PI),material);
@@ -1515,21 +1396,73 @@ function buildArcWalls(){
 	arcWallC12.position.set(25,2.5,-80);
 	arcWallC12.castShadow = true;
 	
-	let mesh = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI), material );
-	mesh.rotation.x = -Math.PI /2;
-	mesh.position.set(25,5,-80)
+	let mesh11 = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI), material );
+	mesh11.rotation.x = -Math.PI /2;
+	mesh11.position.set(25,5,-80)
 
-	let mesh2 = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI), material );
-	mesh2.rotation.x = -Math.PI /2;
-	mesh2.position.set(25,0,-80)
+	let mesh12 = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI), material );
+	mesh12.rotation.x = -Math.PI /2;
+	mesh12.position.set(25,0,-80)
 	
-	group.add(arcWallC11,arcWallC12,mesh,mesh2)
+	group.add(arcWallC11,arcWallC12,mesh11,mesh12)
 	arcWalls.push(group);
 	class1.add(group)
+	//// class 3
+	/*
+	let group2 = new THREE.Group();
+	var arcWallC31 = new THREE.Mesh(new THREE.CylinderGeometry(20,20,5,32,32,true,0,Math.PI/2),material);
+	arcWallC31.R = 48.75;
+	arcWallC31.height = 5
+	arcWallC31.position.set(325,82.5,-323.75);
+	arcWallC31.castShadow = true;
+	arcWallC31.thetaStart = 0;
+	arcWallC31.thetaLength = Math.PI/2;
 	
+	var arcWallC32 = new THREE.Mesh(new THREE.CylinderGeometry(22.5,22.5,5,32,32,true,0,Math.PI/2),material);
+	arcWallC32.position.set(325,82.5,-323.75);
+	arcWallC32.castShadow = true;
 	
+	let mesh31 = new THREE.Mesh(new THREE.RingGeometry( 20, 22.5, 32,1,Math.PI/2,Math.PI/2), material );
+	mesh31.rotation.x = -Math.PI /2;
+	mesh31.rotation.z = Math.PI;
+	mesh31.position.set(325,85,-323.75)
+
+	let mesh32 = new THREE.Mesh(new THREE.RingGeometry( 20, 22.5, 32,1,Math.PI/2,Math.PI/2), material );
+	mesh32.rotation.x = -Math.PI /2;
+	mesh32.rotation.z = Math.PI;
+	mesh32.position.set(325,80,-323.75)
+	
+	group2.add(arcWallC31,arcWallC32,mesh31,mesh32)
+	arcWalls.push(group2);
+	class3.add(group2)
+
+	let group3 = new THREE.Group();
+	var arcWallC33 = new THREE.Mesh(new THREE.CylinderGeometry(20,20,5,32,32,true,Math.PI/2,Math.PI/2),material);
+	arcWallC33.R = 48.75;
+	arcWallC33.height = 5
+	arcWallC33.position.set(325,82.5,-226.25);
+	arcWallC33.castShadow = true;
+	arcWallC33.thetaStart = Math.PI/2;
+	arcWallC33.thetaLength = Math.PI/2;
+	
+	var arcWallC34 = new THREE.Mesh(new THREE.CylinderGeometry(22.5,22.5,5,32,32,true,Math.PI/2,Math.PI/2),material);
+	arcWallC34.position.set(325,82.5,-226.25);
+	arcWallC34.castShadow = true;
+	
+	let mesh33 = new THREE.Mesh(new THREE.RingGeometry( 20, 22.5, 32,1,0,Math.PI/2), material );
+	mesh33.rotation.x = -Math.PI /2;
+	mesh33.position.set(325,85,-226.25)
+
+	let mesh34 = new THREE.Mesh(new THREE.RingGeometry( 20, 22.5, 32,1,0,Math.PI/2), material );
+	mesh34.rotation.x = -Math.PI /2;
+	mesh34.position.set(325,80,-226.25)
+	group3.add(arcWallC33,arcWallC34,mesh33,mesh34)
+	arcWalls.push(group3);
+	class3.add(group3)
+	*/
 }
 function setClassVisible(level){
+	
 		class1Rotate.visible = false;
 		class2Rotate.visible = false;
 		class3Rotate.visible = false;		

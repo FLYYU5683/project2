@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
 import {balls,steve} from './main.js'
-import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak} from './touchEvent.js'
+import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode} from './touchEvent.js'
 import {portalsRenderer} from './portal.js'
 import {createMultiMaterialObject} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/utils/SceneUtils.js';
 import {setClassVisible} from './buildTerrain.js';
@@ -46,6 +46,12 @@ var inLoading = false;
 var loadingOpened = false
 var loadingClosing = false;
 var chooseHoles,whichHoles;
+
+var ballMoveMode = false;
+var ballMoveControl = new THREE.Group();
+
+var vec = new THREE.Vector3();
+
 function render() {
   renderer.setScissorTest(false);
   var WW = window.innerWidth;
@@ -485,14 +491,14 @@ function buildHUD(){
 			depthWrite: false,
 			map: texture15});
 		gearButton = new THREE.Mesh(new THREE.PlaneGeometry(2,2),gearMaterial);
-		gearButton.position.set(-8.9,7.5,500);
+		gearButton.position.set(-8.9,9.5,500);
 		gearButton.scale.set(1,0.5,1)
 		sceneHUD.add(gearButton)
 		gearButton.visible = false;
 		
 	  ///replay Button
 	  let loader2 = new THREE.TextureLoader();
-	  var texture2 = loader2.load("https://i.imgur.com/qGZYbQ8.png")
+	  var texture2 = loader2.load("https://i.imgur.com/Y7SXNIN.png")
 	  var replay1Material = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -501,7 +507,7 @@ function buildHUD(){
 		depthWrite: false,
 		map: texture2});
 	  let loader3 = new THREE.TextureLoader();
-	  var texture3 = loader3.load("https://i.imgur.com/BvV2eFr.png")
+	  var texture3 = loader3.load("https://i.imgur.com/aUG7vH9.png")
 	  var replay2Material = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -520,9 +526,9 @@ function buildHUD(){
 		depthWrite: false,
 		map: textureX});
 		
-		var XButton = new THREE.Mesh(new THREE.PlaneGeometry(2,2),XMaterial);
-		//XButton.position.set(-8.9,7.5,500);
-		XButton.scale.set(1,0.5,1)
+	  var XButton = new THREE.Mesh(new THREE.PlaneGeometry(2,2),XMaterial);
+	  //XButton.position.set(-8.9,7.5,500);
+	  XButton.scale.set(1,0.5,1)
 		
 	  var gearBoard = new THREE.Mesh(new THREE.PlaneGeometry(9,1.6),new THREE.MeshBasicMaterial({color:0xAAAAAA}))
 	  gearBoard.position.set(-4.4,6.5,300)
@@ -534,6 +540,7 @@ function buildHUD(){
 	  replay2Button.position.set(-2.5,6.5,100);
 	  replayGroup.add(gearBoard,replay1Button,replay2Button)
 	  replayGroup.visible = false;
+	  replayGroup.position.set(0,2,0)
 	  sceneHUD.add(replayGroup)
 	/// 進球後
 	
@@ -634,22 +641,93 @@ function buildHUD(){
 	let load = new THREE.Mesh(new THREE.PlaneGeometry(20,20),loadMaterial)
 	load.position.z = 900
 	sceneLoading.add(load)
+	// ball move Button
 	
+	let perpleArrowTexture = loader4.load("https://i.imgur.com/8dUcgUV.png")
+	let perpleArrowMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: perpleArrowTexture});
+	  
+	let perpleArrow = new THREE.Mesh(new THREE.PlaneGeometry(5, 2),perpleArrowMaterial)
+	perpleArrow.position.set(4.5,0,0);
+	ballMoveControl.add(perpleArrow.clone());
+	perpleArrow.rotation.z = Math.PI;
+	
+	perpleArrow.position.set(-4.5,0,0);
+	ballMoveControl.add(perpleArrow.clone());
+	
+	perpleArrow.scale.set(0.5,2,1);
+	perpleArrow.position.set(0,-2.25,0);
+	perpleArrow.rotation.z = -Math.PI/2;
+	ballMoveControl.add(perpleArrow.clone());
+	
+	perpleArrow.position.set(0,2.25,0);
+	perpleArrow.rotation.z = Math.PI/2;
+	ballMoveControl.add(perpleArrow.clone());
+
+	
+
+	//https://i.imgur.com/KzOa1Ue.png
+	let setTexture = loader4.load("https://i.imgur.com/KzOa1Ue.png");
+	
+	let setButtonMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: setTexture});
+		
+	let setButton = new THREE.Mesh(new THREE.PlaneGeometry(2, 2),setButtonMaterial)
+	setButton.scale.set(2,1,1);
+	
+	let upTexture = loader4.load("https://i.imgur.com/iMKdBln.png");
+	let upButtonMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: upTexture});
+	let upButton = new THREE.Mesh(new THREE.PlaneGeometry(5, 2),upButtonMaterial)	
+	upButton.position.set(-6,-2.5,0)
+	
+	let downTexture = loader4.load("https://i.imgur.com/1Suvg84.png")
+	let downButtonMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: downTexture});
+	let downButton = new THREE.Mesh(new THREE.PlaneGeometry(5, 2),downButtonMaterial)	
+	downButton.position.set(6,-2.5,0)
+	
+	ballMoveControl.add(setButton,upButton,downButton);
+	ballMoveControl.position.set(0,-6,0);
+	sceneHUD.add(ballMoveControl);
+	ballMoveControl.visible = false;
 }
 function HUDPress(){
+	
 	event.preventDefault();
 	var touch = new THREE.Vector2();
 	touch.x = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
     touch.y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
+	console.log(touch.x,touch.y)
 	if(Math.abs(touch.x) <= 0.4 && Math.abs(touch.y) <= 0.4){
 	    if(start === false){
 			start = true;
 			startButton.visible = false
-			switchCamera = 1;
+			switchCamera = 3;
 			chooseLevelButton.visible = true;
 		}
 	}
-	if(start === true && modeChose === false){
+	else if(start === true && modeChose === false){
 		if(between(touch.x,1,0.02) && between(touch.y,-0.1,-0.33)){
 			balls[0].start();
 			balls[1].start();
@@ -673,9 +751,46 @@ function HUDPress(){
 			manipulateButton.visible = true;
 		}
 	}
-	if(start && modeChose && levelChose && !inLoading){
+	if(ballMoveMode){//ballMoveControl
+		let FB = new THREE.Vector3(cameraOnPlayer.localToWorld(new THREE.Vector3()).x,balls[0].pos.y,cameraOnPlayer.localToWorld(new THREE.Vector3()).z);
+		FB.copy(balls[0].pos.clone().sub(FB).normalize()).multiplyScalar(0.5);
+		//LR.sub(cameraOnPlayer.position).normalize();
+		let LR = FB.clone().applyAxisAngle(new THREE.Vector3(0,1,0),Math.PI/2).multiplyScalar(0.5);
+		if(between(touch.x,-0.27,-0.75) && between(touch.y,-0.46,-0.67)){//左
+			vec.copy(LR)
+			return 7;
+		}
+		else if (between(touch.x,0.64,0.17) && between(touch.y,-0.46,-0.67)){//右
+			vec.copy(LR.negate())
+			return 7;
+		}
+		else if	(between(touch.x,0.15,-0.26) && between(touch.y,-0.21,-0.46)){//前
+			vec.copy(FB)
+			return 7;
+		}
+		else if	(between(touch.x,0.15,-0.26) && between(touch.y,-0.69,-0.92)){//後
+			vec.copy(FB.negate())
+			return 7;
+		}
+		else if (between(touch.x,-0.37,-0.92) && between(touch.y,-0.71,-0.93)){//上
+			vec.copy(new THREE.Vector3(0,0.5,0))
+			return 7;
+		}
+		else if (between(touch.x,0.82,0.27) && between(touch.y,-0.71,-0.93)){//下
+			console.log("in")
+			vec.copy(new THREE.Vector3(0,-0.5,0))
+			return 7;
+		}
+		else if (between(touch.x,0.17,-0.27) && between(touch.y,-0.46,-0.69)){//確定
+			balls[0].useG = true;
+			ballMoveMode = false;
+			ballMoveControl.visible = false
+			sliderGroup.visible = true;
+		}
+		
+	}
+	if(start && modeChose && levelChose && !inLoading && !ballMoveMode){//開始玩的操作
 		if(isOver === false){
-			
 			///Camera按鈕
 			if(touch.x >= 0.6 && touch.y >= 0.84){
 				if(!isOpen){
@@ -694,23 +809,47 @@ function HUDPress(){
 			}
 			///gear pressed
 			if(mode === 1){
-				if(between(touch.x,-0.82,-1),between(touch.y,0.83,0.72)){
+				if(between(touch.x,-0.82,-1) && between(touch.y,1,0.92)){
 					if(replayGroup.visible === false){
 						gearButton.scale.set(0.6,0.3,0.6)
 						replayGroup.visible = true;
 					}
 					else{
 						gearButton.scale.set(1,0.5,1)
-						replayGroup.visible = false;				
+						replayGroup.visible = false;		
 					}
 				}
-				/// replay
-				if(replayGroup.visible === true){
-					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.74,0.62)){
-						return 6;
+				/// select level or move ball
+				else if(replayGroup.visible === true){
+					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.94,0.81)){
+						
+						balls[0].choose = true;
+						balls[0].start();
+						balls[1].start();
+						levelChose = false;
+						levelChangeButton.visible = false;
+						sliderGroup.visible = false;
+						manipulateButton.visible = true;					
+						isOver = false;
+						steve.camera.children[0].fov = 40 + fovX * 2
+						steve.direct.children[3].children[0].fov = 40 + fovX * 2;
+						steve.camera.children[0].updateProjectionMatrix();
+						steve.direct.children[3].children[0].updateProjectionMatrix();
+						balls[0].runInHole = false
+						inHoleBreak();
+						chooseHoles[level-1].visible = true
+						
+						gearButton.visible = false;
+						gearButton.scale.set(1,0.5,1)
+						replayGroup.visible = false;
+						
 					}
-					if(between(touch.x,-0.1,-0.5)&& between(touch.y,0.74,0.62)){
-						return 5;
+					if(between(touch.x,-0.1,-0.5)&& between(touch.y,0.94,0.81)){
+						ballMoveMode = true;
+						balls[0].useG = false;
+						sliderGroup.visible = false;
+						ballMoveControl.visible =  true;
+						
 					}			
 				}
 			}
@@ -742,41 +881,43 @@ function HUDPress(){
 				}
 			}
 			///滑條
-			if(touch.y <= -0.75 && sliderGroup.onTop === true){
-				
-				return 1;		
-			}
-			else if(between(touch.x,0.25,-0.36) && between(touch.y,-0.57,-0.67) && sliderGroup.onTop === true){
-				sliderGroup.onTop = false;
-				
-				return 1;
-			}
-			else if( between(touch.x,0.25,-0.36) && touch.y <= -0.86 && sliderGroup.onTop === false){
+			if(true){
+				if(touch.y <= -0.75 && sliderGroup.onTop === true){
+					
+					return 1;		
+				}
+				else if(between(touch.x,0.25,-0.36) && between(touch.y,-0.57,-0.67) && sliderGroup.onTop === true){
+					sliderGroup.onTop = false;
+					
+					return 1;
+				}
+				else if( between(touch.x,0.25,-0.36) && touch.y <= -0.86 && sliderGroup.onTop === false){
 				sliderGroup.onTop = true;
 				
 				return 1;
 			}
-			
+			}
 			/// 操作
-			
-			if(sliderGroup.onTop === false && touch.x <= -0.38 && between(touch.y,-0.67,-0.86)){
-				return 2;
-			}
-			else if (sliderGroup.onTop === false && touch.x >= 0.38 && between(touch.y,-0.67,-0.86)){
-				return 3;
-			}
-			else if (sliderGroup.onTop === false && between(touch.x,0.38,-0.38) && between(touch.y,-0.67,-0.86)){
-				return 4;
-			}
-			else if (sliderGroup.onTop === true && touch.x <= -0.38 && between(touch.y,-0.38,-0.57)){
-				return 2;
-			}
-			else if (sliderGroup.onTop === true && touch.x >= 0.38 && between(touch.y,-0.38,-0.57)){
-				return 3;
-			}
-			else if (sliderGroup.onTop === true && between(touch.x,0.38,-0.38) && between(touch.y,-0.38,-0.57)){
-				return 4;
-			}		
+			if(true){
+				if(sliderGroup.onTop === false && touch.x <= -0.38 && between(touch.y,-0.67,-0.86)){
+					return 2;
+				}
+				else if (sliderGroup.onTop === false && touch.x >= 0.38 && between(touch.y,-0.67,-0.86)){
+					return 3;
+				}
+				else if (sliderGroup.onTop === false && between(touch.x,0.38,-0.38) && between(touch.y,-0.67,-0.86)){
+					return 4;
+				}
+				else if (sliderGroup.onTop === true && touch.x <= -0.38 && between(touch.y,-0.38,-0.57)){
+					return 2;
+				}
+				else if (sliderGroup.onTop === true && touch.x >= 0.38 && between(touch.y,-0.38,-0.57)){
+					return 3;
+				}
+				else if (sliderGroup.onTop === true && between(touch.x,0.38,-0.38) && between(touch.y,-0.38,-0.57)){
+					return 4;
+				}
+			}			
 			return 0;
 		} 
 		else{
@@ -816,10 +957,10 @@ function HUDPress(){
 			}
 		}
 	}
-	else if(levelChose === false && mode === 1){
+	if(levelChose === false && mode === 1){//選關
 		if(touch.x >= 0.38 && between(touch.y,-0.67,-0.86)){//右切
 			level++;
-			if(level === 4){
+			if(level === 3){////////////////////////////////////////////第三關建完要+
 				level = 1;
 			}
 			setClassVisible(level)
@@ -834,7 +975,7 @@ function HUDPress(){
 		else if(between(touch.x,0.38,-0.38) && between(touch.y,-0.67,-0.86)){//確定
 			levelChose = true;
 			if(level === 1)
-				balls[0].pos.copy(new THREE.Vector3(0,1,10));
+				balls[0].pos.copy(new THREE.Vector3(0,1,40));
 			else if (level === 2)
 				balls[0].pos.copy(new THREE.Vector3(0,2,-135));
 			else if (level === 3)
@@ -850,7 +991,7 @@ function HUDPress(){
 			resetCameraAngle();
 			resetPlayData(level);
 			for (let k = 0; k < chooseHoles.length; k++){
-			chooseHoles[k].visible = false;
+				chooseHoles[k].visible = false;
 			}
 			return
 		}
@@ -865,7 +1006,7 @@ function HUDPress(){
 }
 function textureAnimate() {
 	if(levelChose){
-		if(start && modeChose && levelChose){
+		if(start && modeChose && mode === 0){
 			for (var i = 0; i < 3; i++){
 				if(i + 1 === level)
 				{
@@ -1019,3 +1160,4 @@ export {buildCamAndSen,textureAnimate,HUDPress,start,cameraButtons,cameraSlider,
 export {cameraOrbit,cameraOnPlayer,cameraOnBall}
 export {scene,sceneMap,render,renderer}
 export {HUDForInHole,level,isOver}
+export {vec}
