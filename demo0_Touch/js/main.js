@@ -74,7 +74,7 @@ function animate() {
 
   table1.updateMatrixWorld();
   table2.updateMatrixWorld();
-  table3.updateMatrixWorld();
+  //table3.updateMatrixWorld();
   
   steve.update(dt);
   if(!start)
