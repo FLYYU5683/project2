@@ -105,12 +105,14 @@ function buildCamAndSen(){
   scene = new THREE.Scene();
   var textureLoader = new THREE.TextureLoader();
   var texture = textureLoader.load('https://i.imgur.com/JHaU4X4.jpg');
+  
   scene.background = texture;
   //scene.fog = new THREE.FogExp2( 0x21384f, 0.0050,1000);
   //scene.background = new THREE.Color( 0x21384f );
   sceneHUD = new THREE.Scene();
   sceneMap = new THREE.Scene();
-  sceneMap.background = texture;
+  //sceneMap.background = texture;
+  sceneMap.background = new THREE.Color( 0xf5f37f );
   sceneLoading = new THREE.Scene();
 
   var amblight = new THREE.AmbientLight(0x255483); // soft white light
@@ -718,12 +720,12 @@ function HUDPress(){
 	var touch = new THREE.Vector2();
 	touch.x = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
     touch.y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
-	console.log(touch.x,touch.y)
+	//console.log(touch.x,touch.y)
 	if(Math.abs(touch.x) <= 0.4 && Math.abs(touch.y) <= 0.4){
 	    if(start === false){
 			start = true;
 			startButton.visible = false
-			switchCamera = 3;
+			switchCamera = 1;
 			chooseLevelButton.visible = true;
 		}
 	}
@@ -777,7 +779,6 @@ function HUDPress(){
 			return 7;
 		}
 		else if (between(touch.x,0.82,0.27) && between(touch.y,-0.71,-0.93)){//下
-			console.log("in")
 			vec.copy(new THREE.Vector3(0,-0.5,0))
 			return 7;
 		}
@@ -847,6 +848,7 @@ function HUDPress(){
 					if(between(touch.x,-0.1,-0.5)&& between(touch.y,0.94,0.81)){
 						ballMoveMode = true;
 						balls[0].useG = false;
+						balls[0].vel.set(0,0,0);
 						sliderGroup.visible = false;
 						ballMoveControl.visible =  true;
 						
@@ -960,7 +962,7 @@ function HUDPress(){
 	if(levelChose === false && mode === 1){//選關
 		if(touch.x >= 0.38 && between(touch.y,-0.67,-0.86)){//右切
 			level++;
-			if(level === 3){////////////////////////////////////////////第三關建完要+
+			if(level === 4){
 				level = 1;
 			}
 			setClassVisible(level)
@@ -979,7 +981,7 @@ function HUDPress(){
 			else if (level === 2)
 				balls[0].pos.copy(new THREE.Vector3(0,2,-135));
 			else if (level === 3)
-				balls[0].pos.copy(new THREE.Vector3(250,81,-300));
+				balls[0].pos.copy(new THREE.Vector3(400,81,-70));
 			balls[1].pos.copy(balls[0].pos)
 			balls[0].vel.set(0,0,0);
 			balls[1].vel.set(0,0,0);
