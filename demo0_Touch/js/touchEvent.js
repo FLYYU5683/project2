@@ -170,11 +170,6 @@ function touchMove(event){
 		steve.camera.children[0].updateProjectionMatrix();
 		steve.direct.children[3].children[0].updateProjectionMatrix();
 	}
-	if(touchHUD === 7){
-		balls[0].pos.add(vec);
-		steve.direct.position.add(vec);
-		steve.camera.position.add(vec);
-	}
 }
 function touchEnd(event){
 	event.preventDefault();
@@ -219,23 +214,27 @@ function touchEnd(event){
 function touchEvent(){
 	//console.log(cameraOnPlayer.localToWorld(new THREE.Vector3(0,0,0)))
 	steve.camera.children[0].updateProjectionMatrix();
-	//console.log(steve.camera.position)
-	
+	//console.log(replayCount)
+	if(inReplay && !ballMove && !swing && repalyEnd){
+	  repalyEnd = false;
+	  replay()
+	} 	
 	if(level !== 3)
 		checkBallZ(balls[0].pos.z)
 	else
 		checkBallX(balls[0].pos.x)
     textureAnimate()
     sliderMove()
-	
-    if(inReplay && !ballMove && !swing){
-	  replay()
-    }
    	if(touchHUD === 2){
 		turnLeft();
 	}
 	if(touchHUD === 3){
 		turnRight();
+	}
+	if(touchHUD === 7){
+		balls[0].pos.add(vec);
+		steve.direct.position.add(vec);
+		steve.camera.position.add(vec);
 	}
    if(balls[1].vel != 0 && isCharge){
 		let temp = new THREE.Vector3(0, 0, 0);
@@ -247,8 +246,7 @@ function touchEvent(){
 		balls[1].vel.copy(vel);
 		predictLine()
    }
-  if(steve.putt.worldToLocal(balls[0].pos.clone()).length() <= (0.5 + 0.5) && !beforeHit)
-  {
+  if(steve.putt.worldToLocal(balls[0].pos.clone()).length() <= (0.5 + 0.5) && !beforeHit){
 	  for(var i = lineList.length; i > 0;i--){
 		scene.remove(lineList[i-1])
 	  }
@@ -337,7 +335,6 @@ function touchEvent(){
 	  }	  
   }
   
-  
 }
 function countSwingReset(){
 	countSwing = 1;
@@ -390,6 +387,7 @@ function replay(){
 		mode = -1
 	}
 	if(replayCount < playDatas[level].power.length){
+
 		for(var i = lineList.length; i > 0;i--)
 			scene.remove(lineList[i-1])
 		sliderGroup.children[5].visible = false;
@@ -406,6 +404,7 @@ function replay(){
 		swing = true;
 		isCharge = false;
 		replayCount++;
+		repalyEnd = true;
 		}
 	else {
 		sliderGroup.children[5].visible = true;
@@ -489,7 +488,7 @@ function checkBallX(ballX){
 function replayAll(){
 	inReplay = true;
 	mode = 2
-	repalyEnd = false;
+	repalyEnd = true;
 	steve.camera.rotation.y = levelTrack[level - 1][0].angleBack;
 }
 function resetCameraAngle(){

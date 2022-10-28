@@ -59,8 +59,12 @@ function buildStoneWall(){
 	var stoneGeometry2 = new THREE.BoxGeometry(100,5,2.5);
 	var loader = new THREE.TextureLoader();
 	var texture = loader.load('https://i.imgur.com/euhOAfo.jpg');
+	/*
 	var stoneMaterial = new THREE.MeshPhongMaterial({
       map: texture,side:THREE.DoubleSide})
+	*/
+	var stoneMaterial = new THREE.MeshPhongMaterial({
+      color: 0x8c8f8d,side:THREE.DoubleSide})
 	var stoneWall1 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
 	stoneWall1.position.set(-25,-2.51,-30);
 	stoneWall1.rotation.y = -Math.PI / 2;
@@ -182,12 +186,14 @@ function buildPlane(){
   planes.push(plane);
   
   //let floor2 = createMultiMaterialObject(ground, [material2, material1]);
+  
   let floor2 = new THREE.Mesh(ground, new THREE.MeshBasicMaterial({
         color: 0x006000,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 1
   }));
+  
   floor2.rotation.x = -Math.PI / 2;
   floor2.position.set(0,0.02,-55)
   floor2.receiveShadow = true;
@@ -533,6 +539,7 @@ function buildWalls(){
   level2Walls[19].mesh.position.set(0, 2.5, -10.5)
   
   //第二關
+  
    for (var i = 0; i < 3; i++) {
     if (i < 2) {
       let x = new Wall(50,5, new THREE.Vector3(0, 0, -1));
@@ -585,6 +592,7 @@ function buildWalls(){
   level2Walls[28].mesh.position.set(100, 2.5, -325)
   level2Walls[29].mesh.position.set(152.5, 2.5, -325)
   class2.add(obstacle1,obstacle2,obstacle3,car,car2)
+  
   for (var i = 20; i <= 29; i++)
 	class2.add(level2Walls[i].mesh);
 

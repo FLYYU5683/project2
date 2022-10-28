@@ -220,7 +220,7 @@ function buildCamAndSen(){
 	sign3 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat3);
 	sign3.position.set(230,85,-310);
 	sign3.rotation.y = -Math.PI / 2 + Math.PI / 9;
-	scene.add(sign3);
+	//scene.add(sign3);
   
   
   
@@ -981,7 +981,7 @@ function HUDPress(){
 			else if (level === 2)
 				balls[0].pos.copy(new THREE.Vector3(0,2,-135));
 			else if (level === 3)
-				balls[0].pos.copy(new THREE.Vector3(400,81,-70));
+				balls[0].pos.copy(new THREE.Vector3(400,61,-70));
 			balls[1].pos.copy(balls[0].pos)
 			balls[0].vel.set(0,0,0);
 			balls[1].vel.set(0,0,0);
@@ -1092,7 +1092,7 @@ function setState(){
 	else if (level === 2)
 		balls[0].pos.copy(new THREE.Vector3(0,2,-135));
 	else if (level === 3)
-		balls[0].pos.copy(new THREE.Vector3(250,81,-300));
+		balls[0].pos.copy(new THREE.Vector3(400,61,-70));
 	resetPlayData(level);
 	levelChangeButton.visible = false;
 	resetCameraAngle();
