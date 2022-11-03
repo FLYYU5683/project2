@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
 import {balls,steve} from './main.js'
-import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode} from './touchEvent.js'
+import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther} from './touchEvent.js'
 import {portalsRenderer} from './portal.js'
 import {createMultiMaterialObject} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/utils/SceneUtils.js';
 import {setClassVisible} from './buildTerrain.js';
@@ -51,6 +51,9 @@ var ballMoveMode = false;
 var ballMoveControl = new THREE.Group();
 
 var vec = new THREE.Vector3();
+var hintPages = 0;
+var hintPagePress = false;
+var hintPage = [];
 
 function render() {
   renderer.setScissorTest(false);
@@ -184,7 +187,7 @@ function buildCamAndSen(){
   });
 
   sign1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat1);
-  sign1.position.set(-10,5,50);
+  sign1.position.set(-10,5,100);
   sign1.rotation.y = Math.PI / 9
   scene.add(sign1);
   
@@ -227,9 +230,9 @@ function buildCamAndSen(){
 }
 function buildHUD(){
 	////計分板
-        var textureloader1 = new THREE.TextureLoader();
+        var textureloader = new THREE.TextureLoader();
         // load a resource
-        textureHUD1 = textureloader1.load(
+        textureHUD1 = textureloader.load(
         // URL ...
         'https://i.imgur.com/humdukl.jpg',
         // onLoad ...
@@ -262,9 +265,8 @@ function buildHUD(){
         score1.position.set(-5, 9, 102);
         sceneHUD.add(score1);
 
-        var textureloader2 = new THREE.TextureLoader();
         // load a resource
-        textureHUD2 = textureloader2.load(
+        textureHUD2 = textureloader.load(
         // URL ...
         'https://i.imgur.com/8ec7043.jpg',
         // onLoad ...
@@ -297,9 +299,8 @@ function buildHUD(){
         score2.position.set(-5, 9, 101);
         sceneHUD.add(score2);
 
-        var textureloader3 = new THREE.TextureLoader();
         // load a resource
-        textureHUD3 = textureloader3.load(
+        textureHUD3 = textureloader.load(
         // URL ...
         'https://i.imgur.com/2NqRqm5.jpg',
         // onLoad ...
@@ -336,8 +337,7 @@ function buildHUD(){
 			scores[k].visible = false;
 		}
 	////Camera按鈕
-	    let loader4 = new THREE.TextureLoader();
-		var texture5 = loader4.load("https://i.imgur.com/dhvNfiN.png")
+		var texture5 = textureloader.load("https://i.imgur.com/dhvNfiN.png")
 		var switchCameraButtonMaterial = new THREE.MeshBasicMaterial({
 			opacity: 1,
 			alphaTest:0.5,
@@ -397,8 +397,7 @@ function buildHUD(){
 	  var ball = new THREE.Mesh(new THREE.ConeGeometry(0.5,0.5,32),new THREE.MeshBasicMaterial({color:0xffffff}))
 	  ball.position.y = 4
 	  
-	  let loader1 = new THREE.TextureLoader();
-	  var texture = loader4.load("https://i.imgur.com/eH3hFaS.png")
+	  var texture = textureloader.load("https://i.imgur.com/eH3hFaS.png")
 	  var FOVMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -414,8 +413,7 @@ function buildHUD(){
 	  sliderGroup.position.set(0,-11.5,200)
 	  sliderGroup.onTop = false;
 	  ///操控
-	  let loader5 = new THREE.TextureLoader();
-	  var texture6 = loader4.load("https://i.imgur.com/RZ7HuLd.png")
+	  var texture6 = textureloader.load("https://i.imgur.com/RZ7HuLd.png")
 	  var arrowMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -427,8 +425,7 @@ function buildHUD(){
 	  var arrow = new THREE.Mesh(new THREE.PlaneGeometry(8, 4),arrowMaterial)
 	  arrow.position.set(-6,0.2,0);
 	  
-	  let loader6 = new THREE.TextureLoader();
-	  var texture7 = loader4.load("https://i.imgur.com/X0fOF3h.png")
+	  var texture7 = textureloader.load("https://i.imgur.com/X0fOF3h.png")
 	  var arrowMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -440,8 +437,7 @@ function buildHUD(){
 	  var arrow1 = new THREE.Mesh(new THREE.PlaneGeometry(8, 4),arrowMaterial)
 	  arrow1.position.set(6,0.2,0);
 	  sceneHUD.add(arrow,arrow1);
-	  let loader7 = new THREE.TextureLoader();
-	  var texture8 = loader4.load("https://i.imgur.com/eHdPwDG.png")
+	  var texture8 = textureloader.load("https://i.imgur.com/eHdPwDG.png")
 	  var arrowMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -450,8 +446,7 @@ function buildHUD(){
 		depthWrite: false,
 		map: texture8});
 		
-		let loaderChoose = new THREE.TextureLoader();
-		var textureChoose = loaderChoose.load("https://i.imgur.com/k2jGSlw.png")
+		var textureChoose = textureloader.load("https://i.imgur.com/k2jGSlw.png")
 		var chooseMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -483,8 +478,7 @@ function buildHUD(){
 	  manipulateButton.visible = false;
 	   /// 齒輪
 	
-		let loader15= new THREE.TextureLoader();
-		var texture15 = loader15.load("https://i.imgur.com/hPNtuny.png")
+		var texture15 = textureloader.load("https://i.imgur.com/hPNtuny.png")
 		var gearMaterial = new THREE.MeshBasicMaterial({
 			opacity: 1,
 			alphaTest:0.5,
@@ -499,8 +493,7 @@ function buildHUD(){
 		gearButton.visible = false;
 		
 	  ///replay Button
-	  let loader2 = new THREE.TextureLoader();
-	  var texture2 = loader2.load("https://i.imgur.com/Y7SXNIN.png")
+	  var texture2 = textureloader.load("https://i.imgur.com/Y7SXNIN.png")
 	  var replay1Material = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -508,8 +501,7 @@ function buildHUD(){
 		depthTest: false,
 		depthWrite: false,
 		map: texture2});
-	  let loader3 = new THREE.TextureLoader();
-	  var texture3 = loader3.load("https://i.imgur.com/aUG7vH9.png")
+	  var texture3 = textureloader.load("https://i.imgur.com/aUG7vH9.png")
 	  var replay2Material = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -518,36 +510,48 @@ function buildHUD(){
 		depthWrite: false,
 		map: texture3});
 		
-	  let loaderX = new THREE.TextureLoader();
-	  var textureX = loaderX.load("https://i.imgur.com/6Pd6ywQ.png")
-	  var XMaterial = new THREE.MeshBasicMaterial({
+	  var textureAim = textureloader.load("https://i.imgur.com/tPJjSqq.png")
+	  var aimMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
 		transparent: true,
 		depthTest: false,
 		depthWrite: false,
-		map: textureX});
+		map: textureAim});
+
+	  var textureHint = textureloader.load("https://i.imgur.com/S4OLZLK.png")
+	  var hintMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: textureHint});
 		
-	  var XButton = new THREE.Mesh(new THREE.PlaneGeometry(2,2),XMaterial);
-	  //XButton.position.set(-8.9,7.5,500);
-	  XButton.scale.set(1,0.5,1)
+	  var aimButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),aimMaterial);
+	  aimButton.position.set(-6.5,5.3,500);
+	  //aimButton.scale.set(1,0.5,1)
 		
-	  var gearBoard = new THREE.Mesh(new THREE.PlaneGeometry(9,1.6),new THREE.MeshBasicMaterial({color:0xAAAAAA}))
-	  gearBoard.position.set(-4.4,6.5,300)
+	  var gearBoard = new THREE.Mesh(new THREE.PlaneGeometry(9,2.8),new THREE.MeshBasicMaterial({color:0xAAAAAA}))
+	  gearBoard.position.set(-4.4,6.0,300)
 	  
 	  var replay1Button = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1),replay1Material)
-	  replay1Button.position.set(-6.5,6.5,100);
+	  replay1Button.position.set(-6.5,6.6,100);
 	  
 	  var replay2Button = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1),replay2Material)
-	  replay2Button.position.set(-2.5,6.5,100);
-	  replayGroup.add(gearBoard,replay1Button,replay2Button)
+	  replay2Button.position.set(-2.5,6.6,100);
+
+	  var hintButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1),hintMaterial)
+	  hintButton.position.set(-2.5,5.3,100);
+	  
+	  replayGroup.add(gearBoard,replay1Button,replay2Button,aimButton,hintButton)
 	  replayGroup.visible = false;
 	  replayGroup.position.set(0,2,0)
 	  sceneHUD.add(replayGroup)
+	  
 	/// 進球後
 	
-	let loader13 = new THREE.TextureLoader();
-	var texture13 = loader13.load("https://i.imgur.com/Bz90jwT.png")
+	var texture13 = textureloader.load("https://i.imgur.com/Bz90jwT.png")
 	var nextLevelMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -556,8 +560,7 @@ function buildHUD(){
 		depthWrite: false,
 		map: texture13});
 
-	let loader14 = new THREE.TextureLoader();
-	var texture14 = loader14.load("https://i.imgur.com/JqLutbX.png")
+	var texture14 = textureloader.load("https://i.imgur.com/JqLutbX.png")
 	var watchReplayMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -571,8 +574,7 @@ function buildHUD(){
 	var watchReplayButton = new THREE.Mesh(new THREE.PlaneGeometry(7,2.5),watchReplayMaterial);
 	watchReplayButton.position.set(-5,0,100);
 
-	let loaderSelect = new THREE.TextureLoader();
-	var textureSelect = loaderSelect.load("https://i.imgur.com/p4ycMph.png")
+	var textureSelect = textureloader.load("https://i.imgur.com/p4ycMph.png")
 	var selectMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -589,8 +591,7 @@ function buildHUD(){
 	levelChangeButton.visible = false;
 	/// modeChoose
 	
-	let loaderMode = new THREE.TextureLoader();
-	var textureMode = loaderMode.load("https://i.imgur.com/2RvgFys.png")
+	var textureMode = textureloader.load("https://i.imgur.com/2RvgFys.png")
 	var modeMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -599,8 +600,7 @@ function buildHUD(){
 		depthWrite: false,
 		map: textureMode});	
 
-	let loaderPractice = new THREE.TextureLoader();
-	var texturePractice = loaderMode.load("https://i.imgur.com/ckhlDxg.png")
+	var texturePractice = textureloader.load("https://i.imgur.com/ckhlDxg.png")
 	var practiceMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -609,8 +609,7 @@ function buildHUD(){
 		depthWrite: false,
 		map: texturePractice});
 		
-	let loaderPlay = new THREE.TextureLoader();
-	var texturePlay = loaderMode.load("https://i.imgur.com/KIy07mB.png")
+	var texturePlay = textureloader.load("https://i.imgur.com/KIy07mB.png")
 	var playMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -634,7 +633,7 @@ function buildHUD(){
 	//第幾關+par
 	parAndHole();
 	// loading
-	let textureLoad= loader1.load('https://i.imgur.com/XjJUoNb.png')
+	let textureLoad= textureloader.load('https://i.imgur.com/XjJUoNb.png')
 	let loadMaterial = new THREE.MeshBasicMaterial({
 		map:textureLoad,
 		opacity: 1,
@@ -645,7 +644,7 @@ function buildHUD(){
 	sceneLoading.add(load)
 	// ball move Button
 	
-	let perpleArrowTexture = loader4.load("https://i.imgur.com/8dUcgUV.png")
+	let perpleArrowTexture = textureloader.load("https://i.imgur.com/8dUcgUV.png")
 	let perpleArrowMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -674,7 +673,7 @@ function buildHUD(){
 	
 
 	//https://i.imgur.com/KzOa1Ue.png
-	let setTexture = loader4.load("https://i.imgur.com/KzOa1Ue.png");
+	let setTexture = textureloader.load("https://i.imgur.com/KzOa1Ue.png");
 	
 	let setButtonMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
@@ -687,7 +686,7 @@ function buildHUD(){
 	let setButton = new THREE.Mesh(new THREE.PlaneGeometry(2, 2),setButtonMaterial)
 	setButton.scale.set(2,1,1);
 	
-	let upTexture = loader4.load("https://i.imgur.com/iMKdBln.png");
+	let upTexture = textureloader.load("https://i.imgur.com/iMKdBln.png");
 	let upButtonMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -698,7 +697,7 @@ function buildHUD(){
 	let upButton = new THREE.Mesh(new THREE.PlaneGeometry(5, 2),upButtonMaterial)	
 	upButton.position.set(-6,-2.5,0)
 	
-	let downTexture = loader4.load("https://i.imgur.com/1Suvg84.png")
+	let downTexture = textureloader.load("https://i.imgur.com/1Suvg84.png")
 	let downButtonMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -713,6 +712,9 @@ function buildHUD(){
 	ballMoveControl.position.set(0,-6,0);
 	sceneHUD.add(ballMoveControl);
 	ballMoveControl.visible = false;
+	// buildHint
+	buildHint()
+	//hintPage[0].visible = true;
 }
 function HUDPress(){
 	
@@ -790,7 +792,7 @@ function HUDPress(){
 		}
 		
 	}
-	if(start && modeChose && levelChose && !inLoading && !ballMoveMode){//開始玩的操作
+	if(start && modeChose && levelChose && !inLoading && !ballMoveMode && !hintPagePress){//開始玩的操作
 		if(isOver === false){
 			///Camera按鈕
 			if(touch.x >= 0.6 && touch.y >= 0.84){
@@ -822,7 +824,7 @@ function HUDPress(){
 				}
 				/// select level or move ball
 				else if(replayGroup.visible === true){
-					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.94,0.81)){
+					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.94,0.81)){//從選關
 						
 						balls[0].choose = true;
 						balls[0].start();
@@ -845,14 +847,20 @@ function HUDPress(){
 						replayGroup.visible = false;
 						
 					}
-					if(between(touch.x,-0.1,-0.5)&& between(touch.y,0.94,0.81)){
+					if(between(touch.x,-0.1,-0.5) && between(touch.y,0.94,0.81)){//球移動
 						ballMoveMode = true;
 						balls[0].useG = false;
 						balls[0].vel.set(0,0,0);
 						sliderGroup.visible = false;
 						ballMoveControl.visible =  true;
 						
-					}			
+					}
+					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.81,0.62)){//瞄準模式
+						aimModeChange();
+					}
+					if(between(touch.x,-0.1,-0.5) && between(touch.y,0.81,0.62)){
+						hintPagePress = true;
+					}
 				}
 			}
 			if(false){
@@ -977,7 +985,7 @@ function HUDPress(){
 		else if(between(touch.x,0.38,-0.38) && between(touch.y,-0.67,-0.86)){//確定
 			levelChose = true;
 			if(level === 1)
-				balls[0].pos.copy(new THREE.Vector3(0,1,40));
+				balls[0].pos.copy(new THREE.Vector3(0,2,100));
 			else if (level === 2)
 				balls[0].pos.copy(new THREE.Vector3(0,2,-135));
 			else if (level === 3)
@@ -1002,6 +1010,28 @@ function HUDPress(){
 			if(k === level - 1){
 				chooseHoles[k].visible = true
 			}
+		}
+	}
+	if(hintPagePress){
+		if(between(touch.x,0.93,0.72) && between(touch.y,0.5,0.38)){
+			hintPagePress = false;
+			for(let i = 0; i < 4; i++)
+				hintPage[i].visible = false;
+			hintPages = 0;
+			return;
+		}
+		else if (hintPages !== 0 && between(touch.y,0.04,-0.13) && between(touch.x,-0.89,-1)){
+			hintPages--;
+			
+		}
+		else if (hintPages !== 3 && between(touch.y,0.04,-0.13) && between(touch.x, 1,0.81)){
+			hintPages++;
+		}
+		for(let i = 0; i < 4; i++){
+			if(hintPages === i)
+				hintPage[i].visible = true;
+			else
+				hintPage[i].visible = false;
 		}
 	}
 	
@@ -1066,6 +1096,7 @@ function loadingOpen(WW,WWPlus){
 		console.log("開完了")
 		loadingOpened = true;
 		setState()
+		setOther()
 		setTimeout(function(){loadingClosing = true; console.log("剛關")},1000)
 		sign *= -1;
 		
@@ -1088,7 +1119,7 @@ function setState(){
 	if(level > 3)
 		level = 1;
 	if(level === 1)
-		balls[0].pos.copy(new THREE.Vector3(0,1,10));
+		balls[0].pos.copy(new THREE.Vector3(0,2,10));
 	else if (level === 2)
 		balls[0].pos.copy(new THREE.Vector3(0,2,-135));
 	else if (level === 3)
@@ -1157,6 +1188,58 @@ function parAndHole(){
 		whichHoles[k].position.set(7.4,8.7)
 		sceneHUD.add(whichHoles[k]);
 	}
+}
+function buildHint(){
+        let newbieHUD1 = new THREE.TextureLoader().load('https://i.imgur.com/5ysBkZT.png');
+        var ntexMat1 = new THREE.MeshBasicMaterial({
+             opacity: 1,
+             transparent: true,
+             depthTest: false,
+             depthWrite: false,
+             map: newbieHUD1
+        });
+        var newbie1 = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), ntexMat1);	
+        sceneHUD.add(newbie1);
+		newbie1.visible=false;
+		
+        let newbieHUD2 = new THREE.TextureLoader().load('https://i.imgur.com/NPY8ZRt.png');
+        var ntexMat2 = new THREE.MeshBasicMaterial({
+             opacity: 1,
+             transparent: true,
+             depthTest: false,
+             depthWrite: false,
+             map: newbieHUD2
+        });
+        var newbie2 = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), ntexMat2);	
+        sceneHUD.add(newbie2);
+		newbie2.visible=false;
+		
+        let newbieHUD3 = new THREE.TextureLoader().load('https://i.imgur.com/HHgPSXk.png');
+        var ntexMat3 = new THREE.MeshBasicMaterial({
+             opacity: 1,
+             transparent: true,
+             depthTest: false,
+             depthWrite: false,
+             map: newbieHUD3
+        });
+        var newbie3 = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), ntexMat3);	
+        sceneHUD.add(newbie3);
+		newbie3.visible=false;
+		
+        let newbieHUD4 = new THREE.TextureLoader().load('https://i.imgur.com/lKvI7MU.png');
+        var ntexMat4 = new THREE.MeshBasicMaterial({
+             opacity: 1,
+             transparent: true,
+             depthTest: false,
+             depthWrite: false,
+             map: newbieHUD4
+        });
+        var newbie4 = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), ntexMat4);	
+        sceneHUD.add(newbie4);
+		newbie4.visible=false;
+	
+		hintPage.push(newbie1,newbie2,newbie3,newbie4)
+		
 }
 export {buildCamAndSen,textureAnimate,HUDPress,start,cameraButtons,cameraSlider,sliderGroup}
 export {cameraOrbit,cameraOnPlayer,cameraOnBall}

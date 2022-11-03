@@ -16,8 +16,9 @@ var class3 = new THREE.Group(),class3Rotate = new THREE.Group();
 var obstacle1=new THREE.Group();
 var obstacle2=new THREE.Group();
 var obstacle3=new THREE.Group();
-var car,car2;
+var car,car2,redhorse2G;
 
+let arcWallGroup3;
 function buildTerrain(){
 	buildPlane();
 	buildWalls();
@@ -30,11 +31,14 @@ function buildTerrain(){
 	buildClass3Music();
 	buildChess();
 	walls.push(level1Walls,level2Walls,level3Walls)
+	
 	class1.position.z = 30;
 	class1Rotate.add(class1.clone())
 	class1.add(bigTable)
 	scene.add(class1)
-	//class1.position.z = -30;
+	class1.position.z = 90;
+	cylinders.class1Pos = new THREE.Vector3(0,0,90)
+	cylinders.y1 = 0;
 	
 	class2.position.z = 300;
 	class2Rotate.add(class2.clone())
@@ -42,12 +46,24 @@ function buildTerrain(){
 	scene.add(class2)
 	class2Rotate.scale.set(0.9,0.9,0.9)
 	class2.position.z = 0;
+	cylinders.class2Pos = new THREE.Vector3(0,0,0)
+	cylinders.y2 =0;
 	
+	class3.position.set(0,-50,0);
+	class3.rotation.x = Math.PI/180 * 10;
 	class3Rotate.add(class3.clone())
+	class3.rotation.x =0;
+	
+	arcWalls.push(arcWallGroup3);
+	class3.add(arcWallGroup3);
+	
 	class3.add(bigTable)
 	scene.add(class3);
 	class3.position.set(400,0,-200);
-	//class3Rotate.position.y = -50;
+	
+	cylinders.class3Pos = new THREE.Vector3(400,0,-200)
+	cylinders.y31 = 0;
+	cylinders.y32 = 200;
 	
 	sceneMap.add(class1Rotate,class2Rotate,class3Rotate)
 	
@@ -388,7 +404,7 @@ function buildWalls(){
    
      
    for(var i = 0; i < 3; i++){
-	  if(i ==0){
+	  if(i == 0){
 		let x = new Wall(20,2.5,new THREE.Vector3(0,0,1),1,0x04220E);
 		x.update();
 		x.mesh.material.clippingPlanes = [clippingPlanes]
@@ -1514,12 +1530,13 @@ function buildClass3Music(){
 		let v = r / 150;
 		return [u,v]
 	}
-	
-	let bigFloorMaterial = new THREE.MeshBasicMaterial({color: 0x606060 ,side: THREE.DoubleSide , transparent: true, opacity: 1});
-
-	
+	let carpetTexture = new THREE.TextureLoader().load("https://i.imgur.com/M8ZyWnR.png")
+	let bigFloorMaterial = new THREE.MeshBasicMaterial({map:carpetTexture ,side: THREE.DoubleSide , transparent: true, opacity: 1});
 	
 	//let mesh = createMultiMaterialObject(geometry, [materialGround, materialLight1]);
+	let ground = new THREE.Mesh(new THREE.CircleGeometry(155,64),new THREE.MeshBasicMaterial({map:carpetTexture,side:THREE.DoubleSide,transparent: true, opacity: 1}))
+	ground.rotation.x = -Math.PI / 2;
+	
 	let bigFloor = new THREE.Mesh(bigFloorGeometry, bigFloorMaterial);
 	
 	bigFloor.y = 0
@@ -1528,13 +1545,14 @@ function buildClass3Music(){
 	bigFloor.inHeightFunc = inHeightFunc;
 	bigFloor.convertUV = bigFloorConvertUV;
 	bigFloor.receiveShadow = true;
+	bigFloor.visible = false;
 	
 	floors.push(bigFloor)	
-	class3.add(bigFloor)
+	class3.add(bigFloor,ground)
 	
 	var floorGeometry = new ParametricGeometry(function(u0, v0, pos) {	
 		let theta = u0 * Math.PI * 2;
-		let r = v0 * 35;
+		let r = v0 * 32;
 		let x = 55 + r * Math.cos(theta);
 		let z = 100 + r * Math.sin(theta);
 		
@@ -1548,7 +1566,7 @@ function buildClass3Music(){
 		let z2 = z * z;
 		let r = Math.sqrt(z2 + x2);
 		let u = Math.acos(x/r) / 2 / Math.PI;
-		let v = r / 35;
+		let v = r / 32;
 		return [u,v]
 	}
 	
@@ -1565,7 +1583,10 @@ function buildClass3Music(){
 	
 	floors.push(floor)	
 	class3.add(floor)
+	let temp = buildTable()
+	temp.position.set(12,0,113)
 	
+	class3.add(temp)
 	var floorGeometry2 = new ParametricGeometry(function(u0, v0, pos) {	
 		let theta = u0 * Math.PI * 2;
 		let r = v0 * 15;
@@ -1669,7 +1690,10 @@ function buildClass3Music(){
 	floors.push(mesh)
 	
 	class3.add(mesh)
-	
+	let temp = buildGlassTable2()
+	temp.position.set(44.5,0,37.5)
+	temp.rotation.y = -Math.PI/8;
+	class3.add(temp)
 	}
 	//鈸
 	if(true){
@@ -1828,80 +1852,104 @@ function buildClass3Music(){
 	}
 	//wall
 	if(true){
-	
 	let arcWallMaterial = new THREE.MeshPhongMaterial({color:0xA23400,side:THREE.DoubleSide,transparent: true,opacity: 1})
 
 	//牆壁灣的
 	
-	var arcWallC15 = new THREE.Mesh(new THREE.CylinderGeometry(33.5,33.5,5,32,32,true,Math.PI / 180 * 190,Math.PI / 180 * 300),arcWallMaterial.clone());
-	arcWallC15.R = 33.5;
+	var arcWallC15 = new THREE.Mesh(new THREE.CylinderGeometry(30,30,5,32,32,true,Math.PI / 180 * 190,Math.PI / 180 * 300),arcWallMaterial.clone());
+	arcWallC15.R = 30;
 	arcWallC15.height = 5
-	arcWallC15.position.set(12,62.5,115);
+	arcWallC15.position.set(12,62.5,112);
 	arcWallC15.castShadow = true;
 	arcWallC15.thetaStart = Math.PI / 180 * 190;
 	arcWallC15.thetaLength = Math.PI / 180 * 300;
 	
-	var arcWallC16 = new THREE.Mesh(new THREE.CylinderGeometry(37.5,37.5,5,32,32,true,Math.PI / 180 * 190,Math.PI / 180 * 300),arcWallMaterial.clone());
-	arcWallC16.position.set(12,62.5,115);
+	var arcWallC16 = new THREE.Mesh(new THREE.CylinderGeometry(34,34,5,32,32,true,Math.PI / 180 * 190,Math.PI / 180 * 300),arcWallMaterial.clone());
+	arcWallC16.position.set(12,62.5,112);
 	arcWallC16.castShadow = true;
 	
-	let mesh15 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 100 , Math.PI / 180 * 300), arcWallMaterial.clone() );
+	let mesh15 = new THREE.Mesh(new THREE.RingGeometry( 30, 34, 32,1, Math.PI / 180 * 100 , Math.PI / 180 * 300), arcWallMaterial.clone() );
 	mesh15.rotation.x = -Math.PI /2;
-	mesh15.position.set(12,65,115)
+	mesh15.position.set(12,65,112)
 	
-	let mesh16 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 100, Math.PI / 180 * 300), arcWallMaterial.clone() );
+	let mesh16 = new THREE.Mesh(new THREE.RingGeometry( 30, 34, 32,1, Math.PI / 180 * 100, Math.PI / 180 * 300), arcWallMaterial.clone() );
 	mesh16.rotation.x = -Math.PI /2;
-	mesh16.position.set(12,60,115)
+	mesh16.position.set(12,60,112)
 	let arcWallGroup1 = new THREE.Group();
 	arcWallGroup1.add(arcWallC15,arcWallC16,mesh15,mesh16)
 
-	var arcWallC17 = new THREE.Mesh(new THREE.CylinderGeometry(33.5,33.5,5,32,32,true,Math.PI / 180 * 180,Math.PI / 180 * 300),arcWallMaterial.clone());
+	var arcWallC17 = new THREE.Mesh(new THREE.CylinderGeometry(33.5,33.5,5,32,32,true,Math.PI / 180 * 140,Math.PI / 180 * 280),arcWallMaterial.clone());
 	arcWallC17.R = 33.5;
 	arcWallC17.height = 5
 	arcWallC17.position.set(-75,2.5,-16);
 	arcWallC17.castShadow = true;
-	arcWallC17.thetaStart = Math.PI / 180 * 180;
-	arcWallC17.thetaLength = Math.PI / 180 * 300;
+	arcWallC17.thetaStart = Math.PI / 180 * 140;
+	arcWallC17.thetaLength = Math.PI / 180 * 280;
 	
-	var arcWallC18 = new THREE.Mesh(new THREE.CylinderGeometry(37.5,37.5,5,32,32,true,Math.PI / 180 * 180,Math.PI / 180 * 300),arcWallMaterial.clone());
+	var arcWallC18 = new THREE.Mesh(new THREE.CylinderGeometry(37.5,37.5,5,32,32,true,Math.PI / 180 * 140,Math.PI / 180 * 280),arcWallMaterial.clone());
 	arcWallC18.position.set(-75,2.5,-16);
 	arcWallC18.castShadow = true;
 	
-	let mesh17 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 90 , Math.PI / 180 * 300), arcWallMaterial.clone() );
+	let mesh17 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 50 , Math.PI / 180 * 280),arcWallMaterial.clone() );
 	mesh17.rotation.x = -Math.PI /2;
 	mesh17.position.set(-75,5,-16)
 	
-	let mesh18 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 90, Math.PI / 180 * 300), arcWallMaterial.clone() );
+	let mesh18 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 50, Math.PI / 180 * 280),arcWallMaterial.clone() );
 	mesh18.rotation.x = -Math.PI /2;
 	mesh18.position.set(-75,0,-16)
 	let arcWallGroup2 = new THREE.Group();
 	arcWallGroup2.add(arcWallC17,arcWallC18,mesh17,mesh18)
 
-	var arcWallC19 = new THREE.Mesh(new THREE.CylinderGeometry(33.5,33.5,5,32,32,true,Math.PI / 180 * 300,Math.PI / 180 * 300),arcWallMaterial.clone());
-	arcWallC19.R = 33.5;
-	arcWallC19.height = 5
-	arcWallC19.position.set(20,2.5,-100);
-	arcWallC19.castShadow = true;
-	arcWallC19.thetaStart = Math.PI / 180 * 300;
-	arcWallC19.thetaLength = Math.PI / 180 * 300;
+	arcWalls.push(arcWallGroup1,arcWallGroup2);
+	class3.add(arcWallGroup1,arcWallGroup2)
 	
-	var arcWallC20 = new THREE.Mesh(new THREE.CylinderGeometry(37.5,37.5,5,32,32,true,Math.PI / 180 * 300,Math.PI / 180 * 300),arcWallMaterial.clone());
-	arcWallC20.position.set(20,2.5,-100);
+	let circle = new THREE.Mesh(new THREE.CircleGeometry(33.5,64),new THREE.MeshBasicMaterial({color:"black",side:THREE.DoubleSide}))
+	circle.rotation.x = -Math.PI/2
+	circle.position.set(-75,0.1,-16);
+	let plane = new THREE.Mesh(new THREE.PlaneGeometry(125,15),new THREE.MeshBasicMaterial({color:"black",side:THREE.DoubleSide}));
+	plane.rotation.x = -Math.PI / 2;
+	plane.rotation.z = -Math.PI / 180 * 100;
+	plane.position.set(-37.5,0.1,-80)
+	class3.add(plane,circle);
+	
+	//外牆
+	let texture = new THREE.TextureLoader().load("https://i.imgur.com/AELmvP9.jpg");
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping; 
+	let material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1.0
+    })
+	texture.repeat.x = 10;
+	texture.repeat.y = 4;
+	
+	var arcWallC19 = new THREE.Mesh(new THREE.CylinderGeometry(150,150,300,64,64,true,0,Math.PI / 180 * 360),material.clone());
+	arcWallC19.R = 150;
+	arcWallC19.dis = 50.5;
+	arcWallC19.height = 300;
+	arcWallC19.position.set(0,150,0);
+	arcWallC19.castShadow = true;
+	arcWallC19.thetaStart = 0;
+	arcWallC19.thetaLength = Math.PI / 180 * 360;
+	
+	var arcWallC20 = new THREE.Mesh(new THREE.CylinderGeometry(154,154,300,64,64,true,0,Math.PI / 180 * 360),material.clone());
+	arcWallC20.position.set(0,150,0);
 	arcWallC20.castShadow = true;
 	
-	let mesh19 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 210 , Math.PI / 180 * 300), arcWallMaterial.clone() );
+	let mesh19 = new THREE.Mesh(new THREE.RingGeometry(150,154, 64,10, 0, Math.PI / 180 * 360),material.clone());
 	mesh19.rotation.x = -Math.PI /2;
-	mesh19.position.set(20,5,-100)
+	mesh19.position.set(0,300,0)
 	
-	let mesh20 = new THREE.Mesh(new THREE.RingGeometry( 33.5, 37.5, 32,1, Math.PI / 180 * 210, Math.PI / 180 * 300), arcWallMaterial.clone() );
+	let mesh20 = new THREE.Mesh(new THREE.RingGeometry(150,154, 64,10, 0, Math.PI / 180 * 360),material.clone());
 	mesh20.rotation.x = -Math.PI /2;
-	mesh20.position.set(20,0,-100)
+	mesh20.position.set(0,0,0)
 	
-	let arcWallGroup3 = new THREE.Group();
+	arcWallGroup3 = new THREE.Group();
 	arcWallGroup3.add(arcWallC19,arcWallC20,mesh19,mesh20)
-	
-	arcWalls.push(arcWallGroup1,arcWallGroup2,arcWallGroup3);
-	class3.add(arcWallGroup1,arcWallGroup2,arcWallGroup3)
+	//arcWalls.push(arcWallGroup3);
+	//class3.add(arcWallGroup3);
 	
 	//牆壁 柱子
 
@@ -1926,7 +1974,7 @@ function buildClass3Music(){
 	var pillarC33 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100}));
 	pillarC33.R = 2;
 	pillarC33.height = 6
-	pillarC33.position.set(-75,3,-51.5);
+	pillarC33.position.set(-43.5,3,1);
 	pillarC33.ID = "wall"
 	pillarC33.castShadow = true;
 	cylinders.push(pillarC33)	
@@ -1935,7 +1983,7 @@ function buildClass3Music(){
 	var pillarC34 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100}));
 	pillarC34.R = 2;
 	pillarC34.height = 6
-	pillarC34.position.set(-45,3,-35.5);
+	pillarC34.position.set(-51,3,-42.5);
 	pillarC34.ID = "wall"
 	pillarC34.castShadow = true;
 	cylinders.push(pillarC34)	
@@ -1944,7 +1992,7 @@ function buildClass3Music(){
 	var pillarC35 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100}));
 	pillarC35.R = 2;
 	pillarC35.height = 6
-	pillarC35.position.set(-10.5,3,-118);
+	pillarC35.position.set(-32,3,-140);
 	pillarC35.ID = "wall"
 	pillarC35.castShadow = true;
 	cylinders.push(pillarC35)	
@@ -1953,29 +2001,32 @@ function buildClass3Music(){
 	var pillarC36 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,6,64),new THREE.MeshPhongMaterial({color:0x642100}));
 	pillarC36.R = 2;
 	pillarC36.height = 6
-	pillarC36.position.set(-10,3,-81);
+	pillarC36.position.set(-19,3,-137);
 	pillarC36.ID = "wall"
 	pillarC36.castShadow = true;
 	cylinders.push(pillarC36)	
 	class3.add(pillarC36);
 	
 	
-    let wall1 = new Wall(90,5, new THREE.Vector3(0, 0, -1));
+    let wall1 = new Wall(100,5, new THREE.Vector3(0, 0, -1));
     wall1.update();
-	wall1.mesh.position.set(-43,2.5,-85);
-	wall1.mesh.rotation.y = Math.PI /180 * 46;
+	wall1.mesh.position.set(-41.5,2.5,-91.5);
+	wall1.mesh.rotation.y = -Math.PI / 180 * 100
 	class3.add(wall1.mesh)
 
-    let wall2 = new Wall(58,5, new THREE.Vector3(0, 0, -1));
+    let wall2 = new Wall(140,5, new THREE.Vector3(0, 0, -1));
     wall2.update();
-	wall2.mesh.position.set(-29,2.5,-56);
-	wall2.mesh.rotation.y = Math.PI /180 * 52.2;
-	class3.add(wall2.mesh)
+	wall2.mesh.position.set(-31.5,2.5,-68);
+	wall2.mesh.rotation.y = -Math.PI / 180 * 100
 	
-	level3Walls.push(wall1,wall2)
+	let wall3 = new Wall(14,5, new THREE.Vector3(0, 0, -1));
+    wall3.update();
+	wall3.mesh.position.set(-25,2.5,-140);
+	wall3.mesh.rotation.y =  -Math.PI / 180 * 12
 	
+	level3Walls.push(wall1,wall2,wall3)
+	class3.add(wall1.mesh,wall2.mesh,wall3.mesh)
 	//walls.push(wall[0],wall[1])
-	
 	}
 	//譜架
 	if(true){
@@ -2010,20 +2061,28 @@ function buildClass3Music(){
 	//鼓
 	if(true){
 	let drum = new THREE.Group();
-	let drumMesh = new THREE.Mesh(new THREE.CylinderGeometry(15,15,15,32,32),new THREE.MeshNormalMaterial({side:THREE.DoubleSide}));
-	drumMesh.position.set(0,7.5,0);
+	let drumBody = new THREE.Mesh(new THREE.CylinderGeometry(15,15,15,32,32),new THREE.MeshPhongMaterial({color:0xe80505,side:THREE.DoubleSide}));
+	drumBody.position.set(0,7.5,0);
+
+	let drumHead1 = new THREE.Mesh(new THREE.CircleGeometry(15,32),new THREE.MeshPhongMaterial({color:0xf5f2dc,side:THREE.DoubleSide}));
+	drumHead1.position.set(0,15.1,0);
+	drumHead1.rotation.x = -Math.PI /2
 	
-	let torus = new THREE.Mesh(new THREE.TorusGeometry( 15, 0.5, 32, 100 ),new THREE.MeshNormalMaterial({side:THREE.DoubleSide}));
+	let drumHead2 = new THREE.Mesh(new THREE.CircleGeometry(15,32),new THREE.MeshPhongMaterial({color:0xf5f2dc,side:THREE.DoubleSide}));
+	drumHead2.position.set(0,-0.1,0);
+	drumHead2.rotation.x = -Math.PI /2
+	
+	let torus = new THREE.Mesh(new THREE.TorusGeometry( 15, 0.5, 32, 100 ),new THREE.MeshPhongMaterial({color:0xb0a9a9,side:THREE.DoubleSide}));
 	torus.rotation.x = Math.PI/2
 	torus.position.y = 15;
-	let torus2 = new THREE.Mesh(new THREE.TorusGeometry( 15, 0.5, 32, 100 ),new THREE.MeshNormalMaterial({side:THREE.DoubleSide}));
+	let torus2 = new THREE.Mesh(new THREE.TorusGeometry( 15, 0.5, 32, 100 ),new THREE.MeshPhongMaterial({color:0xb0a9a9,side:THREE.DoubleSide}));
 	torus2.rotation.x = Math.PI/2
 	torus2.position.y = 0;
 	
-	let cylinder1 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshNormalMaterial({side:THREE.DoubleSide}));
-	let cylinder2 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshNormalMaterial({side:THREE.DoubleSide}));
-	let cylinder3 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshNormalMaterial({side:THREE.DoubleSide}));
-	let cylinder4 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshNormalMaterial({side:THREE.DoubleSide}));
+	let cylinder1 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshPhongMaterial({color:0xfae26b,bside:THREE.DoubleSide}));
+	let cylinder2 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshPhongMaterial({color:0xfae26b,bside:THREE.DoubleSide}));
+	let cylinder3 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshPhongMaterial({color:0xfae26b,bside:THREE.DoubleSide}));
+	let cylinder4 = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,15,32,32),new THREE.MeshPhongMaterial({color:0xfae26b,bside:THREE.DoubleSide}));
 	let pos = 15 * Math.sqrt(2)/2;
 	
 	cylinder1.position.set(pos,7.5,pos)
@@ -2031,28 +2090,30 @@ function buildClass3Music(){
 	cylinder3.position.set(-pos,7.5,-pos)
 	cylinder4.position.set(pos,7.5,-pos)
 
-	drum.add(drumMesh,torus,torus2,cylinder1,cylinder2,cylinder3,cylinder4)
+	drum.add(drumBody,drumHead1,drumHead2,torus,torus2,cylinder1,cylinder2,cylinder3,cylinder4)
 	drum.position.set(10,35,-20);
 	class3.add(drum);
-	
+	class3.add(drumstand());
 	}
 }
 function buildMusicStand(stickLength,angle){
 	let group = new THREE.Group();
-	
+	/*
 	let material = new THREE.MeshNormalMaterial({
         side: THREE.DoubleSide
     })
+	*/
+	let material = new THREE.MeshPhongMaterial({color:0x474545,side: THREE.DoubleSide});
 	//上面架子
 	let topGroup = new THREE.Group();
 	
 	let top1 = new THREE.Mesh(new THREE.BoxGeometry(47,35,0.5),material);
 	let top2 = new THREE.Mesh(new THREE.BoxGeometry(47,0.5,5),material);
 	top1.position.set(0,17.5,-0.25)
-	top1.rotation.y = Math.PI;
+	//top1.rotation.y = Math.PI;
 	top2.position.set(0,0.25,2.5);
 	
-	topGroup.add(top1,top2);
+	topGroup.add(top1,top2,sheetTexture(11.5,1),sheetTexture(-11.5,0));
 	topGroup.position.z = 1.27;
 	topGroup.rotation.x = -Math.PI/ 180 * 30
 	topGroup.rotation.z = angle;
@@ -2064,12 +2125,17 @@ function buildMusicStand(stickLength,angle){
 	
 	let top1C = new Wall(47,35,new THREE.Vector3(0,0,1),1,0x888888,2.5,0)
 	top1C.mesh.position.set(0,17.5,-0.25);
+	top1C.mesh.visible = false;
+	
 	let top2C = new Wall(47,5,new THREE.Vector3(0,0,1),1,0x88888,2.5,0)
 	top2C.mesh.position.set(0,0.25,2.5);
 	top2C.mesh.rotation.x = -Math.PI/2
+	top2C.mesh.visible = false;
+	
 	let top3C = new Wall(47,5,new THREE.Vector3(0,0,1),1,0x88888,2.5,0)
 	top3C.mesh.position.set(0,3,0);
 	top3C.mesh.rotation.x = -Math.PI/ 180 * 60 
+	top3C.mesh.visible = false;
 	
 	level3Walls.push(top1C,top2C,top3C);
 	topGroup.add(top1C.mesh,top2C.mesh,top3C.mesh);
@@ -2124,6 +2190,9 @@ function buildMusicStand(stickLength,angle){
 	group.position.y = (30 + stickLength) / 2;
 	scene.add(group)
 	group.scale.set(0.5,0.5,0.5);
+	
+	sheetTexture()
+	
 	return group;
 }
 function buildChess(){
@@ -2133,8 +2202,6 @@ function buildChess(){
     let materialGround = new THREE.MeshBasicMaterial({
         color: 0x888888,
         side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 1
     });	
 	var heightFunc = function(x,z) {
 	  let K1 = 0,p1x = 0,p1z = 0,w1 = 1;
@@ -2153,7 +2220,7 @@ function buildChess(){
         let r=v0*150;
         let x= 0+r*Math.cos(theta);
         let z= 0+r*Math.sin(theta);
-        pos.set(x,heightFunc(x,z)+101,z);
+        pos.set(x,heightFunc(x,z)+201,z);
     },40,40);
     
         
@@ -2167,14 +2234,14 @@ function buildChess(){
     }
     
     let floor9 = new THREE.Mesh(geometry7,materialGround);
-    floor9.y=101;
+    floor9.y=201;
 	floor9.heightFunc = heightFunc;
 	floor9.inHeightFunc = inHeightFunc;
 	floor9.convertUV = convertUV7;
 	floor9.receiveShadow = true;	
 	floors.push(floor9)
   var loader = new THREE.TextureLoader(); 
-  var textureTest1 = loader.load('https://i.imgur.com/e5OlOkI.jpg');  
+  var textureTest1 = loader.load('https://i.imgur.com/Lae2wkX.jpg');  
   let material1 = new THREE.MeshBasicMaterial({
         map: textureTest1,
         side: THREE.DoubleSide,
@@ -2324,360 +2391,500 @@ function buildChess(){
   let redcar1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredcar);
   redcar1skin.position.set(0,2.6,0);
   redcar1skin.rotation.x=-Math.PI/2;
-  redcar1.R=R;
-  redcar1.height=5;
-  redcar1.ID="wall";
   redcar1G.add(redcar1,redcar1skin);
   class3chess.push(redcar1G);
   class3chess[0].position.set(-98,3.6,97);
+  class3chess[0].R=R;
+  class3chess[0].height=5;
+  class3chess[0].ID="wall"; 
   
   var redelephant1G = new THREE.Group();
   let redelephant1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redelephant1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredelephant);
   redelephant1skin.position.set(0,2.6,0);
   redelephant1skin.rotation.x=-Math.PI/2;
-  redelephant1.R=R;
-  redelephant1.height=5;
-  redelephant1.ID="wall";
   redelephant1G.add(redelephant1,redelephant1skin);
   class3chess.push(redelephant1G);
   class3chess[1].position.set(-48,3.6,97);
+  class3chess[1].R=R;
+  class3chess[1].height=5;
+  class3chess[1].ID="wall";    
   
   var redadvisor1G = new THREE.Group();
   let redadvisor1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redadvisor1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredadvisor);
   redadvisor1skin.position.set(0,2.6,0);
   redadvisor1skin.rotation.x=-Math.PI/2;
-  redadvisor1.R=R;
-  redadvisor1.height=5;
-  redadvisor1.ID="wall";
   redadvisor1G.add(redadvisor1,redadvisor1skin);
   class3chess.push(redadvisor1G);
   class3chess[2].position.set(-23,3.6,97);
+  class3chess[2].R=R;
+  class3chess[2].height=5;
+  class3chess[2].ID="wall";
   
   var redgeneralG = new THREE.Group();
   let redgeneral =new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redgeneralskin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredgeneral);
   redgeneralskin.position.set(0,2.6,0);
   redgeneralskin.rotation.x=-Math.PI/2;
-  redgeneral.R=R;
-  redgeneral.height=5;
-  redgeneral.ID="wall";
   redgeneralG.add(redgeneral,redgeneralskin);
   class3chess.push(redgeneralG);
   class3chess[3].position.set(2,3.6,97);
-  
-  
+  class3chess[3].R=R;
+  class3chess[3].height=5;
+  class3chess[3].ID="wall";   
   
   var redadvisor2G = new THREE.Group();
   let redadvisor2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redadvisor2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredadvisor);
   redadvisor2skin.position.set(0,2.6,0);
   redadvisor2skin.rotation.x=-Math.PI/2;
-  redadvisor2.R=R;
-  redadvisor2.height=5;
-  redadvisor2.ID="wall";
   redadvisor2G.add(redadvisor2,redadvisor2skin);
   class3chess.push(redadvisor2G);
   class3chess[4].position.set(27,3.6,97);
+  class3chess[4].R=R;
+  class3chess[4].height=5;
+  class3chess[4].ID="wall"; 
   
   var redcar2G = new THREE.Group();
   let redcar2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redcar2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredcar);
   redcar2skin.position.set(0,2.6,0);
   redcar2skin.rotation.x=-Math.PI/2;
-  redcar2.R=R;
-  redcar2.height=5;
-  redcar2.ID="wall";
   redcar2G.add(redcar2,redcar2skin);
   class3chess.push(redcar2G);
   class3chess[5].position.set(77,3.6,97);
+  class3chess[5].R=R;
+  class3chess[5].height=5;
+  class3chess[5].ID="wall";  
   
   var redcannon1G = new THREE.Group();
   let redcannon1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redcannon1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredcannon);
   redcannon1skin.position.set(0,2.6,0);
   redcannon1skin.rotation.x=-Math.PI/2;
-  redcannon1.R=R;
-  redcannon1.height=5;
-  redcannon1.ID="wall";
   redcannon1G.add(redcannon1,redcannon1skin);
   class3chess.push(redcannon1G);
   class3chess[6].position.set(-23,3.6,55);
+  class3chess[6].R=R;
+  class3chess[6].height=5;
+  class3chess[6].ID="wall";
   
   var redelephant2G = new THREE.Group();
   let redelephant2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redelephant2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredelephant);
   redelephant2skin.position.set(0,2.6,0);
   redelephant2skin.rotation.x=-Math.PI/2;
-  redelephant2.R=R;
-  redelephant2.height=5;
-  redelephant2.ID="wall";
   redelephant2G.add(redelephant2,redelephant2skin);
   class3chess.push(redelephant2G);
   class3chess[7].position.set(2,3.6,55);
+  class3chess[7].R=R;
+  class3chess[7].height=5;
+  class3chess[7].ID="wall";
   
   var redhorse1G = new THREE.Group();
   let redhorse1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redhorse1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredhorse);
   redhorse1skin.position.set(0,2.6,0);
   redhorse1skin.rotation.x=-Math.PI/2;
-  redhorse1.R=R;
-  redhorse1.height=5;
-  redhorse1.ID="wall";
   redhorse1G.add(redhorse1,redhorse1skin);
   class3chess.push(redhorse1G);
   class3chess[8].position.set(52,3.6,55);
+  class3chess[8].R=R;
+  class3chess[8].height=5;
+  class3chess[8].ID="wall"; 
   
   var redsoldier1G = new THREE.Group();
   let redsoldier1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redsoldier1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredsoldier);
   redsoldier1skin.position.set(0,2.6,0);
   redsoldier1skin.rotation.x=-Math.PI/2;
-  redsoldier1.R=R;
-  redsoldier1.height=5;
-  redsoldier1.ID="wall";
   redsoldier1G.add(redsoldier1,redsoldier1skin);
   class3chess.push(redsoldier1G);
   class3chess[9].position.set(-98,3.6,32);
+  class3chess[9].R=R;
+  class3chess[9].height=5;
+  class3chess[9].ID="wall";  
   
   var redsoldier2G = new THREE.Group();
   let redsoldier2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redsoldier2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredsoldier);
   redsoldier2skin.position.set(0,2.6,0);
   redsoldier2skin.rotation.x=-Math.PI/2;
-  redsoldier2.R=R;
-  redsoldier2.height=5;
-  redsoldier2.ID="wall";
   redsoldier2G.add(redsoldier2,redsoldier2skin);
   class3chess.push(redsoldier2G);
   class3chess[10].position.set(2,3.6,32);
+  class3chess[10].R=R;
+  class3chess[10].height=5;
+  class3chess[10].ID="wall";
   
   var redsoldier3G = new THREE.Group();
   let redsoldier3 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redsoldier3skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredsoldier);
   redsoldier3skin.position.set(0,2.6,0);
   redsoldier3skin.rotation.x=-Math.PI/2;
-  redsoldier3.R=R;
-  redsoldier3.height=5;
-  redsoldier3.ID="wall";
   redsoldier3G.add(redsoldier3,redsoldier3skin);
   class3chess.push(redsoldier3G);
   class3chess[11].position.set(52,3.6,32);
+  class3chess[11].R=R;
+  class3chess[11].height=5;
+  class3chess[11].ID="wall"; 
   
   var redsoldier4G = new THREE.Group();
   let redsoldier4 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redsoldier4skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredsoldier);
   redsoldier4skin.position.set(0,2.6,0);
   redsoldier4skin.rotation.x=-Math.PI/2;
-  redsoldier4.R=R;
-  redsoldier4.height=5;
-  redsoldier4.ID="wall";
   redsoldier4G.add(redsoldier4,redsoldier4skin);
   class3chess.push(redsoldier4G);
   class3chess[12].position.set(98,3.6,32);
+  class3chess[12].R=R;
+  class3chess[12].height=5;
+  class3chess[12].ID="wall";
   
   var redcannon2G = new THREE.Group();
   let redcannon2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redcannon2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredcannon);
   redcannon2skin.position.set(0,2.6,0);
   redcannon2skin.rotation.x=-Math.PI/2;
-  redcannon2.R=R;
-  redcannon2.height=5;
-  redcannon2.ID="wall";
   redcannon2G.add(redcannon2,redcannon2skin);
   class3chess.push(redcannon2G);
   class3chess[13].position.set(-73,3.6,12);
+  class3chess[13].R=R;
+  class3chess[13].height=5;
+  class3chess[13].ID="wall";
   
-  var redhorse2G = new THREE.Group();
+  redhorse2G = new THREE.Group();
   let redhorse2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let redhorse2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialredhorse);
   redhorse2skin.position.set(0,2.6,0);
   redhorse2skin.rotation.x=-Math.PI/2;
-  redhorse2.R=R;
-  redhorse2.height=5;
-  redhorse2.ID="wall";
   redhorse2G.add(redhorse2,redhorse2skin);
   class3chess.push(redhorse2G);
   class3chess[14].position.set(-23,3.6,12);
+  class3chess[14].R=R;
+  class3chess[14].height=5;
+  class3chess[14].ID="wall";
   
   var blackcar1G = new THREE.Group();
   let blackcar1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackcar1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackcar);
   blackcar1skin.position.set(0,2.6,0);
   blackcar1skin.rotation.x=-Math.PI/2;
-  blackcar1.R=R;
-  blackcar1.height=5;
-  blackcar1.ID="wall";
   blackcar1G.add(blackcar1,blackcar1skin);
   class3chess.push(blackcar1G);
   class3chess[15].position.set(-48,3.6,-13);
+  class3chess[15].R=R;
+  class3chess[15].height=5;
+  class3chess[15].ID="wall";
   
   var blacksoldier1G = new THREE.Group();
   let blacksoldier1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blacksoldier1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblacksoldier);
   blacksoldier1skin.position.set(0,2.6,0);
   blacksoldier1skin.rotation.x=-Math.PI/2;
-  blacksoldier1.R=R;
-  blacksoldier1.height=5;
-  blacksoldier1.ID="wall";
   blacksoldier1G.add(blacksoldier1,blacksoldier1skin);
   class3chess.push(blacksoldier1G);
   class3chess[16].position.set(52,3.6,-13);
+  class3chess[16].R=R;
+  class3chess[16].height=5;
+  class3chess[16].ID="wall";
   
   var blacksoldier2G = new THREE.Group();
   let blacksoldier2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blacksoldier2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblacksoldier);
   blacksoldier2skin.position.set(0,2.6,0);
   blacksoldier2skin.rotation.x=-Math.PI/2;
-  blacksoldier2.R=R;
-  blacksoldier2.height=5;
-  blacksoldier2.ID="wall";
   blacksoldier2G.add(blacksoldier2,blacksoldier2skin);
   class3chess.push(blacksoldier2G);
   class3chess[17].position.set(-98,3.6,-33);
+  class3chess[17].R=R;
+  class3chess[17].height=5;
+  class3chess[17].ID="wall";
   
   var blacksoldier3G = new THREE.Group();
   let blacksoldier3 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blacksoldier3skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblacksoldier);
   blacksoldier3skin.position.set(0,2.6,0);
   blacksoldier3skin.rotation.x=-Math.PI/2;
-  blacksoldier3.R=R;
-  blacksoldier3.height=5;
-  blacksoldier3.ID="wall";
   blacksoldier3G.add(blacksoldier3,blacksoldier3skin);
   class3chess.push(blacksoldier3G);
   class3chess[18].position.set(2,3.6,-33);
+  class3chess[18].R=R;
+  class3chess[18].height=5;
+  class3chess[18].ID="wall";
   
   var blacksoldier4G = new THREE.Group();
   let blacksoldier4 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blacksoldier4skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblacksoldier);
   blacksoldier4skin.position.set(0,2.6,0);
   blacksoldier4skin.rotation.x=-Math.PI/2;
-  blacksoldier4.R=R;
-  blacksoldier4.height=5;
-  blacksoldier4.ID="wall";
   blacksoldier4G.add(blacksoldier4,blacksoldier4skin);
   class3chess.push(blacksoldier4G);
   class3chess[19].position.set(98,3.6,-33);
-  
+  class3chess[19].R=R;
+  class3chess[19].height=5;
+  class3chess[19].ID="wall";
+
   var blackcannon1G = new THREE.Group();
   let blackcannon1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackcannon1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackcannon);
   blackcannon1skin.position.set(0,2.6,0);
   blackcannon1skin.rotation.x=-Math.PI/2;
-  blackcannon1.R=R;
-  blackcannon1.height=5;
-  blackcannon1.ID="wall";
   blackcannon1G.add(blackcannon1,blackcannon1skin);
   class3chess.push(blackcannon1G);
-  class3chess[20].position.set(-73,3.6,-56);
+  class3chess[20].position.set(-23,3.6,-33);
+  class3chess[20].R=R;
+  class3chess[20].height=5;
+  class3chess[20].ID="wall";
   
   var blackelephant1G = new THREE.Group();
   let blackelephant1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackelephant1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackelephant);
   blackelephant1skin.position.set(0,2.6,0);
   blackelephant1skin.rotation.x=-Math.PI/2;
-  blackelephant1.R=R;
-  blackelephant1.height=5;
-  blackelephant1.ID="wall";
   blackelephant1G.add(blackelephant1,blackelephant1skin);
   class3chess.push(blackelephant1G);
   class3chess[21].position.set(2,3.6,-56);
+  class3chess[21].R=R;
+  class3chess[21].height=5;
+  class3chess[21].ID="wall";
   
   var blackhorse1G = new THREE.Group();
   let blackhorse1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackhorse1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackhorse);
   blackhorse1skin.position.set(0,2.6,0);
   blackhorse1skin.rotation.x=-Math.PI/2;
-  blackhorse1.R=R;
-  blackhorse1.height=5;
-  blackhorse1.ID="wall";
   blackhorse1G.add(blackhorse1,blackhorse1skin);
   class3chess.push(blackhorse1G);
   class3chess[22].position.set(52,3.6,-56);
+  class3chess[22].R=R;
+  class3chess[22].height=5;
+  class3chess[22].ID="wall"; 
   
   var blackhorse2G = new THREE.Group();
   let blackhorse2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackhorse2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackhorse);
   blackhorse2skin.position.set(0,2.6,0);
   blackhorse2skin.rotation.x=-Math.PI/2;
-  blackhorse2.R=R;
-  blackhorse2.height=5;
-  blackhorse2.ID="wall";
   blackhorse2G.add(blackhorse2,blackhorse2skin);
   class3chess.push(blackhorse2G);
   class3chess[23].position.set(-23,3.6,-79);
+  class3chess[23].R=R;
+  class3chess[23].height=5;
+  class3chess[23].ID="wall";
   
   var blackadvisor1G = new THREE.Group();
   let blackadvisor1 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackadvisor1skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackadvisor);
   blackadvisor1skin.position.set(0,2.6,0);
   blackadvisor1skin.rotation.x=-Math.PI/2;
-  blackadvisor1.R=R;
-  blackadvisor1.height=5;
-  blackadvisor1.ID="wall";
   blackadvisor1G.add(blackadvisor1,blackadvisor1skin);
   class3chess.push(blackadvisor1G);
   class3chess[24].position.set(-23,3.6,-100);
+  class3chess[24].R=R;
+  class3chess[24].height=5;
+  class3chess[24].ID="wall"; 
   
   var blackgeneralG = new THREE.Group();
   let blackgeneral = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackgeneralskin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackgeneral);
   blackgeneralskin.position.set(0,2.6,0);
   blackgeneralskin.rotation.x=-Math.PI/2;
-  blackgeneral.R=R;
-  blackgeneral.height=5;
-  blackgeneral.ID="wall";
   blackgeneralG.add(blackgeneral,blackgeneralskin);
   class3chess.push(blackgeneralG);
   class3chess[25].position.set(2,3.6,-100);
+  class3chess[25].R=R;
+  class3chess[25].height=5;
+  class3chess[25].ID="wall";
   
   var blackadvisor2G = new THREE.Group();
   let blackadvisor2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackadvisor2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackadvisor);
   blackadvisor2skin.position.set(0,2.6,0);
   blackadvisor2skin.rotation.x=-Math.PI/2;
-  blackadvisor2.R=R;
-  blackadvisor2.height=5;
-  blackadvisor2.ID="wall";
   blackadvisor2G.add(blackadvisor2,blackadvisor2skin);
   class3chess.push(blackadvisor2G);
   class3chess[26].position.set(27,3.6,-100);
-  
+  class3chess[26].R=R;
+  class3chess[26].height=5;
+  class3chess[26].ID="wall"; 
+ 
   var blackelephant2G = new THREE.Group();
   let blackelephant2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackelephant2skin = new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackelephant);
   blackelephant2skin.position.set(0,2.6,0);
   blackelephant2skin.rotation.x=-Math.PI/2;
-  blackelephant2.R=R;
-  blackelephant2.height=5;
-  blackelephant2.ID="wall";
   blackelephant2G.add(blackelephant2,blackelephant2skin);
   class3chess.push(blackelephant2G);
   class3chess[27].position.set(52,3.6,-100);
+  class3chess[27].R=R;
+  class3chess[27].height=5;
+  class3chess[27].ID="wall"; 
   
   var blackcar2G = new THREE.Group();
   let blackcar2 = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 5, 32 ),material2);
   let blackcar2skin =new THREE.Mesh(new THREE.CircleGeometry(R,32),materialblackcar);
   blackcar2skin.position.set(0,2.6,0);
   blackcar2skin.rotation.x=-Math.PI/2;
-  blackcar2.R=R;
-  blackcar2.height=5;
-  blackcar2.ID="wall";
   blackcar2G.add(blackcar2,blackcar2skin);
   class3chess.push(blackcar2G);
   class3chess[28].position.set(77,3.6,-100);
+  class3chess[28].R=R;
+  class3chess[28].height=5;
+  class3chess[28].ID="wall";
+  
 	}
 	let group = new THREE.Group();
     for(var i = 0; i <=28; i++){
-	  cylinders.push(class3chess[i].children[0])
+	  cylinders.push(class3chess[i])
 	  group.add(class3chess[i]);
 	}
 	group.add(checkerboard)
-	group.position.y = 100;
+	group.position.y = 200;
 	class3.add(group,floor9);
+}
+function sheetTexture(x,type){
+  var loader = new THREE.TextureLoader(); 
+  var sheet1Texture;
+  if(type === 0){
+	sheet1Texture = loader.load('https://i.imgur.com/v9ETmYo.png');  
+  }
+  if(type === 1){
+	sheet1Texture = loader.load('https://i.imgur.com/AAZjcv8.png');  
+  }
+  let sheet1Material = new THREE.MeshBasicMaterial({
+        map: sheet1Texture,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1.0
+  });
+  
+  var checkerboard = new THREE.Mesh(new THREE.PlaneGeometry(21,29.7),sheet1Material);
+  checkerboard.position.set(x,14.85,0.15)
+  return checkerboard;
+  //class3.add(checkerboard)
+  
+}
+function drumstand(){
+	let group = new THREE.Group();
+		let material = new THREE.MeshPhongMaterial({
+		color:0x9c9b9a,
+        side: THREE.DoubleSide
+    })
+	let stickGroup = new THREE.Group();
+	let stick1 = new THREE.Mesh(new THREE.CylinderGeometry(1.27,1.27,6,32,32),material)
+	let stick2 = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,15,32,32),material)
+	stick1.position.y = -3;
+	stick2.position.y = -13.5;
+	stickGroup.add(stick1,stick2);
+	stickGroup.position.z = -1.5
+	//腳架
+	let stick3Group = new THREE.Group();
+	let stick3 = new THREE.Mesh(new THREE.CylinderGeometry(1.27,1.27,16,32,32),material)
+	stick3.position.y = -8;
+	stick3.position.z = 1;
+	stick3Group.add(stick3);
+	stick3Group.rotation.x = -Math.PI/180 * 53
+		
+	let stick4Group = new THREE.Group();
+	let stick4 = new THREE.Mesh(new THREE.CylinderGeometry(1.27,1.27,20,32,32),material)
+	stick4.position.y = -10;
+	stick4.position.z = -1;
+	stick4.position.x = -1;
+	stick4Group.add(stick4);
+	stick4Group.rotation.z = -Math.PI/180 * 45
+	stick4Group.rotation.x = Math.PI/180 * 45
+		
+	let stick5Group = new THREE.Group();
+	let stick5 = new THREE.Mesh(new THREE.CylinderGeometry(1.27,1.27,20,32,32),material)
+	stick5.position.y = -10;
+	stick5.position.z = -1;
+	stick5.position.x = 1;
+	stick5Group.add(stick5);
+	stick5Group.rotation.z = Math.PI/180 * 45
+	stick5Group.rotation.x = Math.PI/180 * 45
+		
+	let sphere1 = new THREE.Mesh(new THREE.SphereGeometry(3,32,32),material);
+	sphere1.position.y = 0
+	sphere1.position.z = -0.25
+	//stickGroup.add(sphere1)
+
+
+	let stickGroup2 = new THREE.Group();
+	stickGroup2.add(stick3Group,stick4Group,stick5Group,sphere1)
+	stickGroup2.position.y = -21;
+	stickGroup2.position.z = -1.5
+		
+	//上面的夾子
+	let bar1 = new THREE.Mesh(new THREE.BoxGeometry(17.5,0.25,2),material)
+	let barCylinder1 = new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,2),new THREE.MeshPhongMaterial({color:0x21201f}))
+	barCylinder1.position.set(16.75,1.1,0)
+	bar1.position.set(8.75,0.1,0)
+	let bar1Group = new THREE.Group();
+	bar1Group.add(bar1,barCylinder1);
+	bar1Group.rotation.y = Math.PI / 180 * 30
+	bar1Group.rotation.z = Math.PI / 180 * 10
+	bar1Group.position.set(0,-0.5,-1.5);
+	
+	let bar2 = new THREE.Mesh(new THREE.BoxGeometry(17.5,0.25,2),material)
+	let barCylinder2 = new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,2),new THREE.MeshPhongMaterial({color:0x21201f}))
+	barCylinder2.position.set(16.75,1.1,0)
+	bar2.position.set(8.75,0.1,0)
+	let bar2Group = new THREE.Group();
+	bar2Group.add(bar2,barCylinder2);
+	bar2Group.rotation.y = Math.PI / 180 * 150
+	bar2Group.rotation.z = Math.PI / 180 * 10
+	bar2Group.position.set(0,-0.5,-1.5);
+	
+	let bar3 = new THREE.Mesh(new THREE.BoxGeometry(17.5,0.25,2),material)
+	let barCylinder3 = new THREE.Mesh(new THREE.CylinderGeometry(0.75,0.75,2),new THREE.MeshPhongMaterial({color:0x21201f}))
+	barCylinder3.position.set(16.75,1.1,0)
+	bar3.position.set(8.75,0.1,0)
+	let bar3Group = new THREE.Group();
+	bar3Group.add(bar3,barCylinder3);
+	bar3Group.rotation.y = Math.PI / 180 * 270
+	bar3Group.rotation.z = Math.PI / 180 * 10
+	bar3Group.position.set(0,-0.5,-1.5);
+	group.add(stickGroup,stickGroup2,bar1Group,bar2Group,bar3Group);
+	group.position.y = 52
+	group.position.set(10,21 + 10,-18.5);
+	
+	return group;
+
+
+}
+function buildTable(){
+	let group = new THREE.Group();
+	let material = new THREE.MeshPhongMaterial({color:0x474545,side: THREE.DoubleSide});
+	let cylinder1 = new THREE.Mesh(new THREE.CylinderGeometry(32,32,3,64,64),material)
+	cylinder1.position.set(0,58.4,0)
+	let cylinder2 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,56.5,64,64),material)
+	cylinder2.position.set(0,28.25,0)
+	let cylinder3 = new THREE.Mesh(new THREE.CylinderGeometry(20,20,2,64,64),material)
+	cylinder3.position.set(0,1,0)
+	group.add(cylinder1,cylinder2,cylinder3);
+	return group;
+} 
+function buildGlassTable2(){
+	let group = new THREE.Group();
+	let material = new THREE.MeshBasicMaterial({color:0x7eaecf,side: THREE.DoubleSide,        transparent: true,
+        opacity: 0.2})
+	let material2 = new THREE.MeshBasicMaterial({color:0xced8de,side: THREE.DoubleSide,})
+	let top = new THREE.Mesh(new THREE.BoxGeometry(50,3,100),material);
+	top.position.set(0,57.4,0)
+	let bar1 = new THREE.Mesh(new THREE.CylinderGeometry(3,3,57.5,32,32),material2);
+	bar1.rotation.y = Math.PI/4
+	bar1.position.set(20,28,45)
+	group.add(top,bar1.clone())
+	bar1.position.set(-20,28,45)
+	group.add(bar1.clone())
+	bar1.position.set(-20,28,-45)
+	group.add(bar1.clone())
+	bar1.position.set(20,28,-45)
+	group.add(bar1.clone())
+	return group
 }
 export {buildTerrain,table1,table2,table3,planes,walls,cylinders,holes,floors,arcWalls}
 export {class1Rotate,class2Rotate,class3Rotate,setClassVisible}
-export {obstacle1,obstacle2,obstacle3,car,car2}
+export {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G}

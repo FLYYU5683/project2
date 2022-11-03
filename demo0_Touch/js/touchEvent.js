@@ -25,12 +25,61 @@ var startMove = false;
 var fingerNum = 0;
 var touchHUD = false;
 var cameraMove = false;
-
+var cameraStartMove = false;
+var aimMode = 0;
 var isCharge = false;
 
 var fovVal = 40,fovX = 0;
 
-function predictLine(){
+function predictLineRough(){
+	if(!cancelCharge){
+		let rollingWS = new THREE.Vector3();
+		let g = new THREE.Vector3(0,-10,0);
+		let n = new THREE.Vector3(0,1,0);
+		rollingWS.copy(balls[1].vel.clone().normalize().multiplyScalar(-g.dot(n)).multiplyScalar(16 * 0.082 * 0.064))
+		var positions = [];
+		var colors = []
+		var EPS = 0.1
+		balls[1].pos.copy(balls[0].pos);
+		//balls[1].runInHole = false;
+		let thisPos = new THREE.Vector3();
+		thisPos.copy(balls[1].pos);
+		positions.push(thisPos.x,thisPos.y,thisPos.z);
+		do{
+			let thisPos = new THREE.Vector3();
+			balls[1].vel.sub(rollingWS)
+			balls[1].pos.add(balls[1].vel.clone().multiplyScalar(0.064))
+			thisPos.copy(balls[1].pos);
+			positions.push(thisPos.x,thisPos.y,thisPos.z);
+			colors.push(255,0,255)
+		}while(balls[1].vel.dot(rollingWS) > 0 && balls[1].pos.y >= -10);
+
+		for(var i = lineList.length; i > 0;i--){
+			scene.remove(lineList[i-1])
+		}
+		var geometry = new LineGeometry();
+		geometry.setPositions(positions);
+		geometry.setColors(colors);
+		matLine4 = new LineMaterial({
+			color: 0xffffff,
+			linewidth: 3, 
+			vertexColors: THREE.VertexColors
+		});
+		var predictLine = new Line2(geometry, matLine4);
+		predictLine.computeLineDistances();
+				
+		scene.add(predictLine);
+				
+		matLine4.resolution.set(window.innerWidth, window.innerHeight); 
+		
+		lineList.push(predictLine)
+				
+		balls[1].pos.copy(balls[0].pos);
+		balls[1].vel.copy(new THREE.Vector3(0,0,0))	
+		
+	}
+}
+function predictLineExact(){
 	if(!cancelCharge){
 		
 		var positions = [];
@@ -38,9 +87,12 @@ function predictLine(){
 		var EPS = 0.1
 		balls[1].pos.copy(balls[0].pos);
 		balls[1].runInHole = false;
+		let thisPos = new THREE.Vector3();
+		thisPos.copy(balls[1].pos);
+			
+		positions.push(thisPos.x,thisPos.y,thisPos.z);
 		do{
-			let dt = 0.032;
-			let thisPos = new THREE.Vector3();
+			let dt = 0.016;
 			balls[1].update(dt)
 			
 			thisPos.copy(balls[1].pos);
@@ -91,7 +143,8 @@ function touchStart(event){
 function touchMove(event){
 
 	event.preventDefault();
-	if(firstTouch && touchHUD === 0 && !ballMove){
+	if(firstTouch && touchHUD === 0 && !ballMove && !steve.moveFin){
+		//console.log(ballMove)
 		if(!startMove){
 			fingerNum = event.touches.length;
 			startMove = true;
@@ -99,7 +152,6 @@ function touchMove(event){
 		if(startMove && fingerNum != event.touches.length){
 			cancelMove = true;
 		}
-		
 		if(!cancelMove){
 			if(fingerNum === 1){
 				isCharge = true;
@@ -183,7 +235,7 @@ function touchEnd(event){
 				
 				steve.direct.position.copy(balls[0].pos.clone());
 				playDatas[level].power.push(steve.power)
-				playDatas[level].rotation.push(steve.direct.clone().rotation.y)
+				playDatas[level].rotation.push(steve.direct.rotation.y)
 				playDatas[level].ballPos.push(balls[0].pos.clone())
 				playDatas[level].putt.push(steve.puttPos.clone())
 				playDatas[level].theta.push(theta)
@@ -212,17 +264,22 @@ function touchEnd(event){
 	touchHUD = -1;
 }
 function touchEvent(){
-	//console.log(cameraOnPlayer.localToWorld(new THREE.Vector3(0,0,0)))
+	//console.log(balls[0].pos)
+	if(steve.direct.rotation.y <= -Math.PI * 2)
+		steve.direct.rotation.y += Math.PI * 2
+	if(steve.direct.rotation.y >= Math.PI * 2)
+		steve.direct.rotation.y -= Math.PI * 2
 	steve.camera.children[0].updateProjectionMatrix();
-	//console.log(replayCount)
 	if(inReplay && !ballMove && !swing && repalyEnd){
 	  repalyEnd = false;
 	  replay()
-	} 	
+	}
+	
 	if(level !== 3)
 		checkBallZ(balls[0].pos.z)
 	else
 		checkBallX(balls[0].pos.x)
+	
     textureAnimate()
     sliderMove()
    	if(touchHUD === 2){
@@ -244,7 +301,11 @@ function touchEvent(){
 		vel.copy(new THREE.Vector3(temp.x, 0, temp.z)).normalize();
 		vel.multiplyScalar(steve.power*8);
 		balls[1].vel.copy(vel);
-		predictLine()
+		if(aimMode === 1)
+			predictLineExact()
+		else
+			predictLineRough()
+		
    }
   if(steve.putt.worldToLocal(balls[0].pos.clone()).length() <= (0.5 + 0.5) && !beforeHit){
 	  for(var i = lineList.length; i > 0;i--){
@@ -259,8 +320,8 @@ function touchEvent(){
       vel.copy(new THREE.Vector3(temp.x, 0, temp.z)).normalize();
       vel.multiplyScalar(steve.power*8);
       balls[0].vel.copy(vel)
-	  setTimeout(function(){if(balls[0].vel.length() >= 0.7 / 3) ballMove = true;},1000);
-      //ballMove = true;
+	  setTimeout(function(){if(balls[0].vel.length() >= 0.7 / 3) cameraStartMove = true;},1000);
+      ballMove = true;
 	  power = 0;
 	  steve.power = 0;
 	  beforeHit = true;
@@ -294,7 +355,7 @@ function touchEvent(){
   if(steve.camera.rotation.y < -Math.PI * 2)
 	steve.camera.rotation.y += Math.PI * 2;
 
-  if(ballMove){
+  if(cameraStartMove){
 	  let temp = levelTrack[level-1][index].angle - steve.camera.rotation.y;
 	  if(fovVal <= 60)
 		fovVal += 1
@@ -314,6 +375,7 @@ function touchEvent(){
 	  }
   }
   if(steve.moveFin && !ballMove){
+	cameraStartMove = false;
 	//let temp = (levelTrack[level-1][index].angle < 0 ? levelTrack[level-1][index].angle + Math.PI / 2 : levelTrack[level-1][index].angle - Math.PI/2) - steve.camera.rotation.y;
 	let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
 	if(fovVal >= 40)
@@ -334,7 +396,14 @@ function touchEvent(){
 			steve.moveFin = false
 	  }	  
   }
-  
+  /*
+  if(balls[0].runInHole === true){
+	cameraMove = false;
+	cameraStartMove = false;
+	steve.moveFin = false
+	ballMove = false;
+  }
+  */
 }
 function countSwingReset(){
 	countSwing = 1;
@@ -428,18 +497,22 @@ function setPos(){
 	
 	{
 		let pos = []
-		let temp = {pos : new THREE.Vector3(0,30, 20),angle : -Math.PI/2,angleBack:0}
-		let temp1 = {pos : new THREE.Vector3(0,30,-50),angle : -Math.PI/2,angleBack:0}
-		let temp2 = {pos : new THREE.Vector3(0,30,-60),angle : -Math.PI,angleBack:-Math.PI/2}
-		pos.push(temp,temp1,temp2);
+		let temp = {pos : new THREE.Vector3(25,30, 10),angle : -Math.PI/2,angleBack:0}
+		let temp1 = {pos : new THREE.Vector3(25,30, -40),angle : -Math.PI,angleBack:-Math.PI / 2}
+		let temp2 = {pos : new THREE.Vector3(50,30, 85),angle : -Math.PI/2*3,angleBack: -Math.PI/2*4}
+		let temp3 = {pos : new THREE.Vector3(50,30, 10),angle : -Math.PI/2*3,angleBack: -Math.PI}
+		let temp4 = {pos : new THREE.Vector3(50,30, -40),angle : -Math.PI,angleBack: -Math.PI}
+		let temp5 = {pos : new THREE.Vector3(50,30, -275),angle : 0,angleBack:0}
+		pos.push(temp,temp1,temp2,temp3,temp4,temp5);
 		levelTrack.push(pos)
 	}
 	{
 		let pos = [];
-		let temp = {pos : new THREE.Vector3(0,30, -120),angle : -Math.PI/2,angleBack:0}
-		let temp1 = {pos : new THREE.Vector3(0,30,-270),angle : -Math.PI/2,angleBack:0}
-		let temp2 = {pos : new THREE.Vector3(0,30,-275),angle : -Math.PI,angleBack:-Math.PI/2}
-		pos.push(temp,temp1,temp2);
+		let temp = {pos : new THREE.Vector3(0,30, -275),angle : -Math.PI/2,angleBack:0}
+		let temp1 = {pos : new THREE.Vector3(150,30,-275),angle : -Math.PI/2*4,angleBack:-Math.PI/2 * 4}
+		let temp2 = {pos : new THREE.Vector3(25,30,-275),angle : -Math.PI,angleBack:-Math.PI/2}
+		let temp3 = {pos : new THREE.Vector3(-25,30,-275),angle : -Math.PI/2,angleBack:-Math.PI/2}
+		pos.push(temp,temp1,temp2,temp3);
 		levelTrack.push(pos)
 	}
 	{
@@ -470,12 +543,32 @@ function setPos(){
 	
 }
 function checkBallZ(ballZ){
-	for(var i = 0; i < levelTrack[level - 1].length; i++){
+	var temp;
+	if(level === 1 && balls[0].pos.x > 25){
+		temp = 2
+	}
+	else if(level === 1 && balls[0].pos.x < 25){
+		temp = 0
+	}
+	if(level === 2 && balls[0].pos.z < -275){
+		temp = 1;
+		for(var i = temp; i < levelTrack[level - 1].length; i++){
+			if(balls[0].pos.x >= levelTrack[level - 1][i].pos.x){
+				index = i;
+				return;
+			}
+		}
+	}
+	else if(level === 2 && balls[0].pos.x < -275){
+		temp = 0;
+	}
+	for(var i = temp; i < levelTrack[level - 1].length; i++){
 		if(ballZ >= levelTrack[level - 1][i].pos.z){
 			index = i;
 			return;
 		}
-	}
+	}	
+		
 }
 function checkBallX(ballX){
 	for(var i = 0; i < levelTrack[level - 1].length; i++){
@@ -504,10 +597,23 @@ var sign;
 function moveMode(vec,inSign){
 	sign = inSign;
 	vector.copy(vec);
-	console.log(vector)
+	//console.log(vector)
 	//signAndVector.push(vec,sign)
+}
+function aimModeChange(){
+	if(aimMode === 0)
+		aimMode = 1;
+	else
+		aimMode = 0;
+	
+}
+function setOther(){
+	cameraMove = false;
+	cameraStartMove = false;
+	steve.moveFin = false
+	ballMove = false;	
 }
 export {theta,beforeHit,useOrb,countSwingReset,countSwing}
 export {touchStart,touchMove,touchEnd,touchEvent}
 export {resetPlayData,setPos,replayAll,resetCameraAngle,inHoleBreak}
-export {fovX,moveMode}
+export {fovX,moveMode,aimModeChange,setOther}
