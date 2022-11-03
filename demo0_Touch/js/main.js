@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {buildTerrain,table1,table2,table3,planes,walls} from './buildTerrain.js';
 import {class1Rotate,class2Rotate,class3Rotate} from './buildTerrain.js';
-import {obstacle1,obstacle2,obstacle3,car,car2} from './buildTerrain.js';
+import {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G} from './buildTerrain.js';
 import {Particle} from './Particle.js'
 import {buildCamAndSen,render,scene,sceneMap,start} from './render.js'
 import {Steve} from './Steve.js'
@@ -13,6 +13,8 @@ var clock = new THREE.Clock();
 var backgroundMusic,hitSound;
 var wallchange=true;
 var wallchange2=true;
+var chesschange=false;
+var chesschange2=false;
 var car1MoveSign = 1,car2MoveSign = -1;
 var inholeSound;
 var sceneDatas = []
@@ -31,7 +33,7 @@ function init() {
   
   var gridXZ = new THREE.GridHelper(600, 60, 'red', 'white');
   //gridXZ.position.set(75,1,-80);
-  gridXZ.position.y = 1
+  gridXZ.position.y = 10
   //scene.add(gridXZ);
   
   //steve
@@ -96,6 +98,7 @@ function animate() {
   wallMove()
   carMove()
   render();
+  chessMove();
   requestAnimationFrame(animate);
 	
 }
@@ -184,6 +187,63 @@ function carMove(){
   if(car2.position.z > -250 || car2.position.z <-350)
 	  car2MoveSign *= -1;
   car2.position.z += car2MoveSign * 0.6;   
+}
+function chessMove(){
+	let times = 2;
+	if(redhorse2G.position.y < 31.6 && chesschange == false)
+	{
+		redhorse2G.position.y+= 0.5 * times;
+	}
+	else if(redhorse2G.position.y >= 31.6 && chesschange==false)
+	{
+	 if(redhorse2G.position.x > 27 && chesschange2 == false)
+	 {
+	  chesschange = true;
+	  redhorse2G.position.x=27;
+      redhorse2G.position.z=-13;	  
+	 }
+	 else if(redhorse2G.position.x>-23&&chesschange2==true)
+	 {			 
+	  redhorse2G.position.x-=0.4 * times;
+      redhorse2G.position.z+=0.2 * times;
+	  redhorse2G.position.y= 31.6;
+	 }
+	 else if(redhorse2G.position.x<=-23&&chesschange2==true)
+	 {
+	  redhorse2G.position.x=-23;
+      redhorse2G.position.z=12;
+	  chesschange = true;
+	  chesschange2 = false;
+	 }
+	 else if(redhorse2G.position.x<=27&&chesschange==false)
+	 {
+	 redhorse2G.position.x+=0.4 * times;
+	 redhorse2G.position.z-=0.2 * times;
+     redhorse2G.position.y= 31.6;	 
+	 }
+    }
+    else if(chesschange==true)
+	{
+     if(redhorse2G.position.y <= 3.7 && redhorse2G.position.x == 27)
+	 {
+		redhorse2G.position.y=3.6;
+		setTimeout(function(){chesschange=false;chesschange2=true;},1000);
+		/*
+		chesschange=false;
+		chesschange2=true;
+		*/
+	 }
+	 else if(redhorse2G.position.y<= 3.7 && redhorse2G.position.x == -23)
+	 {
+		redhorse2G.position.y = 3.6;
+		setTimeout(function(){chesschange=false},1000);
+		//chesschange=false;
+	 }
+     else if (redhorse2G.position.y > 3.7){
+	  redhorse2G.position.y -= 1 * times;
+	 }    
+	}		
+	
 }
 function writeObstaclePos(){
 	var temp = []

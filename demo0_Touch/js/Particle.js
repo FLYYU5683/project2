@@ -64,7 +64,7 @@ class Particle {
 
 	  this.checkHole(holes)
 		if(this.inHole != true){
-
+			
 			this.collidingPlane(planes);
 			
 			this.checkFloor(floors)
@@ -230,49 +230,59 @@ class Particle {
 
   }
   checkCylinder(cylinders){
-        var count = 0;
-        var COR = 0.64;
-        for(var i = 0; i < cylinders.length; i++){
-            let cylinder = cylinders[i];
-            var cylinderPos = new THREE.Vector3()
-            cylinderPos.copy(new THREE.Vector3(0,cylinder.worldToLocal(this.pos.clone()).y,0))
-            var ballPos = new THREE.Vector3()
-            ballPos.copy(cylinder.worldToLocal(this.pos.clone()))
-
-            if(ballPos.sub(cylinderPos).length() <= this.r + cylinder.R && Math.abs(cylinderPos.length()) <= cylinder.height / 2){
-				if(this.ID === "player"){
-					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
-				}
-                count++;
-                ballPos.normalize()
-                var temp = new THREE.Vector3();
-                temp.copy(cylinderPos.clone().add(ballPos.clone().multiplyScalar(this.r + cylinder.R)))
+    var count = 0;
+    var COR = 0.64;
+    for(var i = 0; i < cylinders.length; i++){
+        let cylinder = cylinders[i];
+        var cylinderPos = new THREE.Vector3()
+        cylinderPos.copy(new THREE.Vector3(cylinder.position.x,this.pos.y,cylinder.position.z))
+		let temp;
+		if(i < 6){
+			cylinderPos.add(cylinders.class1Pos)
+			temp = cylinders.y1;
+		}
+		if(i >= 6 && i < 20){
+			cylinderPos.add(cylinders.class2Pos)
+			temp = cylinders.y2;
+		}
+		if(i >= 20 && i < 26){
+			cylinderPos.add(cylinders.class3Pos)
+			temp = cylinders.y31
+		}
+		if(i >= 26 && i < 55){
+			cylinderPos.add(cylinders.class3Pos)
+			temp = cylinders.y32			
+		}
+		temp += cylinder.position.y;
+			
+		
+        var ballPos = new THREE.Vector3()
+        ballPos.copy(this.pos)
+        if(ballPos.sub(cylinderPos).length() <= this.r + cylinder.R && this.pos.y <= temp +  cylinder.height/2 + this.r && this.pos.y >= temp - cylinder.height / 2 - this.r){
+			if(this.ID === "player"){
+				this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
+			}
+            count++;
+            ballPos.normalize()
+            this.pos.copy(cylinderPos.add(ballPos.clone().multiplyScalar(this.r + cylinder.R)))
 				
-                this.pos.copy(cylinder.localToWorld(temp))
 				
-                this.n.copy(cylinder.localToWorld(ballPos).sub(cylinder.position).normalize());
-                //this.n.copy(ballPos);
+            this.n.copy(ballPos);
 				
-                if (this.nowIsFlyC && this.nowIsFlyP && this.nowIsFlyCy || cylinder.ID === "wall") {
-					/*
-                    var tempV = new THREE.Vector3(0, 0, 0)
-					tempV.copy(this.vel.clone().projectOnVector(this.n).negate())
-					this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
-					this.vel.add(tempV.multiplyScalar(COR))
-					*/
-					this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
-				}
-				else {
-					this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
+            if(this.nowIsFlyC && this.nowIsFlyP && this.nowIsFlyCy || cylinder.ID === "wall") {
+				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
+			}
+			else {
+				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
 					//this.vel.sub(this.n.clone().multiplyScalar(this.vel.dot(this.n)));
-				}
-                 this.nowIsFlyCy = false;
+			}
+            this.nowIsFlyCy = false;
             }
         }
-         if (count === 0) {
-      this.nowIsFlyCy = true;
-    }
-    }
+        if (count === 0) {
+			this.nowIsFlyCy = true;
+		}
+    }	
   checkWall(allWalls) {
     for (var k = 0; k < allWalls.length; k++) {
 		let walls = allWalls[k]
@@ -407,11 +417,14 @@ class Particle {
 		  arcWallPos.copy(new THREE.Vector3(0,arcWall.worldToLocal(this.pos.clone()).y,0))
 		  ballPos.copy(arcWall.worldToLocal(this.pos.clone()));
 		  let norV = arcWallPos.clone().sub(ballPos);
-		  
+			
+			if(arcWall.dis !== undefined){
+				times = arcWall.dis;
+			}
 			if(this.ID === "player")
 				arcWalls[i].children.forEach(function (b){b.material.opacity = 1})
-			if(norV.length() >= arcWall.R - this.r * times && Math.abs(arcWallPos.length()) <= arcWall.height / 2 && norV.length() <= arcWall.R && inAngle && this.ID === "player"){
-				arcWalls[i].children.forEach(function (b){b.material.opacity = 0.5})
+			if(norV.length() >= arcWall.R - this.r * times && Math.abs(arcWallPos.length()) <= arcWall.height / 2 && norV.length() <= arcWall.R && inAngle && this.ID === "player" ){
+				arcWalls[i].children.forEach(function (b){b.material.opacity = 0.3})
 			}
             if(norV.length() >= arcWall.R - this.r && norV.length() <= arcWall.R && Math.abs(arcWallPos.length()) <= arcWall.height / 2 && inAngle){
 				if(this.ID === "player"){
@@ -434,9 +447,9 @@ class Particle {
   }
   start(){
 	this.vel.set(0,0,0);
-	this.pos.set(0,2,40);
+	this.pos.set(0,2,100);
 	//this.pos.set(0,1,40);
-	//this.pos.set(230,81,-300); level 3
+	//this.pos.set(400,140,-70);// level 3
   }
   play(audioBuffer) {
     const source = context.createBufferSource();
