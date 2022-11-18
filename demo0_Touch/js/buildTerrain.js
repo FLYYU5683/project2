@@ -33,6 +33,7 @@ var quad_uvs =
 
 let arcWallGroup3;
 function buildTerrain(){
+	
 	buildPlane();
 	buildWalls();
 	buildholes();
@@ -64,7 +65,7 @@ function buildTerrain(){
 	cylinders.class2Pos = new THREE.Vector3(0,0,0)
 	cylinders.y2 = 0;
 	
-	//class3.position.set(0,-50,0);
+	//class3.rotation.x = Math.PI/180 * 10;
 	class3.rotation.x = Math.PI/180 * 10;
 	class3Rotate.add(class3.clone())
 	class3.rotation.x =0;
@@ -458,41 +459,6 @@ function buildWalls(){
 	class2.add(level2Walls[i].mesh);
 
 }
-function buildClass3Wall(){
-	let class3wall = [];
-	
-	for(var i=0;i<3;i++)
-   {
-      let x = new Wall(100,5, new THREE.Vector3(0, 0, -1));
-      x.update();
-      class3wall.push(x);
-   }
-   class3wall[0].mesh.rotation.y = -Math.PI / 2;
-   
-   class3wall[0].mesh.position.set(225, 82.5, -275);
-   class3wall[1].mesh.position.set(275,82.5,-325);
-   class3wall[2].mesh.position.set(275,82.5,-225);
-   
-   for(var i=0;i<6;i++)
-   {
-      let x = new Wall(200,5, new THREE.Vector3(0, 0, -1));
-      x.update();
-      class3wall.push(x);
-   }
-   
-   class3wall[3].mesh.position.set(425, 82.5, -250);
-   class3wall[4].mesh.position.set(425,82.5,-300);
-   class3wall[5].mesh.position.set(425, 42.5, -250);
-   class3wall[6].mesh.position.set(425,42.5,-200);
-   class3wall[7].mesh.position.set(425, 42.5, -300);
-   class3wall[8].mesh.position.set(425,42.5,-350);
-   
-	for(var i = 0; i <=8; i++)
-	  class3.add(class3wall[i].mesh);
-  
-   return class3wall;
-	
-}
 function buildholes(){
 	
 	var meshFunc2 = function(u0,v0,pos){
@@ -710,115 +676,6 @@ function buildPillar(){
 	cylinders.push(pillarC16)
 	
 	class1.add(pillarC11,pillarC12,pillarC13,pillarC14,pillarC15,pillarC16)
-	/*
-	var class21 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class21.R = 2;
-	class21.height = 6
-	class21.position.set(60,3,-150);
-	class21.ID = "wall"
-	class21.castShadow = true;
-	scene.add(class21)
-	cylinders.push(class21)
-	
-	var class22 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class22.R = 2;
-	class22.height = 6
-	class22.position.set(60,3,-100);
-	class22.ID = "wall"
-	class22.castShadow = true;
-	scene.add(class22)
-	cylinders.push(class22)
-	
-	var class23 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class23.R = 2;
-	class23.height = 6
-	class23.position.set(140,3,-230);
-	class23.ID = "wall"
-	class23.castShadow = true;
-	scene.add(class23)
-	cylinders.push(class23)
-	
-	var class24 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class24.R = 2;
-	class24.height = 6
-	class24.position.set(190,3,-230);
-	class24.ID = "wall"
-	class24.castShadow = true;
-	scene.add(class24)
-	cylinders.push(class24)
-	
-	var class25 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,11,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class25.R = 2;
-	class25.height = 11
-	class25.position.set(140,5.5,-150);
-	class25.ID = "wall"
-	class25.castShadow = true;
-	scene.add(class25)
-	cylinders.push(class25)
-	
-	var class26 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,11,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class26.R = 2;
-	class26.height = 11
-	class26.position.set(190,5.5,-100);
-	class26.ID = "wall"
-	class26.castShadow = true;
-	scene.add(class26)
-	cylinders.push(class26)
-
-	var class27 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,7,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class27.R = 2;
-	class27.height = 7
-	class27.position.set(110,3.5,-100)
-	class27.ID = "wall"
-	class27.castShadow = true;
-	scene.add(class27)
-	cylinders.push(class27)
-
-	var class28 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,7,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class28.R = 2;
-	class28.height = 7
-	class28.position.set(110,3.5,-150)
-	class28.ID = "wall"
-	class28.castShadow = true;
-	scene.add(class28)
-	cylinders.push(class28)
-
-	var class29 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,7,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class29.R = 2;
-	class29.height = 7
-	class29.position.set(140,3.5,-180)
-	class29.ID = "wall"
-	class29.castShadow = true;
-	scene.add(class29)
-	cylinders.push(class29)
-
-	var class211 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,7,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class211.R = 2;
-	class211.height = 7
-	class211.position.set(190,3.5,-180)
-	class211.ID = "wall"
-	class211.castShadow = true;
-	scene.add(class211)
-	cylinders.push(class211)
-
-	var class212 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,11,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class212.R = 2;
-	class212.height = 11
-	class212.position.set(140,5.5,-100);
-	class212.ID = "wall"
-	class212.castShadow = true;
-	scene.add(class212)
-	cylinders.push(class212)
-
-	var class213 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,11,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
-	class213.R = 2;
-	class213.height = 8
-	class213.position.set(190,5.5,-150);
-	class213.ID = "wall"
-	class213.castShadow = true;
-	scene.add(class213)
-	cylinders.push(class213)
-	*/
 	//第二關柱子
 	var pillarC21 = new THREE.Mesh(new THREE.CylinderGeometry(2,2,6,64),new THREE.MeshPhongMaterial({color:0x642100,clippingPlanes: [localPlane]}));
 	pillarC21.R = 2;
@@ -1670,6 +1527,7 @@ function bulidMiniWorld(){
 			*/
 			
 			//扇葉
+			/*
 			let wall52 = new Wall(5,30,new THREE.Vector3(0,0,1),1,0xA23400)
 	        wall52.mesh.position.set(0,-15,7); 
 			level3Walls.push(wall52)
@@ -1692,31 +1550,11 @@ function bulidMiniWorld(){
 	        fang.add(wall52.mesh,wall53.mesh,wall54.mesh,wall55.mesh);
 	        fang.position.set(90,45,85);
 	        class3.add(fang);
-			
+			*/
 			}
 		}
 	
 	}
-	/*
-	if(true){//時間
-		let group = new THREE.Group();
-		
-		let Newton1 = buildNewtonCradle();
-		let Newton2 = Newton1.clone();
-		let Newton3 = Newton1.clone();
-		let Newton4 = Newton1.clone();
-
-		Newtons.push(Newton1,Newton2,Newton3,Newton4)
-		Newtons[0].position.z = -1
-		Newtons[1].position.z = 1
-		Newtons[2].position.z = -3
-		Newtons[3].position.z = 3
-		group.add(stand(),Newton1,Newton2,Newton3,Newton4)
-		group.position.set(90,10,85)
-		group.scale.set(2.5,2.5,2.5)
-		scene.add(group)
-	}
-	*/
 	if(true){//風車
 		let group = buildFan()
 		group.position.set(90,10,85)
@@ -2049,4 +1887,4 @@ function buildGoal(){
 }
 export {buildTerrain,table1,table2,table3,planes,walls,cylinders,holes,floors,arcWalls}
 export {class1Rotate,class2Rotate,class3Rotate,setClassVisible}
-export {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G,boxg,steveg,wall49,fang}
+export {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G,boxg,steveg,wall49/*,fang*/}
