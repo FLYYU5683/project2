@@ -63,6 +63,7 @@ class Particle {
     this.pos.add(this.vel.clone().multiplyScalar(dtt));
 
 	  this.checkHole(holes)
+	  this.checkarea(15 + 300,50 -300,38 + 300,70 - 300)
 		if(this.inHole != true){
 			
 			this.collidingPlane(planes);
@@ -448,8 +449,9 @@ class Particle {
   start(){
 	this.vel.set(0,0,0);
 	this.pos.set(0,2,100);
+	//this.pos.set(350,16,-220);
 	//this.pos.set(0,1,40);
-	//this.pos.set(400,140,-70);// level 3
+	//this.pos.set(150,2,60);// level 3
   }
   play(audioBuffer) {
     const source = context.createBufferSource();
@@ -457,6 +459,67 @@ class Particle {
     source.connect(context.destination);
     source.start();
   }
+  checkarea(x1,y1,x2,y2){
+	  let Rect = makeRect(x1,y1,x2,y2);
+	  if (Check_Intersect (Rect, balls[0], 1)) 
+		if(this.choose){
+				this.play(inholeSoundBuffer)//playSound2(soundSource.inHole)//this.inholeSound.play();
+				this.choose = false;
+				this.inHole = false;
+				this.nowIsFlyP = false;
+				this.nowIsFlyC = false;
+				this.nowIsFlyF = false;
+				
+				countSwingReset();
+				if(!this.choose)
+					HUDForInHole();
+				
+				this.vel.set(0,0,0);
+		}   
+  }
 }
 
+function makeRect(x1,z1,x2,z2){
+	let Rect = {};
+    Rect.max = new THREE.Vector3(x1, 0, z1) ;
+    Rect.min = new THREE.Vector3(x2, 0, z2) ;
+    Rect.px =  new THREE.Vector3(1,0,0).sub(new THREE.Vector3((x1+x2)/2, 0, (z1+z2)/2));
+    return Rect;
+}	
+  
+function Check_Intersect(Rect, C, Rad){
+	const Rad2 = Rad * Rad;
+  
+  let xHat = Rect.px;
+  let zHat = xHat.clone().cross (new THREE.Vector3(0,1,0)).normalize();
+  
+  let R = {max:{x:0, z:0}, min:{x:0, z:0}};
+  let cp = Rect.max.clone().sub (C.pos);   
+  R.max.x = cp.dot (xHat), R.max.z = cp.dot (zHat);
+  
+	cp = Rect.min.clone().sub (C.pos);
+  R.min.x = cp.dot (xHat), R.min.z = cp.dot (zHat);
+  
+	if (R.max.x < 0) 			/* R to left of circle center */
+   	if (R.max.z < 0) 		/* R in lower left corner */
+     		return ((R.max.x * R.max.x + R.max.z * R.max.z) < Rad2);
+   	else if (R.min.z > 0) 	/* R in upper left corner */
+     		return ((R.max.x * R.max.x + R.min.z * R.min.z) < Rad2);
+   	else 					/* R due West of circle */
+     		return(Math.abs(R.max.x) < Rad);
+ 	else if (R.min.x > 0)  	/* R to right of circle center */
+   		if (R.max.z < 0) 	/* R in lower right corner */
+     			return ((R.min.x * R.min.x + R.max.z * R.max.z) < Rad2);
+   	else if (R.min.z > 0)  	/* R in upper right corner */
+     		return ((R.min.x * R.min.x + R.min.z * R.min.z) < Rad2);
+   	else 				/* R due East of circle */
+     		return (R.min.x < Rad);
+ 	else				/* R on circle vertical centerline */
+   		if (R.max.z < 0) 	/* R due South of circle */
+     		return (Math.abs(R.max.z) < Rad);
+   	else if (R.min.z > 0)  	/* R due North of circle */
+     		return (R.min.z < Rad);
+   	else 				/* R contains circle centerpoint */
+     		return(true);
+} 
 export {Particle}

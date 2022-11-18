@@ -989,7 +989,7 @@ function HUDPress(){
 			else if (level === 2)
 				balls[0].pos.copy(new THREE.Vector3(0,2,-135));
 			else if (level === 3)
-				balls[0].pos.copy(new THREE.Vector3(400,61,-70));
+				balls[0].pos.copy(new THREE.Vector3(300,16,-290));
 			balls[1].pos.copy(balls[0].pos)
 			balls[0].vel.set(0,0,0);
 			balls[1].vel.set(0,0,0);
