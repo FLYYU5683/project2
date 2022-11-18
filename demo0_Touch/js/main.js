@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {buildTerrain,table1,table2,table3,planes,walls} from './buildTerrain.js';
+import {buildTerrain,table1,table2,table3,planes,walls,boxg,fang} from './buildTerrain.js';
 import {class1Rotate,class2Rotate,class3Rotate} from './buildTerrain.js';
-import {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G} from './buildTerrain.js';
+import {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G,steveg,wall49} from './buildTerrain.js';
 import {Particle} from './Particle.js'
 import {buildCamAndSen,render,scene,sceneMap,start} from './render.js'
 import {Steve} from './Steve.js'
@@ -18,6 +18,10 @@ var chesschange2=false;
 var car1MoveSign = 1,car2MoveSign = -1;
 var inholeSound;
 var sceneDatas = []
+var goalkeeper,goalkeeper2,goalkeeper3,goalkeeper4,connect1,handle1,handle2;
+var timeclass=new THREE.Group();
+var class2g=new THREE.Group();
+var handleg=new THREE.Group();
 
 var hitSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/hit.mp3", inHoleSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/inhole.wav";
 var hitSoundBuffer,inholeSoundBuffer;
@@ -33,15 +37,25 @@ function init() {
   
   var gridXZ = new THREE.GridHelper(600, 60, 'red', 'white');
   //gridXZ.position.set(75,1,-80);
-  gridXZ.position.y = 10
-  //scene.add(gridXZ);
+  gridXZ.position.y = 0
+  scene.add(gridXZ);
   
   //steve
   steve=new Steve(4,12);
+  goalkeeper=new Steve(3,9);
+  goalkeeper2=new Steve(3,9);
+  goalkeeper3=new Steve(3,9);
+  goalkeeper4=new Steve(3,9);
   steve.buildsteve();
+  goalkeeper.buildsteve();
+  goalkeeper2.buildsteve();
+  goalkeeper3.buildsteve();
+  goalkeeper4.buildsteve();
   steve.buildFootPrint();
   //balls
   buildBalls()
+  //class 2
+  buildtimeclass();
   //terrain
   buildTerrain() 
   //set touchEvent
@@ -67,7 +81,8 @@ function init() {
 }
 function animate() {
   //backgroundMusic.play();
-
+  boxg.rotation.z+=0.05;
+  fang.rotation.z+=0.05;
   var dt = clock.getDelta();
   class1Rotate.rotation.y += Math.PI / 160/2 ;
   class2Rotate.rotation.y += Math.PI / 160/2 ;
@@ -96,9 +111,10 @@ function animate() {
     b.forEach(function(c){c.update()})
   });
   wallMove()
-  carMove()
+  //carMove()
   render();
-  chessMove();
+  //chessMove();
+  goalkeeperMove();
   requestAnimationFrame(animate);
 	
 }
@@ -261,5 +277,62 @@ function setObstaclePos(index){
 	car1MoveSign = sceneDatas[index][7]
 	car2MoveSign = sceneDatas[index][8]
 }
+function buildtimeclass(){
+  goalkeeper.direct.rotation.y=-Math.PI/2
+  goalkeeper.direct.rotation.x=-Math.PI
+  goalkeeper2.direct.rotation.y=-Math.PI/2
+  goalkeeper3.direct.rotation.y=-Math.PI/2
+  goalkeeper4.direct.rotation.y=Math.PI
+  goalkeeper.direct.position.set(0, 20,0 );
+  goalkeeper2.direct.position.set(17, -20,0 );
+  goalkeeper3.direct.position.set(-17, -20,0);
+  goalkeeper4.direct.position.set(125,0,-300);
+  connect1=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,60, 32,1),new THREE.MeshPhongMaterial( {color: 0xffffff,side:THREE.DoubleSide})
+)
+  connect1.rotation.x=Math.PI/2;
+  connect1.rotation.z=-Math.PI/2;
+  connect1.position.set(0,20,-225);
+  handle1=new THREE.Mesh(new THREE.CylinderGeometry(2,2,10, 32,1),new THREE.MeshPhongMaterial( {color: 0x000000,side:THREE.DoubleSide})
+)
+  handle1.rotation.x=Math.PI/2;
+  handle1.rotation.z=-Math.PI/2;
+  handle1.position.set(35,20,-225);
+  handle2=new THREE.Mesh(new THREE.CylinderGeometry(2,2,10, 32,1),new THREE.MeshPhongMaterial( {color: 0x000000,side:THREE.DoubleSide})
+)
+  handle2.rotation.x=Math.PI/2;
+  handle2.rotation.z=-Math.PI/2;
+  handle2.position.set(-35,20,-225);
+  timeclass.add(goalkeeper.direct,goalkeeper2.direct,goalkeeper3.direct)
+  timeclass.position.set(0,20,-225);
+  let connect2=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,60, 32,1),new THREE.MeshPhongMaterial( {color: 0xffffff,side:THREE.DoubleSide})
+)
+  connect2.rotation.x=Math.PI/2;
+  connect2.position.set(0,0,0);
+  let handle3=new THREE.Mesh(new THREE.CylinderGeometry(2,2,10, 32,1),new THREE.MeshPhongMaterial( {color: 0x000000,side:THREE.DoubleSide})
+)
+  handle3.rotation.x=Math.PI/2;
+  handle3.position.set(0,0,35);
+  let handle4=new THREE.Mesh(new THREE.CylinderGeometry(2,2,10, 32,1),new THREE.MeshPhongMaterial( {color: 0x000000,side:THREE.DoubleSide})
+)
+  handle4.rotation.x=Math.PI/2;
+  handle4.position.set(0,0,-35);
+  handleg.add(connect2,handle3,handle4)
+  handleg.position.set(125,20,-300);
+  class2g.add(handleg,connect1,handle2,handle1,timeclass,goalkeeper4.direct);
+  scene.add(class2g);
+}
+function goalkeeperMove(){
+	handle1.rotation.x+=0.1;
+	handle2.rotation.x+=0.1;
+	connect1.rotation.x+=0.1;	
+	timeclass.rotation.x-=0.05;
+	steveg.rotation.x-=0.05;
+	if(goalkeeper4.direct.position.z > -285 || goalkeeper4.direct.position.z <-315)
+	  car2MoveSign *= -1;
+  goalkeeper4.direct.position.z += car2MoveSign * 0.5;
+  wall49.mesh.position.z += car2MoveSign * 0.5;  
+  handleg.position.z+=car2MoveSign * 0.5;
+}
+
 export {init,animate,steve,balls,writeObstaclePos,setObstaclePos}
-export {hitSoundBuffer,inholeSoundBuffer,context}
+export {hitSoundBuffer,inholeSoundBuffer,context,class2g}

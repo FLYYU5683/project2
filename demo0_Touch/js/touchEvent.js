@@ -264,7 +264,7 @@ function touchEnd(event){
 	touchHUD = -1;
 }
 function touchEvent(){
-	//console.log(balls[0].pos)
+	console.log(balls[0].pos.z)
 	if(steve.direct.rotation.y <= -Math.PI * 2)
 		steve.direct.rotation.y += Math.PI * 2
 	if(steve.direct.rotation.y >= Math.PI * 2)
@@ -275,10 +275,7 @@ function touchEvent(){
 	  replay()
 	}
 	
-	if(level !== 3)
-		checkBallZ(balls[0].pos.z)
-	else
-		checkBallX(balls[0].pos.x)
+	checkBallZ(balls[0].pos.z)
 	
     textureAnimate()
     sliderMove()
@@ -320,7 +317,11 @@ function touchEvent(){
       vel.copy(new THREE.Vector3(temp.x, 0, temp.z)).normalize();
       vel.multiplyScalar(steve.power*8);
       balls[0].vel.copy(vel)
-	  setTimeout(function(){if(balls[0].vel.length() >= 0.7 / 3) cameraStartMove = true;},1000);
+	  setTimeout(function(){
+			if(balls[0].vel.length() >= 0.7 / 3) 
+				cameraStartMove = true;
+	  },1000);
+	  
       ballMove = true;
 	  power = 0;
 	  steve.power = 0;
@@ -377,24 +378,24 @@ function touchEvent(){
   if(steve.moveFin && !ballMove){
 	cameraStartMove = false;
 	//let temp = (levelTrack[level-1][index].angle < 0 ? levelTrack[level-1][index].angle + Math.PI / 2 : levelTrack[level-1][index].angle - Math.PI/2) - steve.camera.rotation.y;
-	let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
-	if(fovVal >= 40)
-		fovVal -= 1
-	steve.camera.children[0].fov = fovVal + fovX * 2
-	steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
-	steve.camera.children[0].updateProjectionMatrix();
-	steve.direct.children[3].children[0].updateProjectionMatrix();
-	
-	  if(temp >= Math.PI/90){
-		  steve.camera.rotation.y += Math.PI/90;
-	  }
-	  else if (temp <= -Math.PI/90){
-		  steve.camera.rotation.y -= Math.PI/90;
-	  }	
-	  else{
-			steve.direct.rotation.y = steve.camera.rotation.y;
-			steve.moveFin = false
-	  }	  
+		let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
+		if(fovVal >= 40)
+			fovVal -= 1
+		steve.camera.children[0].fov = fovVal + fovX * 2
+		steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
+		steve.camera.children[0].updateProjectionMatrix();
+		steve.direct.children[3].children[0].updateProjectionMatrix();
+		
+		  if(temp >= Math.PI/90){
+			  steve.camera.rotation.y += Math.PI/90;
+		  }
+		  else if (temp <= -Math.PI/90){
+			  steve.camera.rotation.y -= Math.PI/90;
+		  }	
+		  else{
+				steve.direct.rotation.y = steve.camera.rotation.y;
+				steve.moveFin = false
+		  }	  
   }
   /*
   if(balls[0].runInHole === true){
@@ -517,10 +518,11 @@ function setPos(){
 	}
 	{
 		let pos = [];
-		let temp = {pos : new THREE.Vector3(230,30, -300),angle : -Math.PI,angleBack: -Math.PI/2}
-		let temp1 = {pos : new THREE.Vector3(270,30, -300),angle : -Math.PI,angleBack: -Math.PI/2}
-		let temp2 = {pos : new THREE.Vector3(380,30,-300),angle : -Math.PI/2 * 3,angleBack:-Math.PI/2}
-		let temp3 = {pos : new THREE.Vector3(390,30,-300),angle : -Math.PI,angleBack:-Math.PI/2}
+		let temp = {pos : new THREE.Vector3(300,30, -300),angle : Math.PI / 2 * 3,angleBack: Math.PI}
+		let temp1 = {pos : new THREE.Vector3(415,30, -230),angle : Math.PI / 2 * 1,  angleBack: Math.PI / 2 * 1}
+		let temp2 = {pos : new THREE.Vector3(315,30,-230),angle : Math.PI/2 * 4, angleBack: Math.PI / 2 * 3}
+		let temp3 = {pos : new THREE.Vector3(285,30,-230),angle : Math.PI / 2 * 3,  angleBack: Math.PI / 2 * 3}
+		//let temp3 = {pos : new THREE.Vector3(315,30,-230),angle : -Math.PI,angleBack:-Math.PI/2}
 		pos.push(temp,temp1,temp2,temp3);
 		levelTrack.push(pos)
 	}
@@ -546,9 +548,21 @@ function checkBallZ(ballZ){
 	var temp;
 	if(level === 1 && balls[0].pos.x > 25){
 		temp = 2
+		for(var i = temp; i < levelTrack[level - 1].length; i++){
+			if(ballZ >= levelTrack[level - 1][i].pos.z){
+				index = i;
+				return;
+			}
+		}
 	}
 	else if(level === 1 && balls[0].pos.x < 25){
 		temp = 0
+		for(var i = temp; i < levelTrack[level - 1].length; i++){
+			if(ballZ >= levelTrack[level - 1][i].pos.z){
+				index = i;
+				return;
+			}
+		}
 	}
 	if(level === 2 && balls[0].pos.z < -275){
 		temp = 1;
@@ -561,22 +575,34 @@ function checkBallZ(ballZ){
 	}
 	else if(level === 2 && balls[0].pos.x < -275){
 		temp = 0;
-	}
-	for(var i = temp; i < levelTrack[level - 1].length; i++){
-		if(ballZ >= levelTrack[level - 1][i].pos.z){
-			index = i;
-			return;
+		for(var i = temp; i < levelTrack[level - 1].length; i++){
+			if(ballZ >= levelTrack[level - 1][i].pos.z){
+				index = i;
+				return;
+			}
 		}
-	}	
+	}
+	
+	if(level === 3 && index === 1){
+		steve.camera.rotation.x = -1
+		index = 1;
+		return;
+	}
+	
+	if(level === 3 && balls[0].pos.z < -230 && balls[0].pos.x < 315){
+			index = 0;
+			return;
+	}
+	else if((level === 3 && balls[0].pos.z > -230) || index > 0){
+		for(var i = 1; i < levelTrack[level - 1].length; i++){
+			if(balls[0].pos.x >= levelTrack[level - 1][i].pos.x){
+				index = i;
+				return;
+			}
+		}			
+	}
+	
 		
-}
-function checkBallX(ballX){
-	for(var i = 0; i < levelTrack[level - 1].length; i++){
-		if(ballX <= levelTrack[level - 1][i].pos.x){
-			index = i;
-			return;
-		}
-	}
 }
 function replayAll(){
 	inReplay = true;
