@@ -264,7 +264,7 @@ function touchEnd(event){
 	touchHUD = -1;
 }
 function touchEvent(){
-	console.log(balls[0].pos.z)
+
 	if(steve.direct.rotation.y <= -Math.PI * 2)
 		steve.direct.rotation.y += Math.PI * 2
 	if(steve.direct.rotation.y >= Math.PI * 2)

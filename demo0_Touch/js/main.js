@@ -38,7 +38,7 @@ function init() {
   var gridXZ = new THREE.GridHelper(600, 60, 'red', 'white');
   //gridXZ.position.set(75,1,-80);
   gridXZ.position.y = 0
-  scene.add(gridXZ);
+  //scene.add(gridXZ);
   
   //steve
   steve=new Steve(4,12);
