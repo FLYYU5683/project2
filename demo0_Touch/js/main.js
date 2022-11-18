@@ -1,5 +1,5 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {buildTerrain,table1,table2,table3,planes,walls,boxg,fang} from './buildTerrain.js';
+import {buildTerrain,table1,table2,table3,planes,walls,boxg/*,fang*/} from './buildTerrain.js';
 import {class1Rotate,class2Rotate,class3Rotate} from './buildTerrain.js';
 import {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G,steveg,wall49} from './buildTerrain.js';
 import {Particle} from './Particle.js'
@@ -82,7 +82,7 @@ function init() {
 function animate() {
   //backgroundMusic.play();
   boxg.rotation.z+=0.05;
-  fang.rotation.z+=0.05;
+  //fang.rotation.z+=0.05;
   var dt = clock.getDelta();
   class1Rotate.rotation.y += Math.PI / 160/2 ;
   class2Rotate.rotation.y += Math.PI / 160/2 ;
