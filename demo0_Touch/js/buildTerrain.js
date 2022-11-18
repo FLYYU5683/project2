@@ -1682,24 +1682,25 @@ function buildFan(){
 	boxg.position.set(0,35,0);
 	group.add(boxg)
 	
-	let stand1 = new THREE.Mesh(new THREE.BoxGeometry(20,2.5,10),new THREE.MeshBasicMaterial({color:"green"}));
+	let stand1 = new THREE.Mesh(new THREE.BoxGeometry(20,2.5,10),new THREE.MeshPhongMaterial());
 	stand1.position.set(0,8.75,0)
 	
-	let stand2 = new THREE.Mesh(new THREE.BoxGeometry(7,2.5,10),new THREE.MeshBasicMaterial({color:"yellow"}));
+	let stand2 = new THREE.Mesh(new THREE.BoxGeometry(7,2.5,10),new THREE.MeshPhongMaterial());
 	stand2.position.set(-6.5,6.25,0)
-	let stand3 = new THREE.Mesh(new THREE.BoxGeometry(7,2.5,10),new THREE.MeshBasicMaterial({color:"pink"}));
+	
+	let stand3 = new THREE.Mesh(new THREE.BoxGeometry(7,2.5,10),new THREE.MeshPhongMaterial());
 	stand3.position.set(6.5,6.25,0)
 	
-	let stand4 = new THREE.Mesh(new THREE.BoxGeometry(37.5,5,7.5),new THREE.MeshBasicMaterial({color:"blue"}));
+	let stand4 = new THREE.Mesh(new THREE.BoxGeometry(37.5,5,7.5),new THREE.MeshPhongMaterial());
 	stand4.position.set(0,2.5,8.75)
 	
-	let stand5 = new THREE.Mesh(new THREE.BoxGeometry(15.25,5,17.5),new THREE.MeshBasicMaterial({color:"white"}));
+	let stand5 = new THREE.Mesh(new THREE.BoxGeometry(15.25,5,17.5),new THREE.MeshPhongMaterial());
 	stand5.position.set(10.625,2.5,-3.75)
 	
-	let stand6 = new THREE.Mesh(new THREE.BoxGeometry(15.25,5,17.5),new THREE.MeshBasicMaterial({color:"white"}));
+	let stand6 = new THREE.Mesh(new THREE.BoxGeometry(15.25,5,17.5),new THREE.MeshPhongMaterial());
 	stand6.position.set(-10.625,2.5,-3.75)
 	
-	let plane = new THREE.Mesh(new THREE.PlaneGeometry(6,17.5),new THREE.MeshBasicMaterial({color:"pink",side:THREE.DoubleSide}))
+	let plane = new THREE.Mesh(new THREE.PlaneGeometry(6,17.5),new THREE.MeshPhongMaterial())
 	plane.position.set(0,2.5,-3.4)
 	plane.rotation.x = Math.PI /180 * 73
 	
