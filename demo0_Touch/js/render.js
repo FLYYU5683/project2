@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
-import {balls,steve} from './main.js'
+import {balls,steve,startSoundBuffer} from './main.js'
 import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther} from './touchEvent.js'
 import {portalsRenderer} from './portal.js'
 import {createMultiMaterialObject} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/utils/SceneUtils.js';
@@ -54,6 +54,11 @@ var vec = new THREE.Vector3();
 var hintPages = 0;
 var hintPagePress = false;
 var hintPage = [];
+
+var aimButton,BetterAimButton;
+var defaultAim=true;
+
+var context = new AudioContext();
 
 function render() {
   renderer.setScissorTest(false);
@@ -189,7 +194,7 @@ function buildCamAndSen(){
   sign1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat1);
   sign1.position.set(-10,5,100);
   sign1.rotation.y = Math.PI / 9
-  scene.add(sign1);
+  //scene.add(sign1);
   
   
   let loader2 = new THREE.TextureLoader();
@@ -206,7 +211,7 @@ function buildCamAndSen(){
 	sign2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 20), texMat2);
 	sign2.position.set(-10,5,-125);
 	sign2.rotation.y = Math.PI / 9
-	scene.add(sign2);
+	//scene.add(sign2);
   
   
   let loader4 = new THREE.TextureLoader();
@@ -510,7 +515,8 @@ function buildHUD(){
 		depthWrite: false,
 		map: texture3});
 		
-	  var textureAim = textureloader.load("https://i.imgur.com/tPJjSqq.png")
+	  //var textureAim = textureloader.load("https://i.imgur.com/tPJjSqq.png")//英
+	  var textureAim = textureloader.load("https://i.imgur.com/4ttPJtC.png") //中
 	  var aimMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -518,8 +524,20 @@ function buildHUD(){
 		depthTest: false,
 		depthWrite: false,
 		map: textureAim});
+	  
+	  var textureBetterAim = textureloader.load("https://i.imgur.com/Kw4riqu.png") //中
+	  var BetterAimMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: textureBetterAim});
+		
+	
 
-	  var textureHint = textureloader.load("https://i.imgur.com/S4OLZLK.png")
+	  //var textureHint = textureloader.load("https://i.imgur.com/S4OLZLK.png") //英
+	  var textureHint = textureloader.load("https://i.imgur.com/6cN3OWm.png") //中
 	  var hintMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
@@ -528,8 +546,10 @@ function buildHUD(){
 		depthWrite: false,
 		map: textureHint});
 		
-	  var aimButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),aimMaterial);
+	  aimButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),aimMaterial);
 	  aimButton.position.set(-6.5,5.3,500);
+	  BetterAimButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),BetterAimMaterial);
+	  BetterAimButton.position.set(-6.5,5.3,500);
 	  //aimButton.scale.set(1,0.5,1)
 		
 	  var gearBoard = new THREE.Mesh(new THREE.PlaneGeometry(9,2.8),new THREE.MeshBasicMaterial({color:0xAAAAAA}))
@@ -544,11 +564,11 @@ function buildHUD(){
 	  var hintButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1),hintMaterial)
 	  hintButton.position.set(-2.5,5.3,100);
 	  
-	  replayGroup.add(gearBoard,replay1Button,replay2Button,aimButton,hintButton)
+	  replayGroup.add(gearBoard,replay1Button,replay2Button,aimButton,BetterAimButton,hintButton)
 	  replayGroup.visible = false;
 	  replayGroup.position.set(0,2,0)
 	  sceneHUD.add(replayGroup)
-	  
+	 
 	/// 進球後
 	
 	var texture13 = textureloader.load("https://i.imgur.com/Bz90jwT.png")
@@ -737,6 +757,10 @@ function HUDPress(){
 			balls[1].start();
 			steve.start();
 			modeChose = true;
+			var source = context.createBufferSource();
+            source.buffer = startSoundBuffer;
+            source.connect(context.destination);
+            source.start();
 			mode = 0 // 標準
 			level = 1;
 			levelChangeButton.children[2].visible = false;
@@ -748,6 +772,10 @@ function HUDPress(){
 		}
 		else if (between(touch.x,-0.1,-1) && between(touch.y,-0.1,-0.33)){
 			modeChose = true;
+			var source = context.createBufferSource();
+            source.buffer = startSoundBuffer;
+            source.connect(context.destination);
+            source.start();
 			mode = 1 // 練習
 			levelChangeButton.children[1].visible = false;
 			levelChose = false;
@@ -816,6 +844,12 @@ function HUDPress(){
 					if(replayGroup.visible === false){
 						gearButton.scale.set(0.6,0.3,0.6)
 						replayGroup.visible = true;
+						if(defaultAim==true){
+						aimButton.visible =true;
+						BetterAimButton.visible =false;}
+						else{
+						aimButton.visible =false;
+						BetterAimButton.visible =true;}
 					}
 					else{
 						gearButton.scale.set(1,0.5,1)
@@ -856,6 +890,13 @@ function HUDPress(){
 						
 					}
 					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.81,0.62)){//瞄準模式
+						defaultAim=!defaultAim;
+						if(defaultAim==true){
+						aimButton.visible =true;
+						BetterAimButton.visible =false;}
+						else{
+						aimButton.visible =false;
+						BetterAimButton.visible =true;}
 						aimModeChange();
 					}
 					if(between(touch.x,-0.1,-0.5) && between(touch.y,0.81,0.62)){
@@ -944,6 +985,7 @@ function HUDPress(){
 			else if (mode === 1){
 				if(between(touch.x,-0.17,-0.97) && between(touch.y,0.2,-0.145)){//回放
 					balls[0].choose = true;
+					balls[0].inHole = false;
 					levelChangeButton.visible = false;
 					replayAll()
 				}
@@ -961,6 +1003,7 @@ function HUDPress(){
 					steve.camera.children[0].updateProjectionMatrix();
 					steve.direct.children[3].children[0].updateProjectionMatrix();
 					balls[0].runInHole = false
+					balls[0].inHole = false;
 					inHoleBreak();
 					chooseHoles[level-1].visible = true
 				}
@@ -987,9 +1030,9 @@ function HUDPress(){
 			if(level === 1)
 				balls[0].pos.copy(new THREE.Vector3(0,2,100));
 			else if (level === 2)
-				balls[0].pos.copy(new THREE.Vector3(0,2,-135));
+				balls[0].pos.copy(new THREE.Vector3(25,2,-135));
 			else if (level === 3)
-				balls[0].pos.copy(new THREE.Vector3(300,16,-290));
+				balls[0].pos.copy(new THREE.Vector3(300,21,-290));
 			balls[1].pos.copy(balls[0].pos)
 			balls[0].vel.set(0,0,0);
 			balls[1].vel.set(0,0,0);
@@ -1095,8 +1138,9 @@ function loadingOpen(WW,WWPlus){
 	else{
 		console.log("開完了")
 		loadingOpened = true;
-		setState()
+		inHoleBreak()
 		setOther()
+		setState()
 		setTimeout(function(){loadingClosing = true; console.log("剛關")},1000)
 		sign *= -1;
 		
@@ -1114,16 +1158,19 @@ function loadingClose(WWPlus){
 	}
 }
 function setState(){
-	balls[0].choose = true;	
 	level++;
 	if(level > 3)
 		level = 1;
 	if(level === 1)
-		balls[0].pos.copy(new THREE.Vector3(0,2,10));
+		balls[0].pos.copy(new THREE.Vector3(0,2,100));
 	else if (level === 2)
-		balls[0].pos.copy(new THREE.Vector3(0,2,-135));
+		balls[0].pos.copy(new THREE.Vector3(25,2,-135));
 	else if (level === 3)
-		balls[0].pos.copy(new THREE.Vector3(400,61,-70));
+		balls[0].pos.copy(new THREE.Vector3(300,21,-290));
+	
+	balls[0].choose = true;	
+	
+	
 	resetPlayData(level);
 	levelChangeButton.visible = false;
 	resetCameraAngle();
@@ -1132,14 +1179,15 @@ function setState(){
 	steve.direct.children[3].children[0].fov = 40 + fovX * 2;
 	steve.camera.children[0].updateProjectionMatrix();
 	steve.direct.children[3].children[0].updateProjectionMatrix();
+	balls[0].inHole = false;
 	balls[0].runInHole = false;
 	inHoleBreak();	
 }
 function parAndHole(){
-	chooseHoles = [];
-	whichHoles = [];
+    chooseHoles = [];
+    whichHoles = [];
     let h1loader= new THREE.TextureLoader();
-        var h1texture = h1loader.load("https://i.imgur.com/AseSAh2.png")
+        var h1texture = h1loader.load("https://i.imgur.com/u6YYXwp.png%22")
         var h1Material = new THREE.MeshBasicMaterial({
             opacity: 1,
             alphaTest:0.5,
@@ -1151,10 +1199,10 @@ function parAndHole(){
         h1Button.visible=false;
         chooseHoles.push(h1Button);
         whichHoles.push(h1Button);
-        
-        
+
+
     let h2loader= new THREE.TextureLoader();
-        var h2texture = h2loader.load("https://i.imgur.com/vMJ7SBU.png")
+        var h2texture = h2loader.load("https://i.imgur.com/jIKvqbj.png%22")
         var h2Material = new THREE.MeshBasicMaterial({
             opacity: 1,
             alphaTest:0.5,
@@ -1166,10 +1214,10 @@ function parAndHole(){
         h2Button.visible=false;
         chooseHoles.push(h2Button);
         whichHoles.push(h2Button);
-        
-    
+
+
     let h3loader= new THREE.TextureLoader();
-        var h3texture = h3loader.load("https://i.imgur.com/N87lxtA.png")
+        var h3texture = h3loader.load("https://i.imgur.com/YhClLTq.png%22")
         var h3Material = new THREE.MeshBasicMaterial({
             opacity: 1,
             alphaTest:0.5,
@@ -1182,12 +1230,12 @@ function parAndHole(){
         chooseHoles.push(h3Button);
         whichHoles.push(h3Button);
     for (let k = 0; k < chooseHoles.length; k++)
-		sceneHUD.add(chooseHoles[k]);
+        sceneHUD.add(chooseHoles[k]);
     for (let k = 0; k < whichHoles.length; k++){
-		whichHoles[k].scale.set(0.5,0.5,0.5)
-		whichHoles[k].position.set(7.4,8.7)
-		sceneHUD.add(whichHoles[k]);
-	}
+        whichHoles[k].scale.set(0.5,0.5,0.5)
+        whichHoles[k].position.set(7.4,8.7)
+        sceneHUD.add(whichHoles[k]);
+    }
 }
 function buildHint(){
         let newbieHUD1 = new THREE.TextureLoader().load('https://i.imgur.com/5ysBkZT.png');
@@ -1245,4 +1293,4 @@ export {buildCamAndSen,textureAnimate,HUDPress,start,cameraButtons,cameraSlider,
 export {cameraOrbit,cameraOnPlayer,cameraOnBall}
 export {scene,sceneMap,render,renderer}
 export {HUDForInHole,level,isOver}
-export {vec}
+export {vec,levelChose,context}

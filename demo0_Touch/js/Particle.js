@@ -33,6 +33,10 @@ class Particle {
 	this.choose = true;
 	this.useG = true;
     scene.add(this.mesh);
+	
+	let box = new THREE.Mesh(new THREE.BoxGeometry(12,6,6))
+	box.position.set(392,3,8-300)
+	//scene.add(box)
 
   }
   update() {
@@ -63,8 +67,9 @@ class Particle {
     this.pos.add(this.vel.clone().multiplyScalar(dtt));
 
 	  this.checkHole(holes)
-	  this.checkarea(15 + 300,50 -300,38 + 300,70 - 300)
+	  this.checkarea();
 		if(this.inHole != true){
+			//console.log("in")
 			
 			this.collidingPlane(planes);
 			
@@ -126,20 +131,6 @@ class Particle {
 			this.pos.copy(hole.localToWorld(temp1))
 			this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
 		}
-		/*
-        var dis = new THREE.Vector3(0, 0, 0)
-        dis.copy(ballNowPos.clone().sub(ballLastPos).normalize().divideScalar(100))
-        ballLastPos.add(dis);
-        while (hole.inMeshFunc(ballLastPos) < 0) {
-          ballLastPos.add(dis);
-        }
-        ballLastPos.sub(dis.multiplyScalar(1));
-
-        this.n.copy(hole.meshDifFunc(ballLastPos).normalize())
-
-        this.pos.copy(hole.localToWorld(ballLastPos.clone()));
-        this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)));
-		*/
       } 
       if (ans <= 0 && hole.ID === "hole") {
 
@@ -178,7 +169,7 @@ class Particle {
 			if(this.choose)
 				this.play(inholeSoundBuffer)//playSound2(soundSource.inHole)//this.inholeSound.play();
 			this.choose = false;
-			this.inHole = false;
+			//this.inHole = false;
 			this.nowIsFlyP = false;
 			this.nowIsFlyC = false;
 			this.nowIsFlyF = false;
@@ -187,8 +178,7 @@ class Particle {
 			if(!this.choose)
 				HUDForInHole();
 			
-			this.vel.set(0,0,0);
-			
+			this.vel.set(0,0,0);	
 		}
 		this.runInHole = true;
 	  }
@@ -459,23 +449,49 @@ class Particle {
     source.connect(context.destination);
     source.start();
   }
-  checkarea(x1,y1,x2,y2){
-	  let Rect = makeRect(x1,y1,x2,y2);
-	  if (Check_Intersect (Rect, balls[0], 1)) 
-		if(this.choose){
-				this.play(inholeSoundBuffer)//playSound2(soundSource.inHole)//this.inholeSound.play();
+  checkarea(){
+	 if(this.pos.y < -5){//第二關
+		  if(this.pos.x > 10 && this.pos.x < 40 && this.pos.z > -445&& this.pos.z < -425){
+			if(this.ID === "player"){
+				this.inHole = true;
+				if(this.choose){
+					this.play(inholeSoundBuffer)//playSound2(soundSource.inHole)//this.inholeSound.play();
+				}   
 				this.choose = false;
-				this.inHole = false;
+				//this.inHole = false;
 				this.nowIsFlyP = false;
 				this.nowIsFlyC = false;
 				this.nowIsFlyF = false;
-				
+						
 				countSwingReset();
 				if(!this.choose)
-					HUDForInHole();
-				
+					HUDForInHole();	
 				this.vel.set(0,0,0);
-		}   
+			}
+			this.runInHole = true;			  
+		  }
+	  }
+	 if(this.pos.y <= 1.5){//第三關
+		if(this.pos.x > 386 && this.pos.x < 398 && this.pos.z > -295 && this.pos.z < -275){
+			if(this.ID === "player"){
+				this.inHole = true;
+				if(this.choose){
+					this.play(inholeSoundBuffer)//playSound2(soundSource.inHole)//this.inholeSound.play();
+				}   
+				this.choose = false;
+				//this.inHole = false;
+				this.nowIsFlyP = false;
+				this.nowIsFlyC = false;
+				this.nowIsFlyF = false;
+						
+				countSwingReset();
+				if(!this.choose)
+					HUDForInHole();	
+				this.vel.set(0,0,0);
+			}
+			this.runInHole = true;			  
+		  }		 
+	 }
   }
 }
 

@@ -4,7 +4,7 @@ import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lin
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level,isOver,HUDForInHole,vec} from './render.js'
-import {steve,balls,writeObstaclePos,setObstaclePos} from './main.js'
+import {steve,balls,writeSteves,setSteves,pressed} from './main.js'
 import {stop,stopTrue} from './Steve.js'
 
 var beforeHit = true;
@@ -63,7 +63,7 @@ function predictLineRough(){
 		matLine4 = new LineMaterial({
 			color: 0xffffff,
 			linewidth: 3, 
-			vertexColors: THREE.VertexColors
+			vertexColors: THREE.VertexColors,
 		});
 		var predictLine = new Line2(geometry, matLine4);
 		predictLine.computeLineDistances();
@@ -133,6 +133,7 @@ function predictLineExact(){
 function touchStart(event){
 	event.preventDefault();
 	touchHUD = HUDPress();
+	
 	if(start && touchHUD === 0){
 		touch.x = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
 		touch.y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
@@ -240,7 +241,7 @@ function touchEnd(event){
 				playDatas[level].putt.push(steve.puttPos.clone())
 				playDatas[level].theta.push(theta)
 				if(level === 2)
-					writeObstaclePos();
+					writeSteves();
 				
 			}
 			else{
@@ -357,25 +358,29 @@ function touchEvent(){
 	steve.camera.rotation.y += Math.PI * 2;
 
   if(cameraStartMove){
+	  //console.log("in1")
 	  let temp = levelTrack[level-1][index].angle - steve.camera.rotation.y;
+	  
 	  if(fovVal <= 60)
 		fovVal += 1
 	  steve.camera.children[0].fov = fovVal + fovX * 2
 	  steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
 	  steve.camera.children[0].updateProjectionMatrix();
 	  steve.direct.children[3].children[0].updateProjectionMatrix();
-		
-	  if(temp >= Math.PI/90){
-		  steve.camera.rotation.y += Math.PI/90;
-	  }
-	  else if (temp <= -Math.PI/90){
-		  steve.camera.rotation.y -= Math.PI/90;
-	  }
-	  else{
+	  
+	  if(Math.abs(temp) <= Math.PI / 90){
 		cameraMove = false;
 	  }
+	  else if(temp > 0){
+		  steve.camera.rotation.y += Math.PI/90;
+	  }
+	  else if (temp < 0){
+		  steve.camera.rotation.y -= Math.PI/90;
+	  }
+	  //console.log(levelTrack[level-1][index].angle * temp < 0)
   }
   if(steve.moveFin && !ballMove){
+	  //console.log("in2")
 	cameraStartMove = false;
 	//let temp = (levelTrack[level-1][index].angle < 0 ? levelTrack[level-1][index].angle + Math.PI / 2 : levelTrack[level-1][index].angle - Math.PI/2) - steve.camera.rotation.y;
 		let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
@@ -386,16 +391,16 @@ function touchEvent(){
 		steve.camera.children[0].updateProjectionMatrix();
 		steve.direct.children[3].children[0].updateProjectionMatrix();
 		
-		  if(temp >= Math.PI/90){
-			  steve.camera.rotation.y += Math.PI/90;
-		  }
-		  else if (temp <= -Math.PI/90){
-			  steve.camera.rotation.y -= Math.PI/90;
-		  }	
-		  else{
+		  if(Math.abs(temp) <= Math.PI / 90){
 				steve.direct.rotation.y = steve.camera.rotation.y;
 				steve.moveFin = false
 		  }	  
+		  if(temp > 0){
+			  steve.camera.rotation.y += Math.PI/90;
+		  }
+		  else if (temp < 0){
+			  steve.camera.rotation.y -= Math.PI/90;
+		  }	
   }
   /*
   if(balls[0].runInHole === true){
@@ -469,7 +474,7 @@ function replay(){
 		steve.puttPos.copy(playDatas[level].putt[replayCount])
 		theta = playDatas[level].theta[replayCount];
 		if(level === 2)
-			setObstaclePos(replayCount)
+			setSteves(replayCount)
 		beforeHit = false;
 		swing = true;
 		isCharge = false;
@@ -500,48 +505,37 @@ function setPos(){
 		let pos = []
 		let temp = {pos : new THREE.Vector3(25,30, 10),angle : -Math.PI/2,angleBack:0}
 		let temp1 = {pos : new THREE.Vector3(25,30, -40),angle : -Math.PI,angleBack:-Math.PI / 2}
-		let temp2 = {pos : new THREE.Vector3(50,30, 85),angle : -Math.PI/2*3,angleBack: -Math.PI/2*4}
+		
+		let temp2 = {pos : new THREE.Vector3(50,30, 85),angle : 0,angleBack: 0}
 		let temp3 = {pos : new THREE.Vector3(50,30, 10),angle : -Math.PI/2*3,angleBack: -Math.PI}
 		let temp4 = {pos : new THREE.Vector3(50,30, -40),angle : -Math.PI,angleBack: -Math.PI}
-		let temp5 = {pos : new THREE.Vector3(50,30, -275),angle : 0,angleBack:0}
+		//let temp5 = {pos : new THREE.Vector3(50,30, -275),angle : 0,angleBack:0}
+		pos.push(temp,temp1,temp2,temp3,temp4/*,temp5*/);
+		levelTrack.push(pos)
+	}
+	{
+		let pos = [];
+		let temp = {pos : new THREE.Vector3(150,30,-120),angle : -Math.PI/2,angleBack:0}
+		let temp1 = {pos : new THREE.Vector3(0,30, -425),angle : -Math.PI,angleBack: -Math.PI}
+		pos.push(temp,temp1);
+		levelTrack.push(pos)
+	}
+	{
+		let pos = [];
+		let temp = {pos : new THREE.Vector3(300,30, -230),angle : -Math.PI/2*3,angleBack: -Math.PI}
+		let temp1 = {pos : new THREE.Vector3(300,30, -200),angle : -Math.PI/2*3,angleBack: -Math.PI/2*3}
+		
+		let temp2 = {pos : new THREE.Vector3(450,30, -245),angle : Math.PI,  angleBack: Math.PI/2}
+		
+		let temp3 = {pos : new THREE.Vector3(450,30,-230),angle : Math.PI/2*3,  angleBack: Math.PI}
+		
+		let temp4 = {pos : new THREE.Vector3(415,30,-230),angle : Math.PI/2,  angleBack: Math.PI/2}
+		
+		let temp5 = {pos : new THREE.Vector3(285,30,-230),angle : 0, angleBack: -Math.PI/2}
+		
 		pos.push(temp,temp1,temp2,temp3,temp4,temp5);
 		levelTrack.push(pos)
 	}
-	{
-		let pos = [];
-		let temp = {pos : new THREE.Vector3(0,30, -275),angle : -Math.PI/2,angleBack:0}
-		let temp1 = {pos : new THREE.Vector3(150,30,-275),angle : -Math.PI/2*4,angleBack:-Math.PI/2 * 4}
-		let temp2 = {pos : new THREE.Vector3(25,30,-275),angle : -Math.PI,angleBack:-Math.PI/2}
-		let temp3 = {pos : new THREE.Vector3(-25,30,-275),angle : -Math.PI/2,angleBack:-Math.PI/2}
-		pos.push(temp,temp1,temp2,temp3);
-		levelTrack.push(pos)
-	}
-	{
-		let pos = [];
-		let temp = {pos : new THREE.Vector3(300,30, -300),angle : Math.PI / 2 * 3,angleBack: Math.PI}
-		let temp1 = {pos : new THREE.Vector3(415,30, -230),angle : Math.PI / 2 * 1,  angleBack: Math.PI / 2 * 1}
-		let temp2 = {pos : new THREE.Vector3(315,30,-230),angle : Math.PI/2 * 4, angleBack: Math.PI / 2 * 3}
-		let temp3 = {pos : new THREE.Vector3(285,30,-230),angle : Math.PI / 2 * 3,  angleBack: Math.PI / 2 * 3}
-		//let temp3 = {pos : new THREE.Vector3(315,30,-230),angle : -Math.PI,angleBack:-Math.PI/2}
-		pos.push(temp,temp1,temp2,temp3);
-		levelTrack.push(pos)
-	}
-	
-	/*
-	for(var i = 10;i >= -50; i = i - 10)
-		pos.push(new THREE.Vector3(0,30,i))
-	pos.push(new THREE.Vector3(-40,30,10))
-	pos.push(new THREE.Vector3(-40,30,0))
-	pos.push(new THREE.Vector3(-40,30,-10))
-	pos.push(new THREE.Vector3(-40,30,-20))
-	pos.push(new THREE.Vector3(-40,30,-30))
-	pos.push(new THREE.Vector3(-40,30,-40))
-	pos.push(new THREE.Vector3(-40,30,-50))
-	
-	pos.push(new THREE.Vector3(-20,30,-70))
-	pos.push(new THREE.Vector3(-10,30,-90))
-	pos.push(new THREE.Vector3(0,30,-110))
-	*/
 	
 }
 function checkBallZ(ballZ){
@@ -564,37 +558,32 @@ function checkBallZ(ballZ){
 			}
 		}
 	}
-	if(level === 2 && balls[0].pos.z < -275){
-		temp = 1;
-		for(var i = temp; i < levelTrack[level - 1].length; i++){
-			if(balls[0].pos.x >= levelTrack[level - 1][i].pos.x){
+	if(level === 2){
+		for(var i = 0; i < levelTrack[level - 1].length; i++){
+			if(balls[0].pos.z <= levelTrack[level - 1][i].pos.z){
 				index = i;
 				return;
 			}
 		}
 	}
-	else if(level === 2 && balls[0].pos.x < -275){
-		temp = 0;
-		for(var i = temp; i < levelTrack[level - 1].length; i++){
-			if(ballZ >= levelTrack[level - 1][i].pos.z){
+	if(level === 3 && pressed !== true){
+		for(var i = 0; i < levelTrack[level - 1].length; i++){
+			if(balls[0].pos.z <= levelTrack[level - 1][i].pos.z){
 				index = i;
 				return;
 			}
 		}
 	}
-	
-	if(level === 3 && index === 1){
-		steve.camera.rotation.x = -1
-		index = 1;
-		return;
-	}
-	
-	if(level === 3 && balls[0].pos.z < -230 && balls[0].pos.x < 315){
-			index = 0;
-			return;
-	}
-	else if((level === 3 && balls[0].pos.z > -230) || index > 0){
-		for(var i = 1; i < levelTrack[level - 1].length; i++){
+	else if(level === 3 && pressed === true){
+		for(var i = 2; i < levelTrack[level - 1].length; i++){
+			if(balls[0].pos.z < -245){
+				if(balls[0].pos.x < 315){
+					index = 3
+					return;
+				}
+				index = 2
+				return;
+			}
 			if(balls[0].pos.x >= levelTrack[level - 1][i].pos.x){
 				index = i;
 				return;
