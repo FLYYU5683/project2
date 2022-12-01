@@ -736,7 +736,7 @@ function buildfloors(){
   hole1.heightFunc = heightFunc;
   hole1.inHeightFunc = inHeightFunc;
   floors.push(hole1)
-  
+
   var geometry3Fake = new ParametricGeometry(function(u0, v0, pos) {	
 		let theta = u0 * Math.PI *2 + Math.PI/2;
 		let r = v0 * 50;
