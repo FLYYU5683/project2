@@ -1,9 +1,10 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {buildTerrain,table1,planes,walls,smallEraser1,smallEraser2} from './buildTerrain.js';
 import {class1Rotate,class2Rotate,class3Rotate} from './buildTerrain.js';
+import {class1,class2,class3} from './buildTerrain.js';
 import {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G,steveg,wallg,pressButton,textureTest,ctexture} from './buildTerrain.js';
 import {Particle} from './Particle.js'
-import {buildCamAndSen,render,scene,sceneMap,start,levelChose,context} from './render.js'
+import {buildCamAndSen,render,scene,sceneMap,start,levelChose,context,level} from './render.js'
 import {Steve} from './Steve.js'
 import {touchStart,touchMove,touchEnd,touchEvent} from "./touchEvent.js"
 import {setPos} from "./touchEvent.js"
@@ -38,8 +39,6 @@ function init() {
   window.ontouchstart = function (e){ e.preventDefault()};
   //camera && sence
   buildCamAndSen()
-  //light
-  buildLight()
   //grid
   
   var gridXZ = new THREE.GridHelper(1000, 100, 'red', 'white');
@@ -108,7 +107,22 @@ function init() {
   
 }
 function animate() {
-	
+	if(level === 1){
+		class1.light.visible = true
+		class2.light.visible = false
+		class3.light.visible = false
+	}	
+	if(level === 2){
+		class1.light.visible = false
+		class2.light.visible = true
+		class3.light.visible = false
+	}	
+	if(level === 3){
+		class1.light.visible = false
+		class2.light.visible = false
+		class3.light.visible = true
+	}
+  
   if(balls[0].pos.distanceTo(class3Button) <= 2.5 + 1)
 	pressed  = true
 
@@ -124,8 +138,8 @@ function animate() {
   }
 
   var dt = clock.getDelta();
-  class1Rotate.rotation.y += Math.PI / 160/2 ;
-  class2Rotate.rotation.y += Math.PI / 160/2 ;
+  //class1Rotate.rotation.y += Math.PI / 160/2 ;
+  //class2Rotate.rotation.y += Math.PI / 160/2 ;
   class3Rotate.rotation.y += Math.PI / 160/2 ;
 
 
@@ -157,27 +171,6 @@ function animate() {
   requestAnimationFrame(animate);
 	
 }
-function buildLight(){
-  
-  let light2 = new THREE.DirectionalLight(0xffffff);
-  light2.position.set(50, 70, 50);
-  light2.castShadow = true;
-  
-  light2.shadow.camera.left = -50;
-  light2.shadow.camera.right = 100;
-  light2.shadow.camera.top = -100;
-  light2.shadow.camera.bottom = 100;
-  light2.shadow.camera.near = 1;
-  light2.shadow.camera.far = 200;
-  light2.shadow.mapSize.width = light2.shadow.mapSize.height = 1024;
-  light2.shadow.bias = -0.007
-  
-  scene.add(light2);
-  sceneMap.add(light2.clone());
-  var dlshelper = new THREE.CameraHelper (light2.shadow.camera) 
-  //scene.add ( dlshelper );
-  
-}
 function buildBalls(){
   var ballMaterial = new THREE.MeshPhongMaterial({
     map: new THREE.TextureLoader().load(
@@ -187,75 +180,42 @@ function buildBalls(){
   
   var ballGeometry = new THREE.SphereGeometry(1, 64);
   var ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
+  ballMesh.castShadow = true;
   var ball = new Particle(ballMesh,0.016,"player");
   balls.push(ball);
   
   var ballGeometry2 = new THREE.SphereGeometry(1, 64);
   var ballMesh2 = new THREE.Mesh(ballGeometry2, ballMaterial);
   ballMesh2.visible = false;
+  ballMesh2.castShadow = true
   var ball2 = new Particle(ballMesh2,0.054,"predict")
   balls.push(ball2);
   
 }
 function writeSteves(){
-	var temp = []
-	var temp2 = [];
-	temp.push(goalkeeper.body.position.clone());
-	temp.push(goalkeeper.body.rotation.clone());
-	
-	temp.push(goalkeeper2.body.position.clone());
-	temp.push(goalkeeper2.body.rotation.clone());
-	
-	temp.push(goalkeeper3.body.position.clone());
-	temp.push(goalkeeper3.body.rotation.clone());
-	
-	temp.push(goalkeeper4.body.position.clone());
-	temp.push(goalkeeper4.body.rotation.clone());
-	
-	temp.push(goalkeeper5.body.position.clone());
-	temp.push(goalkeeper5.body.rotation.clone());
-	
-	temp.push(goalkeeper6.body.position.clone());
-	temp.push(goalkeeper6.body.rotation.clone());
-	
-	temp.push(goalkeeper7.body.position.clone());
-	temp.push(goalkeeper7.body.rotation.clone());
-	
-	temp.push(goalkeeper8.body.position.clone());
-	temp.push(goalkeeper8.body.rotation.clone());
-	
-	temp.push(goalkeeper9.body.position.clone());
-	temp.push(goalkeeper9.body.rotation.clone());
-	
-	sceneDatas.push(temp);
+	let temp = []
+	temp.push(handle1.rotation.x,
+	handle2.rotation.x,
+	connect1.rotation.x,
+	timeclass.rotation.x,
+	steveg.rotation.x,
+	car2MoveSign,
+	timeclass2.position.x,
+	wallg.position.x,
+	handleg.position.x
+	)
+	sceneDatas.push(temp)
 }
 function setSteves(index){
-	goalkeeper.body.position.copy(sceneDatas[index][0])
-	goalkeeper.body.rotation.copy(sceneDatas[index][1])
-	
-	goalkeeper2.body.position.copy(sceneDatas[index][2])
-	goalkeeper2.body.rotation.copy(sceneDatas[index][3])
-	
-	goalkeeper3.body.position.copy(sceneDatas[index][4])
-	goalkeeper3.body.rotation.copy(sceneDatas[index][5])
-	
-	goalkeeper4.body.position.copy(sceneDatas[index][6])
-	goalkeeper4.body.rotation.copy(sceneDatas[index][7])
-	
-	goalkeeper5.body.position.copy(sceneDatas[index][8])
-	goalkeeper5.body.rotation.copy(sceneDatas[index][9])
-	
-	goalkeeper6.body.position.copy(sceneDatas[index][10])
-	goalkeeper6.body.rotation.copy(sceneDatas[index][11])
-	
-	goalkeeper7.body.position.copy(sceneDatas[index][12])
-	goalkeeper7.body.rotation.copy(sceneDatas[index][13])
-	
-	goalkeeper8.body.position.copy(sceneDatas[index][14])
-	goalkeeper8.body.rotation.copy(sceneDatas[index][15])
-	
-	goalkeeper9.body.position.copy(sceneDatas[index][16])
-	goalkeeper9.body.rotation.copy(sceneDatas[index][17])
+	handle1.rotation.x = sceneDatas[index][0]
+	handle2.rotation.x = sceneDatas[index][1]
+	connect1.rotation.x = sceneDatas[index][2]
+	timeclass.rotation.x = sceneDatas[index][3]
+	steveg.rotation.x = sceneDatas[index][4]
+	car2MoveSign = sceneDatas[index][5]
+	timeclass2.position.x = sceneDatas[index][6]
+	wallg.position.x = sceneDatas[index][7]
+	handleg.position.x = sceneDatas[index][8]
 }
 function buildtimeclass(){
   goalkeeper.direct.rotation.y=-Math.PI/2
@@ -284,6 +244,7 @@ function buildtimeclass(){
   connect1.rotation.x=Math.PI/2;
   connect1.rotation.z=-Math.PI/2;
   connect1.position.set(20,20,-295);
+  connect1.castShadow = true;
   handle1=new THREE.Mesh(new THREE.CylinderGeometry(2,2,10, 32,1),new THREE.MeshPhongMaterial( {color: 0x000000,side:THREE.DoubleSide})
 )
   handle1.rotation.x=Math.PI/2;
@@ -315,11 +276,13 @@ function buildtimeclass(){
   connect2.rotation.x=Math.PI/2;
   connect2.rotation.z=-Math.PI/2;
   connect2.position.set(0,0,0);
+  connect2.castShadow = true;
   let connect3=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,160, 32,1),new THREE.MeshPhongMaterial( {color: 0xffffff,side:THREE.DoubleSide})
 )
   connect3.rotation.x=Math.PI/2;
   connect3.rotation.z=-Math.PI/2;
   connect3.position.set(20,20,-235);
+  connect3.castShadow = true;
   let handle3=new THREE.Mesh(new THREE.CylinderGeometry(2,2,10, 32,1),new THREE.MeshPhongMaterial( {color: 0x000000,side:THREE.DoubleSide})
 )
   handle3.position.set(80,0,0);
@@ -343,9 +306,9 @@ function goalkeeperMove(){
 	steveg.rotation.x-=0.1;
 	if(timeclass2.position.x > 15 || timeclass2.position.x <-5)
 	  car2MoveSign *= -1;
-  timeclass2.position.x += car2MoveSign * 0.5;
-  wallg.position.x += car2MoveSign * 0.5;
-  handleg.position.x+=car2MoveSign * 0.5;
+	timeclass2.position.x += car2MoveSign * 0.5;
+	wallg.position.x += car2MoveSign * 0.5;
+	handleg.position.x+=car2MoveSign * 0.5;
 }
 function rgb(){
     textureTest.offset.y +=1/5;

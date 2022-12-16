@@ -31,6 +31,10 @@ var isCharge = false;
 
 var fovVal = 40,fovX = 0;
 
+var openMap = false;
+var hitting = false;
+var turned = false;
+
 function predictLineRough(){
 	if(!cancelCharge){
 		let rollingWS = new THREE.Vector3();
@@ -341,15 +345,19 @@ function touchEvent(){
 	steve.body.visible = false;
 	if(balls[0].runInHole !== true && !inReplay)
 	{
+		openMap = true;
+		hitting = true;
+		/*
 		steve.goal.copy(balls[0].pos)
 		steve.begin.copy(steve.lastPos)
 		steve.footPath.position.copy(steve.lastPos)
 		stopTrue(); 
+		*/
 	}
 	else{
-		//steve.camera.rotation.y = steve.direct.rotation.y;
 		balls[0].runInHole = false;
 	}
+	
   }
   
   if(steve.camera.rotation.y > Math.PI * 2)
@@ -359,6 +367,7 @@ function touchEvent(){
 
   if(cameraStartMove){
 	  //console.log("in1")
+	  turned = false;
 	  let temp = levelTrack[level-1][index].angle - steve.camera.rotation.y;
 	  
 	  if(fovVal <= 60)
@@ -379,8 +388,8 @@ function touchEvent(){
 	  }
 	  //console.log(levelTrack[level-1][index].angle * temp < 0)
   }
-  if(steve.moveFin && !ballMove){
-	  //console.log("in2")
+  if(steve.moveFin && !ballMove && !turned){
+	
 	cameraStartMove = false;
 	//let temp = (levelTrack[level-1][index].angle < 0 ? levelTrack[level-1][index].angle + Math.PI / 2 : levelTrack[level-1][index].angle - Math.PI/2) - steve.camera.rotation.y;
 		let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
@@ -393,7 +402,7 @@ function touchEvent(){
 		
 		  if(Math.abs(temp) <= Math.PI / 90){
 				steve.direct.rotation.y = steve.camera.rotation.y;
-				steve.moveFin = false
+				turned = true;
 		  }	  
 		  if(temp > 0){
 			  steve.camera.rotation.y += Math.PI/90;
@@ -628,7 +637,12 @@ function setOther(){
 	steve.moveFin = false
 	ballMove = false;	
 }
+function openMapFalse(){
+	openMap = false;
+}function hittingFalse(){
+	hitting = false;
+}
 export {theta,beforeHit,useOrb,countSwingReset,countSwing}
 export {touchStart,touchMove,touchEnd,touchEvent}
 export {resetPlayData,setPos,replayAll,resetCameraAngle,inHoleBreak}
-export {fovX,moveMode,aimModeChange,setOther}
+export {fovX,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse}
