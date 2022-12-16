@@ -1,10 +1,10 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
 import {balls,steve,startSoundBuffer} from './main.js'
-import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther} from './touchEvent.js'
-import {portalsRenderer} from './portal.js'
+import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse} from './touchEvent.js'
 import {createMultiMaterialObject} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/utils/SceneUtils.js';
 import {setClassVisible} from './buildTerrain.js';
+import {stopTrue} from './Steve.js'
 
 var look = false;
 var cameraOnPlayer,cameraForMap,cameraHUD,cameraOrbit,cameraOnBall,scene,sceneHUD,sceneMap,renderer;
@@ -29,7 +29,6 @@ var isOver = false;
 var levelPos =  [new THREE.Vector3(0,1,10),new THREE.Vector3(0,2,-135),new THREE.Vector3(250,81,-300)]
 
 var level = 1;
-var sign1,sign2,sign3;
 
 
 var gearButton,replayGroup = new THREE.Group();
@@ -41,6 +40,10 @@ var chooseLevelButton = new THREE.Group();
 
 var i = 0;
 var sign = 1;
+
+var i2 = 0;
+var sign2 = 1;
+
 var sceneLoading,cameraLoading;
 var inLoading = false;
 var loadingOpened = false
@@ -59,7 +62,8 @@ var aimButton,BetterAimButton;
 var defaultAim=true;
 
 var context = new AudioContext();
-
+var cameraForFoot1,cameraForFoot2,cameraForFoot3;
+var oneTime = false;
 function render() {
   renderer.setScissorTest(false);
   var WW = window.innerWidth;
@@ -105,8 +109,52 @@ function render() {
 	renderer.setScissor(WW / 2 - WWPlus*i / 2, HH / 2 - HHPlus *i /2, WWPlus*i, HHPlus *i );
 	renderer.render(sceneLoading, cameraLoading);  
   }
-    
-
+  if(hitting){
+	if(openMap){
+		if( i2 <=60 ){
+			i2 += sign2;
+		}
+		else{
+			openMapFalse();
+			steve.goal.copy(balls[0].pos)
+			steve.begin.copy(steve.lastPos)
+			steve.footPath.position.copy(steve.lastPos)
+			stopTrue(); 
+			sign2 *= -1;
+		}
+	}
+	if(steve.moveFin){
+		if(i2 > 0)
+			i2 += sign2;
+		else{
+			sign2 *= -1;
+			hittingFalse();
+			steve.moveFin = false
+		}
+	}
+	
+	renderer.setScissorTest(true);
+	renderer.setScissor(WW / 2 - WWPlus *i2 / 2, HH / 2 - HHPlus *i2 /2, WWPlus*i2, HHPlus *i2 );
+	
+	cameraForFoot1.position.set(25,100,30)//1
+	cameraForFoot1.lookAt(25,0,30)
+	
+	cameraForFoot2.position.set(25,400,-275)//2
+	cameraForFoot2.lookAt(25,0,-275)
+	cameraForFoot2.rotation.z -= Math.PI/2
+	
+	
+	cameraForFoot3.position.set(365,300,-250)//3
+	cameraForFoot3.lookAt(365,0,-250)
+	cameraForFoot3.rotation.z += Math.PI
+	if(level===1)
+		renderer.render(scene, cameraForFoot1);
+	if(level===2)
+		renderer.render(scene, cameraForFoot2);
+	if(level===3)
+		renderer.render(scene, cameraForFoot3); 
+	
+  }
 }
 function buildCamAndSen(){
   
@@ -148,7 +196,12 @@ function buildCamAndSen(){
   cameraHUD.position.z = 1580;
   
   cameraLoading = new THREE.OrthographicCamera(-10, 10, 10, -10, -10, 1600);
-  cameraLoading.position.z = 1580;  
+  cameraLoading.position.z = 1580;
+
+  cameraForFoot1 = new THREE.OrthographicCamera(-150, 150, 300, -300, -10, 1000);
+  cameraForFoot2 = new THREE.OrthographicCamera(-250, 250, 300, -300, -10, 1000);
+  cameraForFoot3 = new THREE.OrthographicCamera(-150, 150, 300, -300, -10, 1000);
+  
   
   cameraOrbit = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
   cameraOrbit.position.set(0, 30, 70);
@@ -180,6 +233,7 @@ function buildCamAndSen(){
   buildHUD()
   
   //洞標
+  /*
 	let loader1 = new THREE.TextureLoader();
   loader1.crossOrigin = '';
   var texture1 = loader1.load('https://i.imgur.com/E3yqlrK.png');
@@ -229,8 +283,7 @@ function buildCamAndSen(){
 	sign3.position.set(230,85,-310);
 	sign3.rotation.y = -Math.PI / 2 + Math.PI / 9;
 	//scene.add(sign3);
-  
-  
+  */
   
 }
 function buildHUD(){
@@ -664,31 +717,31 @@ function buildHUD(){
 	sceneLoading.add(load)
 	// ball move Button
 	
-	let perpleArrowTexture = textureloader.load("https://i.imgur.com/8dUcgUV.png")
-	let perpleArrowMaterial = new THREE.MeshBasicMaterial({
+	let purpleArrowTexture = textureloader.load("https://i.imgur.com/8dUcgUV.png")
+	let purpleArrowMaterial = new THREE.MeshBasicMaterial({
 		opacity: 1,
 		alphaTest:0.5,
 		transparent: true,
 		depthTest: false,
 		depthWrite: false,
-		map: perpleArrowTexture});
+		map: purpleArrowTexture});
 	  
-	let perpleArrow = new THREE.Mesh(new THREE.PlaneGeometry(5, 2),perpleArrowMaterial)
-	perpleArrow.position.set(4.5,0,0);
-	ballMoveControl.add(perpleArrow.clone());
-	perpleArrow.rotation.z = Math.PI;
+	let purpleArrow = new THREE.Mesh(new THREE.PlaneGeometry(5, 2),purpleArrowMaterial)
+	purpleArrow.position.set(4.5,0,0);
+	ballMoveControl.add(purpleArrow.clone());
+	purpleArrow.rotation.z = Math.PI;
 	
-	perpleArrow.position.set(-4.5,0,0);
-	ballMoveControl.add(perpleArrow.clone());
+	purpleArrow.position.set(-4.5,0,0);
+	ballMoveControl.add(purpleArrow.clone());
 	
-	perpleArrow.scale.set(0.5,2,1);
-	perpleArrow.position.set(0,-2.25,0);
-	perpleArrow.rotation.z = -Math.PI/2;
-	ballMoveControl.add(perpleArrow.clone());
+	purpleArrow.scale.set(0.5,2,1);
+	purpleArrow.position.set(0,-2.25,0);
+	purpleArrow.rotation.z = -Math.PI/2;
+	ballMoveControl.add(purpleArrow.clone());
 	
-	perpleArrow.position.set(0,2.25,0);
-	perpleArrow.rotation.z = Math.PI/2;
-	ballMoveControl.add(perpleArrow.clone());
+	purpleArrow.position.set(0,2.25,0);
+	purpleArrow.rotation.z = Math.PI/2;
+	ballMoveControl.add(purpleArrow.clone());
 
 	
 
@@ -741,8 +794,8 @@ function HUDPress(){
 	event.preventDefault();
 	var touch = new THREE.Vector2();
 	touch.x = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
-    touch.y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
-	//console.log(touch.x,touch.y)
+	touch.y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
+
 	if(Math.abs(touch.x) <= 0.4 && Math.abs(touch.y) <= 0.4){
 	    if(start === false){
 			start = true;
@@ -973,9 +1026,16 @@ function HUDPress(){
 		} 
 		else{
 			if(mode === 0){
-				if(between(touch.x,-0.17,-0.97) && between(touch.y,0.2,-0.145)){
+				if(between(touch.x,-0.17,-0.97) && between(touch.y,0.2,-0.145)){//回放
 					balls[0].choose = true;
+					balls[0].inHole = false;
 					levelChangeButton.visible = false;
+					if(level === 1)
+						balls[0].pos.copy(new THREE.Vector3(0,2,100));
+					else if (level === 2)
+						balls[0].pos.copy(new THREE.Vector3(25,2,-135));
+					else if (level === 3)
+						balls[0].pos.copy(new THREE.Vector3(300,21,-290));
 					replayAll()
 				}
 				else if(between(touch.x , 0.82, 0.05) && between(touch.y,0.2,-0.145)){
@@ -987,6 +1047,12 @@ function HUDPress(){
 					balls[0].choose = true;
 					balls[0].inHole = false;
 					levelChangeButton.visible = false;
+					if(level === 1)
+						balls[0].pos.copy(new THREE.Vector3(0,2,100));
+					else if (level === 2)
+						balls[0].pos.copy(new THREE.Vector3(25,2,-135));
+					else if (level === 3)
+						balls[0].pos.copy(new THREE.Vector3(300,21,-290));
 					replayAll()
 				}
 				else if(between(touch.x , 0.82, 0.05) && between(touch.y,0.2,-0.145)){//下一關
@@ -1147,7 +1213,7 @@ function loadingOpen(WW,WWPlus){
 	}
 }
 function loadingClose(WWPlus){
-	if(i * WWPlus >= 0)
+	if(i * WWPlus > 0)
 		i += sign;
 	else{
 		console.log("關完了")

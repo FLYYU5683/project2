@@ -215,61 +215,61 @@ class Steve{
 
   }));
   
-  this.right.position.set(2,1,0);
-  this.left.position.set(-2,1,0);
+  this.right.position.set(2,100,0);
+  this.left.position.set(-2,100,0);
   this.right.rotation.x=-Math.PI/2;
   this.left.rotation.x=-Math.PI/2;
   this.left.material.opacity=0;
   this.right.material.opacity=0;
-  
+  /*
   this.left.visible = false;
   this.right.visible = false;
-  
+  */
   this.footPath.add(this.right);
   this.footPath.add(this.left);
-  //scene.add(this.footPath);  
+  scene.add(this.footPath);  
   
-  this.right2.position.set(2,1,0);
-  this.left2.position.set(-2,1,0);
+  this.right2.position.set(2,100,0);
+  this.left2.position.set(-2,100,0);
   this.right2.rotation.x=-Math.PI/2;
   this.left2.rotation.x=-Math.PI/2;
   this.left2.material.opacity=0;
   this.right2.material.opacity=0;
-  
+  /*
   this.left2.visible = false;
   this.right2.visible = false;
-  
+  */
   this.footPath2.add(this.right2);
   this.footPath2.add(this.left2);
-  //scene.add(this.footPath2);
+  scene.add(this.footPath2);
   
-  this.right3.position.set(2,1,0);
-  this.left3.position.set(-2,1,0);
+  this.right3.position.set(2,100,0);
+  this.left3.position.set(-2,100,0);
   this.right3.rotation.x=-Math.PI/2;
   this.left3.rotation.x=-Math.PI/2;
   this.left3.material.opacity=0;
   this.right3.material.opacity=0;
-  
+  /*
   this.left3.visible = false;
   this.right3.visible = false;
-  
+  */
   this.footPath3.add(this.right3);
   this.footPath3.add(this.left3);
-  //scene.add(this.footPath3);
+  scene.add(this.footPath3);
   
-  this.right4.position.set(2,1,0);
-  this.left4.position.set(-2,1,0);
+  this.right4.position.set(2,100,0);
+  this.left4.position.set(-2,100,0);
   this.right4.rotation.x=-Math.PI/2;
   this.left4.rotation.x=-Math.PI/2;
   this.left4.material.opacity=0;
   this.right4.material.opacity=0;
-  
+  /*
   this.left4.visible = false;
   this.right4.visible = false;
-  
+  */
   this.footPath4.add(this.right4);
   this.footPath4.add(this.left4);
-  //scene.add(this.footPath4);  
+  scene.add(this.footPath4);  
 	  
 	  
   }
@@ -501,6 +501,7 @@ class Steve{
   head.add (mesh);
   mesh.position.y = WW/2;
   mesh.rotation.y = -Math.PI / 2;
+  mesh.castShadow = true;
   return head;
 }
  buildLArm(WW,HH,DD) {
@@ -561,6 +562,7 @@ class Steve{
   lArm.add(mesh);
   mesh.position.y = -HH / 2;
   mesh.position.z = 5;
+   mesh.castShadow = true;
   return lArm;
 }
   buildRArm(WW,HH,DD) {
@@ -622,6 +624,7 @@ class Steve{
   mesh.position.y = -HH / 2 + 2;
   mesh.position.x = 1;
   mesh.position.z = 1;
+  mesh.castShadow = true;
   return rArm;
 }
  buildLLeg(WW, HH, DD) {
@@ -681,6 +684,7 @@ class Steve{
   let mesh = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
   lLeg.add (mesh);
   mesh.position.y = -HH/2;
+   mesh.castShadow = true;
   return lLeg;
 }
   buildRLeg(WW,HH,DD) {
@@ -740,6 +744,7 @@ class Steve{
   let mesh = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
   rLeg.add (mesh);
   mesh.position.y = -HH/2;
+  mesh.castShadow = true;
   return rLeg;
 }
   buildTorso(WW, HH, DD) {
@@ -797,13 +802,15 @@ class Steve{
   indices.push (20,21,22, 20,22,23); // [0,1,2, 0,2,3] + 20
 	uvs.push (g.u/UU,g.v/VV, l.u/UU,l.v/VV, m.u/UU,m.v/VV, h.u/UU,h.v/VV); //  g,l,m,h
 
-	geometry.setIndex(indices);  
+  geometry.setIndex(indices);  
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));	
+  
   let mesh = new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({map: texture, side:THREE.DoubleSide}));
   torso.add (mesh);
   mesh.position.y = HH/2;
   mesh.rotation.y = Math.PI/2;
+  mesh.castShadow = true;
 
 	return torso;
 }

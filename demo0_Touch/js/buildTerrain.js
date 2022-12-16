@@ -49,34 +49,61 @@ function buildTerrain(){
 	
 	walls.push(level1Walls,level2Walls,level3Walls)
 	
-	class1.position.z = 30;
+	class1.position.set(-25,0,60)
 	class1Rotate.add(class1.clone())
+	class1.position.set(0,0,90);
+	class1Rotate.scale.set(2,2,2)
 	class1.add(bigTable)
+	
+	let light1 = buildLight(new THREE.Vector3(-25,100,-120),400,Math.PI/4)
+	class1.light = light1;
+	class1.add(light1)
+	
 	scene.add(class1)
-	class1.position.z = 90;
+	
 	cylinders.class1Pos = new THREE.Vector3(0,0,90)
 	cylinders.y1 = 0;
 	
-	class2.position.z = 300;
+	class2.position.set(-25,0,300)
 	class2Rotate.add(class2.clone())
+	class2.position.set(0,0,0);
+	class2Rotate.scale.set(2,2,2)
 	class2.add(bigTable)
+	
+	let light2 = buildLight(new THREE.Vector3(25,150,-275),600,Math.PI/3.8,-0.00002)
+	let box = new THREE.Mesh(new THREE.BoxGeometry(10,10,10));
+	box.position.set(25,0,-275);
+	box.visible = false;
+	class2.light = light2;
+	class2.add(light2,box)
+	class2.light.target = box;
+	
 	scene.add(class2)
-	class2Rotate.scale.set(0.9,0.9,0.9)
-	class2.position.z = 0;
 	cylinders.class2Pos = new THREE.Vector3(0,0,0)
 	cylinders.y2 = 0;
 	
-	//class3.rotation.x = Math.PI/180 * 10;
+	class3.position.set(-65,0,-50)
 	class3Rotate.add(class3.clone())
-
+	class3.position.set(300,0,-300);
+	class3Rotate.scale.set(2,2,2)
+	
+	let light = buildLight(new THREE.Vector3(65,150,50),400,Math.PI/5);
+	class3.light = light;
+	let box3 = new THREE.Mesh(new THREE.BoxGeometry(10,10,10));
+	box3.position.set(65,0,50)
+	box3.visible = false;
+	class3.add(light,box3)
+	class3.light.target = box3;
+	
 	class3.add(bigTable)
 	scene.add(class3);
-	class3.position.set(300,0,-300);
 	
 	cylinders.class3Pos = new THREE.Vector3(400,0,-200)
 	cylinders.y31 = 0;
 	cylinders.y32 = 200;
 	
+	let mapLight = buildLight(new THREE.Vector3(0,200,0),600,Math.PI/3)
+	sceneMap.add(mapLight)
 	sceneMap.add(class1Rotate,class2Rotate,class3Rotate)
 	
 	class2Rotate.visible = false;
@@ -90,29 +117,37 @@ function buildStoneWall(){
 
 	var stoneMaterial = new THREE.MeshPhongMaterial({
       color: 0x8c8f8d,side:THREE.DoubleSide})
+	  
 	var stoneWall1 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
 	stoneWall1.position.set(-25,-2.51,-30);
 	stoneWall1.rotation.y = -Math.PI / 2;
+	stoneWall1.castShadow = true;
 	
 	var stoneWall2 = new THREE.Mesh(stoneGeometry2,stoneMaterial);
 	stoneWall2.position.set(75,-2.51,-30);
 	stoneWall2.rotation.y = -Math.PI / 2;
+	stoneWall2.castShadow = true;
 	
 	var stoneWall3 = new THREE.Mesh(stoneGeometry,stoneMaterial);
 	stoneWall3.position.set(0,-2.51,20);
+	stoneWall3.castShadow = true;
 	
 	var stoneWall4 = new THREE.Mesh(stoneGeometry,stoneMaterial);
 	stoneWall4.position.set(50,-2.51,20);
+	stoneWall4.castShadow = true;
 	
 	var arcStoneWall1 = new THREE.Mesh(new THREE.CylinderGeometry(51.25,51.25,5,32,32,true,Math.PI/2,Math.PI),stoneMaterial)
 	arcStoneWall1.position.set(25,-2.5,-80)
+	arcStoneWall1.castShadow = true;
 	
 	var arcStoneWall2 = new THREE.Mesh(new THREE.CylinderGeometry(48.75,48.75,5,32,32,true,Math.PI/2,Math.PI),stoneMaterial)
 	arcStoneWall2.position.set(25,-2.5,-80)
+	arcStoneWall2.castShadow = true;
 	
 	let mesh = new THREE.Mesh(new THREE.RingGeometry( 48.75, 51.25, 32,1,0,Math.PI),stoneMaterial);
 	mesh.rotation.x = -Math.PI /2;
 	mesh.position.set(25,0,-80)
+	mesh.castShadow = true;
 	
 	
 	class1.add(stoneWall1,stoneWall2,stoneWall3,stoneWall4,arcStoneWall1,arcStoneWall2,mesh)
@@ -615,13 +650,13 @@ function buildfloors(){
   textureTest = loader.load('https://i.imgur.com/FyMwBQ8.png');  //漸層透明黑底縮寬度
   
   
-  let material1 = new THREE.MeshBasicMaterial({
+  let material1 = new THREE.MeshPhongMaterial({
         map: textureTest,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.8
   });
-  let material2 = new THREE.MeshBasicMaterial({
+  let material2 = new THREE.MeshPhongMaterial({
         color: 0x006000,
         side: THREE.DoubleSide,
         transparent: true,
@@ -639,6 +674,7 @@ function buildfloors(){
 	}
   
   let floorL = createMultiMaterialObject(geometry1, [material2, material1]);
+	
    textureTest.wrapS = THREE.RepeatWrapping;
    textureTest.wrapT = THREE.RepeatWrapping;
    textureTest.repeat.set (1,1/5);
@@ -649,7 +685,8 @@ function buildfloors(){
   floorL.convertUV = convertUV1;
   floorL.heightFunc = heightFunc;
   floorL.inHeightFunc = inHeightFunc;
-  floorL.receiveShadow = true;
+  floorL.children[0].receiveShadow = true;
+  floorL.children[1].receiveShadow = true;
   floors.push(floorL)
 
   
@@ -664,7 +701,8 @@ function buildfloors(){
   
   let floorR = createMultiMaterialObject(geometry2, [material2, material1]);
 
-  floorR.receiveShadow = true;
+  floorR.children[0].receiveShadow = true;
+  floorR.children[1].receiveShadow = true;
   floorR.y = 0
   floorR.convertUV = convertUV2;
   floorR.heightFunc = heightFunc;
@@ -681,7 +719,7 @@ function buildfloors(){
   
   const localPlane = new THREE.Plane(new THREE.Vector3(0, 0 ,-1), 10.0);
 
-  let cmaterial = new THREE.MeshBasicMaterial({
+  let cmaterial = new THREE.MeshPhongMaterial({
         map: ctexture,
         side: THREE.DoubleSide,
         transparent: true,
@@ -708,8 +746,7 @@ function buildfloors(){
 		return [u,v]
 	}
   let floor3 = createMultiMaterialObject(geometry3, [material2, cmaterial]);
-   
-  floor3.receiveShadow = true;
+  
   floor3.y = 0
   floor3.convertUV = convertUV3;
   floor3.heightFunc = heightFunc;
@@ -717,7 +754,7 @@ function buildfloors(){
   floors.push(floor3) 
 
   var alpha = loader.load('https://i.imgur.com/d8LnKPK.png');
-  let materialHole = new THREE.MeshBasicMaterial({color: 0x006000,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.5,})
+  let materialHole = new THREE.MeshPhongMaterial({color: 0x006000,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.5,})
   
   var geometry4 = new ParametricGeometry(function(u0, v0, pos) {
 		let x = 25 + 50 * u0;
@@ -730,7 +767,8 @@ function buildfloors(){
   
   let hole1 = createMultiMaterialObject(geometry4, [materialHole, material1]);
 
-  hole1.receiveShadow = true;
+  hole1.children[0].receiveShadow = true;
+  hole1.children[1].receiveShadow = true;
   hole1.y = 0
   hole1.convertUV = convertUV4;
   hole1.heightFunc = heightFunc;
@@ -748,8 +786,9 @@ function buildfloors(){
 
     let floor3Fake = createMultiMaterialObject(geometry3Fake, [material2, cmaterial]);
 	
-	floor3Fake.renderOrder = 1
-	
+	//floor3Fake.renderOrder = 1
+	floor3Fake.children[0].receiveShadow = true;
+	floor3Fake.children[1].receiveShadow = true;
 	let group = new THREE.Group();
 	group.add(floorL.clone(),floorR.clone(),hole1.clone(),floor3Fake)
 	group.position.z = -90;
@@ -770,18 +809,13 @@ function buildfloors(){
 	textureTest1.wrapT = THREE.RepeatWrapping;
     textureTest1.repeat.set(1,1)	
 	
-	let materialLight1 = new THREE.MeshBasicMaterial({
-        map: textureTest1,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.7
-	});
-	
-    let materialGround = new THREE.MeshBasicMaterial({
+    let materialGround = new THREE.MeshPhongMaterial({
 		map: textureTest1,
         side: THREE.DoubleSide,
+		/*
         transparent: true,
         opacity: 1
+		*/
     });	
 	
 	var convertUV = function(x,z){
@@ -794,7 +828,7 @@ function buildfloors(){
 	mesh.inHeightFunc = inHeightFunc;
 	mesh.convertUV = convertUV;
 	mesh.receiveShadow = true;
-	
+	console.log(mesh)
 	
 	floors.push(mesh)
 	class2.add(mesh)
@@ -861,7 +895,7 @@ function bulidMiniWorld(){
 					-(x - p1x) * (x - p1x) / w1 / w1 - (z - p1z) * (z - p1z) / w1 / w1) * (-2 * ((z - p1z) / w1) / w1 )]
 				}
 			
-			let materialGround = new THREE.MeshBasicMaterial({
+			let materialGround = new THREE.MeshPhongMaterial({
 				//color: 0x006000,
 				map: new THREE.TextureLoader().load("https://i.imgur.com/jBuQQHS.png"),
 				side: THREE.DoubleSide,
@@ -1019,7 +1053,7 @@ function bulidMiniWorld(){
 		if(true){//ruler
 			
 			let ruler1 = buildRuler();
-			ruler1.position.set(89,15,70);
+			ruler1.position.set(88.9,15,70);
 			
 			ruler1.rotation.y = -Math.PI / 2
 			ruler1.rotation.z = Math.PI / 180 * 9
@@ -1027,8 +1061,8 @@ function bulidMiniWorld(){
 			let ruler2 = buildRuler();
 			ruler2.position.set(95,15,70);
 			
-			ruler2.rotation.y = -Math.PI / 2
-			ruler2.rotation.z = Math.PI / 180 * 9
+			ruler2.rotation.y = Math.PI / 2
+			ruler2.rotation.z = -Math.PI / 180 * 9
 			
 			class3.add(ruler1,ruler2);
 			
@@ -1074,8 +1108,7 @@ function bulidMiniWorld(){
 			drum.scale.set(1/3,1/3,1/3)
 			drum.rotation.z = -Math.PI / 180 * 2
 			class3.add(drum);
-		}
-		
+		}		
 	}
 	if(true){//wall
 		if(true){//鉛筆
@@ -1192,7 +1225,7 @@ function bulidMiniWorld(){
 		
 			let group = new THREE.Group();
 			
-			let material = new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/MN5mWBg.png"),side:THREE.DoubleSide,transparent: true,opacity: 1})
+			let material = new THREE.MeshPhongMaterial({map: new THREE.TextureLoader().load("https://i.imgur.com/MN5mWBg.png"),side:THREE.DoubleSide,transparent: true,opacity: 1})
 			var arcWallC11 = new THREE.Mesh(new THREE.CylinderGeometry(27,27,5,32,32,true,Math.PI/2 * 3,Math.PI/3),material);
 			arcWallC11.R = 27;
 			arcWallC11.height = 5
@@ -1507,41 +1540,52 @@ function bulidMiniWorld(){
 		}
 		if(true){//按鈕
 			//let texture = new THREE.TextureLoader().load('https://i.imgur.com/cwu54BH.png')
-			pressButton = new THREE.Mesh(new THREE.SphereGeometry(2.5,32,32,0,Math.PI * 2,0,Math.PI/ 4),new THREE.MeshBasicMaterial({color:"red"}))
+			pressButton = new THREE.Mesh(new THREE.SphereGeometry(2.5,32,32,0,Math.PI * 2,0,Math.PI/ 4),new THREE.MeshPhongMaterial({color:"red"}))
 			pressButton.rotation.x = -Math.PI / 2
 			pressButton.rotation.z = -Math.PI / 180 * 48
 			pressButton.position.set(-9,21.6,90)
 			class3.add(pressButton)
 		}
 	}
+	if(true){//ligh
+	}
 }
 function buildEraser(){
 	let group = new THREE.Group();
 	
-	let body = new THREE.Mesh(new THREE.BoxGeometry(24,5,12), new THREE.MeshBasicMaterial({color:0xdedcdc}))
-	//body.position.x = 2
+	let body = new THREE.Mesh(new THREE.BoxGeometry(24,5,12), new THREE.MeshPhongMaterial({color:0xdedcdc}))
+	body.castShadow = true;
 	
-	let mesh1 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"blue"}))
+	let mesh1 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"blue"}))
 	mesh1.position.set(-4.49,1.75,4)
-	let mesh2 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshBasicMaterial({color:"white"}))
+	mesh1.castShadow = true;
+	let mesh2 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh2.position.set(-4.49,1.75,0)
-	let mesh3 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"black"}))
+	mesh2.castShadow = true;
+	let mesh3 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"black"}))
 	mesh3.position.set(-4.49,1.75,-4)
+	mesh3.castShadow = true;
 	
-	let mesh4 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshBasicMaterial({color:"white"}))
+	let mesh4 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh4.position.set(-4.49,0,4)
-	let mesh5 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshBasicMaterial({color:"white"}))
+	mesh4.castShadow = true;
+	let mesh5 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh5.position.set(-4.49,0,-4)
+	mesh5.castShadow = true;
 	
-	let mesh6 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"blue"}))
+	let mesh6 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"blue"}))
 	mesh6.position.set(-4.49,-1.75,-4)
-	let mesh7 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshBasicMaterial({color:"white"}))
+	mesh6.castShadow = true;
+	let mesh7 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh7.position.set(-4.49,-1.75,0)
-	let mesh8 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"black"}))
+	mesh7.castShadow = true;
+	let mesh8 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"black"}))
 	mesh8.position.set(-4.49,-1.75,4)	
+	mesh8.castShadow = true;
 	
-	let mesh9 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"black"}))
+	let mesh9 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"black"}))
 	mesh9.position.set(-4.49,1.75,-4)
+	mesh9.castShadow = true;
 
 	group.add(body,mesh1,mesh2,mesh3,mesh4,mesh5,mesh6,mesh7,mesh8)
 	group.position.set(0,1.5,0)
@@ -1555,30 +1599,39 @@ function buildEraser(){
 function buildSmallEraser(zAngle){
 	let group = new THREE.Group();
 	
-	let body = new THREE.Mesh(new THREE.BoxGeometry(24,5,12), new THREE.MeshBasicMaterial({color:0xdedcdc}))
-	//body.position.x = 2
+	let body = new THREE.Mesh(new THREE.BoxGeometry(24,5,12), new THREE.MeshPhongMaterial({color:0xdedcdc}))
+	body.castShadow = true;
 	
-	let mesh1 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"red"}))
+	let mesh1 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"red"}))
 	mesh1.position.set(-4.49,1.75,4)
-	let mesh2 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshBasicMaterial({color:"white"}))
+	mesh1.castShadow = true;
+	let mesh2 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh2.position.set(-4.49,1.75,0)
-	let mesh3 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"red"}))
+	mesh2.castShadow = true;
+	let mesh3 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"red"}))
 	mesh3.position.set(-4.49,1.75,-4)
+	mesh3.castShadow = true;
 	
-	let mesh4 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshBasicMaterial({color:"white"}))
+	let mesh4 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh4.position.set(-4.49,0,4)
-	let mesh5 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshBasicMaterial({color:"white"}))
+	mesh4.castShadow = true;
+	let mesh5 = new THREE.Mesh(new THREE.BoxGeometry(15,1,5), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh5.position.set(-4.49,0,-4)
+	mesh5.castShadow = true;
 	
-	let mesh6 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"red"}))
+	let mesh6 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"red"}))
 	mesh6.position.set(-4.49,-1.75,-4)
-	let mesh7 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshBasicMaterial({color:"white"}))
+	mesh6.castShadow = true;
+	let mesh7 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,3), new THREE.MeshPhongMaterial({color:"white"}))
 	mesh7.position.set(-4.49,-1.75,0)
-	let mesh8 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"red"}))
+	mesh7.castShadow = true;
+	let mesh8 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"red"}))
 	mesh8.position.set(-4.49,-1.75,4)	
+	mesh8.castShadow = true;	
 	
-	let mesh9 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshBasicMaterial({color:"red"}))
+	let mesh9 = new THREE.Mesh(new THREE.BoxGeometry(15,2.5,5), new THREE.MeshPhongMaterial({color:"red"}))
 	mesh9.position.set(-4.49,1.75,-4)
+	mesh9.castShadow = true;
 
 	group.add(body,mesh1,mesh2,mesh3,mesh4,mesh5,mesh6,mesh7,mesh8)
 	if(zAngle <= 0){
@@ -1602,20 +1655,23 @@ function buildSmallEraser(zAngle){
 function buildPencil(){
 	let group = new THREE.Group();
 	
-	let body = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,45,6),new THREE.MeshBasicMaterial({color : 0xffc933}))
-	let alu = new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.6,2,32),new THREE.MeshBasicMaterial({color : 0x94938f}))
-	let eraser = new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,3,32),new THREE.MeshBasicMaterial({color : 0xd92b25}))
+	let body = new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,45,6),new THREE.MeshPhongMaterial({color : 0xffc933}))
+	let alu = new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.6,2,32),new THREE.MeshPhongMaterial({color : 0x94938f}))
+	let eraser = new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.3,3,32),new THREE.MeshPhongMaterial({color : 0xd92b25}))
 	
-	let brown = new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,45.01,32),new THREE.MeshBasicMaterial({color : 0xb37f4f}))
-	let black = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,45.02,32),new THREE.MeshBasicMaterial({color : 0x1c1c1b}))
+	let brown = new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,45.01,32),new THREE.MeshPhongMaterial({color : 0xb37f4f}))
+	let black = new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,45.02,32),new THREE.MeshPhongMaterial({color : 0x1c1c1b}))
 	body.rotation.x = -Math.PI/2
 	body.rotation.y = Math.PI / 180 * 90
+	body.castShadow = true;
 	
 	alu.rotation.x = -Math.PI / 2
 	alu.position.z = 23.5;
+	alu.castShadow = true;
 	
 	eraser.rotation.x = -Math.PI / 2
 	eraser.position.z = 26;
+	eraser.castShadow = true;
 	
 	brown.rotation.x = -Math.PI/2
 	black.rotation.x = -Math.PI/2
@@ -1631,15 +1687,17 @@ function buildBook(){
 	
 	let loader = new THREE.TextureLoader();
 	let matArray = [];
-	matArray.push(new THREE.MeshBasicMaterial({map : loader.load("https://i.imgur.com/VqZfkMV.jpg")}))
-	matArray.push(new THREE.MeshBasicMaterial({map : loader.load("https://i.imgur.com/VqZfkMV.jpg")}))
-	matArray.push(new THREE.MeshBasicMaterial({map : loader.load("https://i.imgur.com/5I081NU.png")}))
-	matArray.push(new THREE.MeshBasicMaterial({map : loader.load("https://i.imgur.com/fgQf5yr.png")}))
-	matArray.push(new THREE.MeshBasicMaterial({map : loader.load("https://i.imgur.com/VqZfkMV.jpg")}))
-	matArray.push(new THREE.MeshBasicMaterial({map : loader.load("https://i.imgur.com/ZausXxX.png")}))
+	matArray.push(new THREE.MeshPhongMaterial({map : loader.load("https://i.imgur.com/VqZfkMV.jpg")}))
+	matArray.push(new THREE.MeshPhongMaterial({map : loader.load("https://i.imgur.com/VqZfkMV.jpg")}))
+	matArray.push(new THREE.MeshPhongMaterial({map : loader.load("https://i.imgur.com/5I081NU.png")}))
+	matArray.push(new THREE.MeshPhongMaterial({map : loader.load("https://i.imgur.com/fgQf5yr.png")}))
+	matArray.push(new THREE.MeshPhongMaterial({map : loader.load("https://i.imgur.com/VqZfkMV.jpg")}))
+	matArray.push(new THREE.MeshPhongMaterial({map : loader.load("https://i.imgur.com/ZausXxX.png")}))
 	let box = new THREE.Mesh(new THREE.BoxGeometry(50,5,30),matArray);
 	box.rotation.y = -Math.PI/2
 	box.position.set(0,-2.5,25);
+	box.receiveShadow = true;
+	box.castShadow = true;
 	group.add(box)
 	return group;
 	
@@ -1647,8 +1705,9 @@ function buildBook(){
 function buildRuler(){
 	let group = new THREE.Group();
 	let texture = new THREE.TextureLoader().load("https://i.imgur.com/m648HMn.png")
-	let body = new THREE.Mesh(new THREE.BoxGeometry(40,0.1,6),new THREE.MeshBasicMaterial({map:texture,alphaTest:0.5,side:THREE.DoubleSide}))
+	let body = new THREE.Mesh(new THREE.BoxGeometry(40,0.1,6),new THREE.MeshPhongMaterial({map:texture,alphaTest:0.5,side:THREE.DoubleSide}))
 	body.position.set(0,0.05,0)
+	body.castShadow = true;
 	group.add(body)
 	return group
 
@@ -1930,6 +1989,29 @@ function buildGoal(){
   class2.add(goal2)
   
 }
+function buildLight(pos,dis,angle,bias = -0.00003){
+
+  let light2 = new THREE.SpotLight(0xffffff,1,dis,angle);
+  light2.position.set(pos.x, pos.y, pos.z);
+  light2.castShadow = true;
+  
+  light2.shadow.camera.left = -50;
+  light2.shadow.camera.right = 100;
+  light2.shadow.camera.top = -100;
+  light2.shadow.camera.bottom = 100;
+  light2.shadow.camera.near = 1;
+  light2.shadow.camera.far = 200;
+  light2.shadow.mapSize.width = light2.shadow.mapSize.height = 1024;
+  light2.shadow.bias = bias;
+
+  //sceneMap.add(light2.clone());
+  var dlshelper = new THREE.CameraHelper (light2.shadow.camera) 
+  //scene.add ( dlshelper );
+  //sceneMap.add ( dlshelper );
+  return light2;
+  
+}
 export {buildTerrain,table1,planes,walls,cylinders,holes,floors,arcWalls}
 export {class1Rotate,class2Rotate,class3Rotate,setClassVisible}
 export {obstacle1,obstacle2,obstacle3,car,car2,redhorse2G,steveg,wallg,smallEraser1,smallEraser2,pressButton,textureTest,ctexture}
+export {class1,class2,class3}
