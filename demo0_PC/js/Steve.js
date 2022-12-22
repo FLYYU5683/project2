@@ -169,7 +169,7 @@ class Steve{
   }
   //////////////////////////////////////////////////////////
 }
-  buildFootPrint(){
+buildFootPrint(){
 	  
 	  var loader = new THREE.TextureLoader();
     var map = loader.load("https://i.imgur.com/0SAEcsV.png");
@@ -363,8 +363,8 @@ footUpdate(){
         this.right3.material.opacity=0;
 		this.left4.material.opacity=0;
         this.right4.material.opacity=0;
-		this.direct.position.copy(balls[0].pos)
-		this.direct.rotation.copy(this.camera.rotation)
+		//this.direct.position.copy(balls[0].pos)
+		this.direct.rotation.y = this.camera.rotation.y
 		count=1;
 		this.moveFin = true;
 	}
@@ -378,7 +378,7 @@ footUpdate(){
 	matLine.resolution.set(window.innerWidth, window.innerHeight);
 	this.camera.position.copy(balls[0].pos)
 	if(stop === false){	  
-     setTimeout(this.footUpdate.bind(this),100);
+     setTimeout(this.footUpdate.bind(this),150);
      stopTrue();
 	}
 	if(!swing && !change){
@@ -386,10 +386,12 @@ footUpdate(){
 		this.head.rotation.y = Math.PI / 2;
 	}
 	if(!swing && !change && !isChange && beforeHit){
-		this.body.visible = false;
+		///////////////////////////////////////////////////////////////////////////steve visible
+		//this.body.visible = false;
 	}
 	if(!beforeHit && !swing){
-		this.body.visible = true
+		///////////////////////////////////////////////////////////////////////////steve visible
+		//this.body.visible = true
 		swing = true;
 		this.head.rotation.y = Math.PI / 2;
 		

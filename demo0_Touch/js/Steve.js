@@ -4,7 +4,7 @@ import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lin
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import {scene,cameraOnPlayer,renderer,cameraOnBall} from './render.js';
 import {balls} from './main.js'
-import {theta,beforeHit} from './touchEvent.js'
+import {theta,beforeHit} from "./touchEvent.js"
 
 const WW = 4,HH = 12;
 var swing = false,isSwing = false,change = false,isChange = false;
@@ -169,10 +169,10 @@ class Steve{
   }
   //////////////////////////////////////////////////////////
 }
-  buildFootPrint(){
+buildFootPrint(){
 	  
 	  var loader = new THREE.TextureLoader();
-    var map = loader.load("https://i.imgur.com/ifTuBvu.png");
+    var map = loader.load("https://i.imgur.com/0SAEcsV.png");
    this.left=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
     map: map,
     transparent: true,
@@ -193,7 +193,7 @@ class Steve{
     transparent: true,
 
   }));
-  var  map2 = loader.load("https://i.imgur.com/DZ2BjPS.png");
+  var  map2 = loader.load("https://i.imgur.com/369aPyu.png");
    this.right=new THREE.Mesh(new THREE.PlaneGeometry(4, 6), new THREE.MeshBasicMaterial({
     map: map2,
     transparent: true,
@@ -214,7 +214,8 @@ class Steve{
     transparent: true,
 
   }));
-  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////截圖修改/*
+  //全部腳印的高度多+兩個0
   this.right.position.set(2,100,0);
   this.left.position.set(-2,100,0);
   this.right.rotation.x=-Math.PI/2;
@@ -270,10 +271,10 @@ class Steve{
   this.footPath4.add(this.right4);
   this.footPath4.add(this.left4);
   scene.add(this.footPath4);  
-	  
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////截圖修改*/  
 	  
   }
-  footUpdate(){
+footUpdate(){
 	  this.uv.x=this.goal.x-this.begin.x;
       this.uv.z=this.goal.z-this.begin.z;
       this.uv.normalize();
@@ -288,7 +289,7 @@ class Steve{
 		this.right.material.opacity=1;
         this.footPath2.position.set(this.temp.x,0.1,this.temp.z);
 	    this.footPath2.lookAt(this.begin.x,0,this.begin.z);
-        this.left2.material.opacity=0.8;
+        this.left2.material.opacity=0;
 	    this.right2.material.opacity=0;		
 	  }
 	  else if(count===2)
@@ -301,7 +302,7 @@ class Steve{
 	     this.right2.material.opacity=0.8;
 		 this.footPath3.position.set(this.temp2.x,0.1,this.temp2.z);
 		 this.footPath3.lookAt(this.begin.x,0,this.begin.z);
-		 this.left3.material.opacity=0.5;
+		 this.left3.material.opacity=0;
 	     this.right3.material.opacity=0;
 	  }
      else
@@ -320,7 +321,7 @@ class Steve{
 	       this.right3.material.opacity=0.5;
            this.footPath4.position.set(this.temp3.x,0.1,this.temp3.z);
 		   this.footPath4.lookAt(this.begin.x,0,this.begin.z);
-		   this.left4.material.opacity=0.2;
+		   this.left4.material.opacity=0;
 	       this.right4.material.opacity=0;		   
 		}
         else
@@ -362,8 +363,8 @@ class Steve{
         this.right3.material.opacity=0;
 		this.left4.material.opacity=0;
         this.right4.material.opacity=0;
-		this.direct.position.copy(balls[0].pos)
-		this.direct.rotation.copy(this.camera.rotation)
+		//this.direct.position.copy(balls[0].pos)
+		this.direct.rotation.y = this.camera.rotation.y
 		count=1;
 		this.moveFin = true;
 	}
@@ -372,12 +373,12 @@ class Steve{
 		stop=false;
 	}
 	  
-  }
+ }
   update(dt){
 	matLine.resolution.set(window.innerWidth, window.innerHeight);
 	this.camera.position.copy(balls[0].pos)
 	if(stop === false){	  
-     setTimeout(this.footUpdate.bind(this),100);
+     setTimeout(this.footUpdate.bind(this),150);
      stopTrue();
 	}
 	if(!swing && !change){
@@ -385,10 +386,12 @@ class Steve{
 		this.head.rotation.y = Math.PI / 2;
 	}
 	if(!swing && !change && !isChange && beforeHit){
-		this.body.visible = false;
+		///////////////////////////////////////////////////////////////////////////steve visible
+		//this.body.visible = false;
 	}
 	if(!beforeHit && !swing){
-		this.body.visible = true
+		///////////////////////////////////////////////////////////////////////////steve visible
+		//this.body.visible = true
 		swing = true;
 		this.head.rotation.y = Math.PI / 2;
 		

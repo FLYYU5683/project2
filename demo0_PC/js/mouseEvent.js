@@ -2,7 +2,7 @@ import {Line2} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/Line
 import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineMaterial.js';
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
-import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level,isOver,HUDForInHole,vec} from './render.js'
+import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level,isOver,HUDForInHole,vec,SteveShow} from './render.js'
 import {steve,balls,writeSteves,setSteves,pressed} from './main.js'
 import {stop,stopTrue} from './Steve.js'
 
@@ -31,7 +31,7 @@ var aimMode = 0;
 var isCharge = false;
 
 var fovVal = 40,fovX = 0;
-
+var fovBass = [0,20,0];
 var openMap = false;
 var hitting = false;
 var turned = false;
@@ -61,6 +61,7 @@ function predictLineRough(){
 		for(var i = lineList.length; i > 0;i--){
 			scene.remove(lineList[i-1])
 		}
+		lineList = []
 		var geometry = new LineGeometry();
 		geometry.setPositions(positions);
 		geometry.setColors(colors);
@@ -112,6 +113,7 @@ function predictLineExact(){
 		for(var i = lineList.length; i > 0;i--){
 			scene.remove(lineList[i-1])
 		}
+		lineList = []
 		var geometry = new LineGeometry();
 		geometry.setPositions(positions);
 		geometry.setColors(colors);
@@ -171,11 +173,13 @@ function mouseMove(event){
 			theta = power / 10 / 2.5;
 			for(var i = 0; i < steve.arrow.children.length; i++)
 				steve.arrow.children[i].visible = false;
+			if(power != 0)
 			for(var i = 0;i < 9 + power; i++)
 				steve.arrow.children[i].visible = true;
 
 		}
 		if(rightMousePressed){
+			
 			var x = (event.clientX / window.innerWidth) * 2 - 1;
 			var y = -(event.clientY / window.innerHeight) * 2 + 1;
 			x -= mouse.x;
@@ -211,6 +215,7 @@ function mouseMove(event){
 				rotateX = 0.53;
 				steve.direct.children[3].rotation.x = 0.53;
 			}
+			
 		}
 	}
 	if(touchHUD === 1){
@@ -218,8 +223,8 @@ function mouseMove(event){
 		fovX = clamp(fovX,-7.5,7.5)
 		cameraSlider.position.x = fovX ;
 		
-		steve.camera.children[0].fov = fovVal + fovX * 2;
-		steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
+		steve.camera.children[0].fov = fovVal + fovX * 2 + fovBass[level - 1];
+		steve.direct.children[3].children[0].fov = fovVal + fovX * 2 + fovBass[level - 1];
 		
 		steve.camera.children[0].updateProjectionMatrix();
 		steve.direct.children[3].children[0].updateProjectionMatrix();
@@ -267,6 +272,7 @@ function mouseUp(event){
 	touchHUD = -1;
 }
 function mouseEvent(){
+
 	if(steve.direct.rotation.y <= -Math.PI * 2)
 		steve.direct.rotation.y += Math.PI * 2
 	if(steve.direct.rotation.y >= Math.PI * 2)
@@ -292,7 +298,7 @@ function mouseEvent(){
 		steve.direct.position.add(vec);
 		steve.camera.position.add(vec);
 	}
-   if(balls[1].vel != 0 && isCharge){
+   if(balls[1].vel != 0 && isCharge && power != 0){
 		let temp = new THREE.Vector3(0, 0, 0);
 		var vel = new THREE.Vector3(0, 0, 0);
 
@@ -300,11 +306,17 @@ function mouseEvent(){
 		vel.copy(new THREE.Vector3(temp.x, 0, temp.z)).normalize();
 		vel.multiplyScalar(steve.power*8);
 		balls[1].vel.copy(vel);
-		if(aimMode === 1)
+		if(aimMode === 1 )
 			predictLineExact()
 		else
 			predictLineRough()
-		
+	
+   }
+   if(power === 0){
+	   	for(var i = lineList.length; i > 0;i--){
+			scene.remove(lineList[i-1])
+		}
+		lineList = []
    }
   if(steve.putt.worldToLocal(balls[0].pos.clone()).length() <= (0.5 + 0.5) && !beforeHit){
 	  for(var i = lineList.length; i > 0;i--){
@@ -338,8 +350,9 @@ function mouseEvent(){
 	  countSwing++;
 	ballMove = false
 	
-	steve.direct.position.copy(balls[0].pos)
-	steve.body.visible = false;
+	
+	///////////////////////////////////////////////////////////////////////////steve visible
+	//steve.body.visible = false;
 	if(balls[0].runInHole !== true && !inReplay)
 	{
 		openMap = true;
@@ -371,8 +384,8 @@ function mouseEvent(){
 	  
 	  if(fovVal <= 60)
 		fovVal += 1
-	  steve.camera.children[0].fov = fovVal + fovX * 2
-	  steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
+	  steve.camera.children[0].fov = fovVal + fovX * 2 + fovBass[level - 1]
+	  steve.direct.children[3].children[0].fov = fovVal + fovX * 2 + fovBass[level - 1];
 	  steve.camera.children[0].updateProjectionMatrix();
 	  steve.direct.children[3].children[0].updateProjectionMatrix();
 	  
@@ -394,14 +407,17 @@ function mouseEvent(){
 		let temp = levelTrack[level-1][index].angleBack - steve.camera.rotation.y;
 		if(fovVal >= 40)
 			fovVal -= 1
-		steve.camera.children[0].fov = fovVal + fovX * 2
-		steve.direct.children[3].children[0].fov = fovVal + fovX * 2;
+		steve.camera.children[0].fov = fovVal + fovX * 2 + fovBass[level - 1]
+		steve.direct.children[3].children[0].fov = fovVal + fovX * 2 + fovBass[level - 1];
 		steve.camera.children[0].updateProjectionMatrix();
 		steve.direct.children[3].children[0].updateProjectionMatrix();
 		
 		  if(Math.abs(temp) <= Math.PI / 90){
 				steve.direct.rotation.y = steve.camera.rotation.y;
 				turned = true;
+				if(SteveShow)
+					steve.body.visible = true
+				steve.direct.position.copy(balls[0].pos)
 		  }	  
 		  if(temp > 0){
 			  steve.camera.rotation.y += Math.PI/90;
@@ -538,7 +554,7 @@ function setPos(){
 		
 		let temp3 = {pos : new THREE.Vector3(450,30,-230),angle : Math.PI/2*3,  angleBack: Math.PI}
 		
-		let temp4 = {pos : new THREE.Vector3(415,30,-230),angle : Math.PI/2,  angleBack: Math.PI/2}
+		let temp4 = {pos : new THREE.Vector3(415,30,-230),angle : Math.PI,  angleBack: Math.PI}
 		
 		let temp5 = {pos : new THREE.Vector3(285,30,-230),angle : 0, angleBack: -Math.PI/2}
 		
@@ -639,7 +655,8 @@ function setOther(){
 }
 function openMapFalse(){
 	openMap = false;
-}function hittingFalse(){
+}
+function hittingFalse(){
 	hitting = false;
 }
 

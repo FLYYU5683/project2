@@ -1,8 +1,8 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {planes,holes,cylinders,walls,floors,arcWalls} from './buildTerrain.js';
-import {balls,context,hitSoundBuffer,inholeSoundBuffer} from './main.js'
+import {balls,context,hitSoundBuffer,inholeSoundBuffer,car2MoveSign} from './main.js'
 import {scene,start,HUDForInHole,level} from './render.js'
-import {countSwingReset} from './touchEvent.js'
+import {countSwingReset} from "./touchEvent.js"
 var playOnce = true;
 
 class Particle {
@@ -286,21 +286,26 @@ class Particle {
 		  temp.copy(wall.mesh.worldToLocal(this.pos.clone()))
 		  var times = 3;
 		  if(wall.type === 0){
+			  
 			  if(this.ID === "player")
 				wall.mesh.material.opacity = 1;
 			  if(temp.z <= (1.25 + this.r) * times  && temp.z >= (-1.25 - this.r) * times && Math.abs(temp.x) <= wall.len / 2 && this.ID === "player"){
 				wall.mesh.material.opacity = 0.5;
 			  }
+			  
 			  if (temp.z <= 1.25 + this.r  && temp.z >= -1.25 - this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
 				if(this.ID === "player"){
 					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
 				}
+
 				this.n.copy(wall.normal);
 				if(temp.z < 0)
 					this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,-1.25 - this.r)));
 				else
 					this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,1.25 + this.r)));
 				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
+				if(wall.ID === "hit")
+					this.vel.add(new THREE.Vector3(0,0,50))
 			  }
 		  }
 		  if(wall.type === 1){
@@ -316,25 +321,19 @@ class Particle {
 				this.n.copy(wall.normal);
 				this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,this.r)));
 				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
-			  }  
-		  }
-		  /*
-		  if(wall.type === 2){
-			   if (temp.y <= wall.height + this.r  && temp.y >= -wall.height * 2 - this.r  && Math.abs(temp.x) <= wall.len/2 && Math.abs(temp.z) <= wall.width/2){
-				if(this.ID === "player"){
-					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
+				
+				if(wall.ID === "LW"){
+					console.log("in")
+					if(car2MoveSign === -1){
+						this.vel.add(new THREE.Vector3(-30,0,0))
+					}
 				}
-				this.n.copy(wall.normal);
-				
-				if(temp.z < 0)
-					this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y + this.r,temp.z)));
-				else
-					this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y + this.r,temp.z)));
-				
-				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
-			  }
-		  }
-		  */		  
+				if(wall.ID === "RW"){
+					if(car2MoveSign === 1)
+						this.vel.add(new THREE.Vector3(30,0,0))
+				}
+			  }  
+		  }	  
 		}
     }
 
@@ -472,7 +471,7 @@ class Particle {
 		  }
 	  }
 	 if(this.pos.y <= 1.5){//第三關
-		if(this.pos.x > 386 && this.pos.x < 398 && this.pos.z > -295 && this.pos.z < -275){
+		if(this.pos.x > 386 && this.pos.x < 393 && this.pos.z > -295 && this.pos.z < -277){
 			if(this.ID === "player"){
 				this.inHole = true;
 				if(this.choose){
