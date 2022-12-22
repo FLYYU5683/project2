@@ -123,18 +123,21 @@ function animate() {
 		class3.light.visible = true
 	}
   
-  if(balls[0].pos.distanceTo(class3Button) <= 2.5 + 1)
+  if(balls[0].pos.distanceTo(class3Button) <= 2.5 + 1){
 	pressed  = true
+	pressButton.material.color.set(0x00ff00)
+  }
 
   if(pressed && smallEraser1.rotation.y <= Math.PI /180 * 60){
-	smallEraser1.rotation.y += Math.PI / 180 / 2
-	smallEraser2.rotation.y -= Math.PI / 180 / 2
+	smallEraser1.rotation.y += Math.PI / 180 / 8
+	smallEraser2.rotation.y -= Math.PI / 180 / 8
   }
   
   if(!levelChose){
 	smallEraser1.rotation.y = 0
 	smallEraser2.rotation.y = 0
 	pressed = false; 
+	pressButton.material.color.set(0xff0000)
   }
 
   var dt = clock.getDelta();
@@ -266,7 +269,7 @@ function buildtimeclass(){
   handle6.rotation.z=-Math.PI/2;
   handle6.position.set(-60,20,-235);
   timeclass.add(goalkeeper.direct,goalkeeper2.direct,goalkeeper3.direct)
-  timeclass.position.set(0,20,-295);
+  timeclass.position.set(15,20,-295);
   timeclass2.add(goalkeeper4.direct,goalkeeper5.direct,goalkeeper6.direct)
   timeclass2.position.set(0,20,-375);
   timeclass3.add(goalkeeper7.direct,goalkeeper8.direct,goalkeeper9.direct)
@@ -311,13 +314,13 @@ function goalkeeperMove(){
 	handleg.position.x+=car2MoveSign * 0.5;
 }
 function rgb(){
-    textureTest.offset.y +=1/4;
+    textureTest.offset.y +=1/3;
 	/*
     rtexture.offset.y +=1/5;
     ltexture.offset.y +=1/5;
 	*/
-    ctexture.offset.y +=1/4;
+    ctexture.offset.y +=1/3;
     setTimeout(rgb, 1000);
 } 
 export {init,animate,steve,balls,writeSteves,setSteves}
-export {hitSoundBuffer,inholeSoundBuffer,startSoundBuffer,context,class2g,pressed}
+export {hitSoundBuffer,inholeSoundBuffer,startSoundBuffer,context,class2g,pressed,car2MoveSign}

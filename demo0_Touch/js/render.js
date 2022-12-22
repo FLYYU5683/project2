@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
 import {balls,steve,startSoundBuffer} from './main.js'
-import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse} from './touchEvent.js'
+import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse,countSwingReset} from './touchEvent.js'
 import {createMultiMaterialObject} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/utils/SceneUtils.js';
 import {setClassVisible} from './buildTerrain.js';
 import {stopTrue} from './Steve.js'
@@ -64,6 +64,9 @@ var defaultAim=true;
 var context = new AudioContext();
 var cameraForFoot1,cameraForFoot2,cameraForFoot3;
 var oneTime = false;
+var fovBass = [0,20,0]
+var SteveShowButton,SteveHideButton;
+var SteveShow=true;
 function render() {
   renderer.setScissorTest(false);
   var WW = window.innerWidth;
@@ -121,6 +124,9 @@ function render() {
 			steve.footPath.position.copy(steve.lastPos)
 			stopTrue(); 
 			sign2 *= -1;
+			setTimeout(function(){
+				steve.body.visible = false;
+			},100);
 		}
 	}
 	if(steve.moveFin){
@@ -604,9 +610,48 @@ function buildHUD(){
 	  BetterAimButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),BetterAimMaterial);
 	  BetterAimButton.position.set(-6.5,5.3,500);
 	  //aimButton.scale.set(1,0.5,1)
+	  
+	  //go button
+	  var textureGo = textureloader.load("https://i.imgur.com/9Zohm1S.png") 
+	  var GoMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: textureGo});
 		
-	  var gearBoard = new THREE.Mesh(new THREE.PlaneGeometry(9,2.8),new THREE.MeshBasicMaterial({color:0xAAAAAA}))
-	  gearBoard.position.set(-4.4,6.0,300)
+	  var GoButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),GoMaterial);
+	  GoButton.position.set(-6.5,4,500);
+	 
+	
+	  //steve button
+	  var textureSteveShow = textureloader.load("https://i.imgur.com/d3l0q3e.png") 
+	  var SteveShowMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: textureSteveShow});
+		
+	  SteveShowButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),SteveShowMaterial);
+	  SteveShowButton.position.set(-2.5,4,500);
+	  
+	  var textureSteveHide = textureloader.load("https://i.imgur.com/OYl9lAx.png") 
+	  var SteveHideMaterial = new THREE.MeshBasicMaterial({
+		opacity: 1,
+		alphaTest:0.5,
+		transparent: true,
+		depthTest: false,
+		depthWrite: false,
+		map: textureSteveHide});
+		
+	  SteveHideButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5,1),SteveHideMaterial);
+	  SteveHideButton.position.set(-2.5,4,500);
+	  
+	  var gearBoard = new THREE.Mesh(new THREE.PlaneGeometry(9,4.2),new THREE.MeshBasicMaterial({color:0xAAAAAA}))
+	  gearBoard.position.set(-4.4,5.3,300)
 	  
 	  var replay1Button = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1),replay1Material)
 	  replay1Button.position.set(-6.5,6.6,100);
@@ -617,7 +662,7 @@ function buildHUD(){
 	  var hintButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1),hintMaterial)
 	  hintButton.position.set(-2.5,5.3,100);
 	  
-	  replayGroup.add(gearBoard,replay1Button,replay2Button,aimButton,BetterAimButton,hintButton)
+	  replayGroup.add(gearBoard,replay1Button,replay2Button,aimButton,BetterAimButton,hintButton,GoButton,SteveHideButton,SteveShowButton)
 	  replayGroup.visible = false;
 	  replayGroup.position.set(0,2,0)
 	  sceneHUD.add(replayGroup)
@@ -795,16 +840,8 @@ function HUDPress(){
 	var touch = new THREE.Vector2();
 	touch.x = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
 	touch.y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
-
-	if(Math.abs(touch.x) <= 0.4 && Math.abs(touch.y) <= 0.4){
-	    if(start === false){
-			start = true;
-			startButton.visible = false
-			switchCamera = 1;
-			chooseLevelButton.visible = true;
-		}
-	}
-	else if(start === true && modeChose === false){
+	console.log(touch.y)
+	if(start === true && modeChose === false){
 		if(between(touch.x,1,0.02) && between(touch.y,-0.1,-0.33)){
 			balls[0].start();
 			balls[1].start();
@@ -822,6 +859,10 @@ function HUDPress(){
 			//cameraButtons.visible = true;
 			sliderGroup.visible = true;
 			//gearButton.visible = true;
+			steve.body.visible = true;
+			SteveShow = true;
+			SteveShowButton.visible =true;
+			SteveHideButton.visible =false;
 		}
 		else if (between(touch.x,-0.1,-1) && between(touch.y,-0.1,-0.33)){
 			modeChose = true;
@@ -834,6 +875,14 @@ function HUDPress(){
 			levelChose = false;
 			chooseLevelButton.visible = false;
 			manipulateButton.visible = true;
+		}
+	}
+	else if(Math.abs(touch.x) <= 0.4 && Math.abs(touch.y) <= 0.4){
+	    if(start === false){
+			start = true;
+			startButton.visible = false
+			switchCamera = 1;
+			chooseLevelButton.visible = true;
 		}
 	}
 	if(ballMoveMode){//ballMoveControl
@@ -903,6 +952,12 @@ function HUDPress(){
 						else{
 						aimButton.visible =false;
 						BetterAimButton.visible =true;}
+						if(SteveShow==true){
+						SteveShowButton.visible =true;
+						SteveHideButton.visible =false;}
+						else{
+						SteveShowButton.visible =false;
+						SteveHideButton.visible =true;}
 					}
 					else{
 						gearButton.scale.set(1,0.5,1)
@@ -921,8 +976,8 @@ function HUDPress(){
 						sliderGroup.visible = false;
 						manipulateButton.visible = true;					
 						isOver = false;
-						steve.camera.children[0].fov = 40 + fovX * 2
-						steve.direct.children[3].children[0].fov = 40 + fovX * 2;
+						steve.camera.children[0].fov = 40 + fovX * 2 + fovBass[level - 1]
+						steve.direct.children[3].children[0].fov = 40 + fovX * 2 + fovBass[level - 1];
 						steve.camera.children[0].updateProjectionMatrix();
 						steve.direct.children[3].children[0].updateProjectionMatrix();
 						balls[0].runInHole = false
@@ -954,6 +1009,45 @@ function HUDPress(){
 					}
 					if(between(touch.x,-0.1,-0.5) && between(touch.y,0.81,0.62)){
 						hintPagePress = true;
+					}
+					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.66,0.56)){
+						balls[0].start();
+						balls[1].start();
+						steve.start();
+						modeChose = true;
+						var source = context.createBufferSource();
+						source.buffer = startSoundBuffer;
+						source.connect(context.destination);
+						source.start();
+						mode = 0 // 標準
+						level = 1;
+						aimModeChange(true)
+						levelChangeButton.children[2].visible = false;
+						chooseLevelButton.visible = false;
+						levelChangeButton.children[1].visible = true;
+
+						resetCameraAngle();
+						resetPlayData(level);						
+						countSwingReset();
+						//cameraButtons.visible = true;
+						sliderGroup.visible = true;
+						//gearButton.visible = true;
+						gearButton.visible = false;
+						gearButton.scale.set(0.8,1.2,0.8)
+						replayGroup.visible = false;
+					}
+					if(between(touch.x,-0.1,-0.5) && between(touch.y,0.66,0.56)){///////show steve
+						SteveShow=!SteveShow;
+						if(SteveShow==true){
+							SteveShowButton.visible =true;
+							SteveHideButton.visible =false;
+							steve.body.visible = true
+						}
+						else{
+							SteveShowButton.visible =false;
+							SteveHideButton.visible =true;
+							steve.body.visible = false;
+						}
 					}
 				}
 			}
@@ -1056,6 +1150,7 @@ function HUDPress(){
 					replayAll()
 				}
 				else if(between(touch.x , 0.82, 0.05) && between(touch.y,0.2,-0.145)){//下一關
+					/*
 					balls[0].choose = true;
 					balls[0].start();
 					balls[1].start();
@@ -1071,6 +1166,15 @@ function HUDPress(){
 					balls[0].runInHole = false
 					balls[0].inHole = false;
 					inHoleBreak();
+					chooseHoles[level-1].visible = true
+					*/
+					levelChose = false;
+					levelChangeButton.visible = false;
+					sliderGroup.visible = false;
+					manipulateButton.visible = true;		
+					inHoleBreak()
+					setOther()
+					setState()
 					chooseHoles[level-1].visible = true
 				}
 			}
@@ -1103,6 +1207,11 @@ function HUDPress(){
 			balls[0].vel.set(0,0,0);
 			balls[1].vel.set(0,0,0);
 			steve.start();
+			steve.camera.children[0].fov = 40 + fovX * 2 + fovBass[level - 1]
+			steve.direct.children[3].children[0].fov = 40 + fovX * 2 + fovBass[level - 1];
+			steve.camera.children[0].updateProjectionMatrix();
+			steve.direct.children[3].children[0].updateProjectionMatrix();
+			
 			//cameraButtons.visible = true;
 			sliderGroup.visible = true;
 			gearButton.visible = true;
@@ -1112,6 +1221,10 @@ function HUDPress(){
 			for (let k = 0; k < chooseHoles.length; k++){
 				chooseHoles[k].visible = false;
 			}
+			steve.body.visible = true;
+			SteveShow = true;
+			SteveShowButton.visible =true;
+			SteveHideButton.visible =false;
 			return
 		}
 		for (let k = 0; k < chooseHoles.length; k++){
@@ -1241,8 +1354,8 @@ function setState(){
 	levelChangeButton.visible = false;
 	resetCameraAngle();
 	isOver = false;
-	steve.camera.children[0].fov = 40 + fovX * 2
-	steve.direct.children[3].children[0].fov = 40 + fovX * 2;
+	steve.camera.children[0].fov = 40 + fovX * 2 + fovBass[level - 1]
+	steve.direct.children[3].children[0].fov = 40 + fovX * 2 + fovBass[level - 1];
 	steve.camera.children[0].updateProjectionMatrix();
 	steve.direct.children[3].children[0].updateProjectionMatrix();
 	balls[0].inHole = false;
@@ -1359,4 +1472,4 @@ export {buildCamAndSen,textureAnimate,HUDPress,start,cameraButtons,cameraSlider,
 export {cameraOrbit,cameraOnPlayer,cameraOnBall}
 export {scene,sceneMap,render,renderer}
 export {HUDForInHole,level,isOver}
-export {vec,levelChose,context}
+export {vec,levelChose,context,SteveShow}
