@@ -165,7 +165,7 @@ class Steve{
   else{
 	  this.direct.add(this.body);
 	  scene.add(this.direct);
-      console.log('123');	  
+      //console.log('123');	  
   }
   //////////////////////////////////////////////////////////
 }

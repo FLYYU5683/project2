@@ -4,7 +4,7 @@ import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lin
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {cameraOnPlayer,renderer,textureAnimate,start,scene,HUDPress,cameraButtons,cameraSlider,sliderGroup,level,isOver,HUDForInHole,vec,SteveShow} from './render.js'
-import {steve,balls,writeSteves,setSteves,pressed} from './main.js'
+import {steve,balls,writeSteves,setSteves,pressed,context,putSoundBuffer} from './main.js'
 import {stop,stopTrue} from './Steve.js'
 
 var beforeHit = true;
@@ -167,7 +167,7 @@ function touchMove(event){
 				var x = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
 				var y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
 				var vector = new THREE.Vector3(touch.x - x,0,touch.y - y)
-				power = clamp(vector.length() * 12,0,10);
+				power = clamp(vector.length() * 12,2,10);
 				steve.power = power;
 				power = Math.floor(power)
 				theta = power / 10 / 2.5;
@@ -328,6 +328,12 @@ function touchEvent(){
       vel.copy(new THREE.Vector3(temp.x, 0, temp.z)).normalize();
       vel.multiplyScalar(steve.power*8);
       balls[0].vel.copy(vel)
+	  
+	  const source = context.createBufferSource();
+	  source.buffer = putSoundBuffer;
+	  source.connect(context.destination);
+	  source.start();
+	  
 	  setTimeout(function(){
 			if(balls[0].vel.length() >= 0.7 / 3) 
 				cameraStartMove = true;
