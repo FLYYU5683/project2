@@ -669,7 +669,7 @@ function buildHUD(){
 	  var hintButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1),hintMaterial)
 	  hintButton.position.set(-2.5,5.3,100);
 	  
-	  replayGroup.add(gearBoard,replay1Button,replay2Button,aimButton,BetterAimButton,hintButton,GoButton,SteveHideButton,SteveShowButton)
+	  replayGroup.add(gearBoard,replay1Button/*,replay2Button*/,aimButton,BetterAimButton,hintButton,GoButton,SteveHideButton,SteveShowButton)
 	  replayGroup.visible = false;
 	  replayGroup.position.set(0,2,0)
 	  sceneHUD.add(replayGroup)
@@ -847,7 +847,7 @@ function HUDPress(){
 	var mouse = new THREE.Vector2();
 	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-	console.log(mouse.x,mouse.y)
+	//console.log(mouse.x,mouse.y)
 
 	if(start === true && modeChose === false){	
 		if(between(mouse.x,0.65,0.14) && between(mouse.y,-0.17,-0.42)){
@@ -977,7 +977,7 @@ function HUDPress(){
 				/// select level or move ball
 				else if(replayGroup.visible === true){
 					if(between(mouse.x,-0.47,-0.83) && between(mouse.y,0.91,0.81)){//從選關
-						
+						/*
 						balls[0].choose = true;
 						balls[0].start();
 						balls[1].start();
@@ -997,14 +997,24 @@ function HUDPress(){
 						gearButton.visible = false;
 						gearButton.scale.set(0.8,1.2,0.8)
 						replayGroup.visible = false;
-						
+						*/
+						levelChose = false;
+						levelChangeButton.visible = false;
+						sliderGroup.visible = false;
+						manipulateButton.visible = true;		
+						inHoleBreak()
+						setOther()
+						setState()
+						chooseHoles[level-1].visible = true
 					}
 					if(between(mouse.x,-0.07,-0.42) && between(mouse.y,0.91,0.81)){//球移動
+						/*
 						ballMoveMode = true;
 						balls[0].useG = false;
 						balls[0].vel.set(0,0,0);
 						sliderGroup.visible = false;
 						ballMoveControl.visible =  true;
+						*/
 						
 					}
 					if(between(mouse.x,-0.47,-0.83) && between(mouse.y,0.77,0.68)){//瞄準模式
@@ -1318,7 +1328,7 @@ function nextLevelAction(){
 	
 }
 function playLoading(){
-	console.log("剛開")
+	//console.log("剛開")
 	inLoading = true;
 }
 function loadingOpen(WW,WWPlus){
@@ -1326,7 +1336,7 @@ function loadingOpen(WW,WWPlus){
 		i += sign;
 	}
 	else{
-		console.log("開完了")
+		//console.log("開完了")
 		loadingOpened = true;
 		inHoleBreak()
 		setOther()
@@ -1340,7 +1350,7 @@ function loadingClose(WWPlus){
 	if(i * WWPlus > 0)
 		i += sign;
 	else{
-		console.log("關完了")
+		//console.log("關完了")
 		inLoading = false;
 		loadingClosing = false;
 		loadingOpened = false;

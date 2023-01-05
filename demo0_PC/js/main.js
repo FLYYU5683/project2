@@ -29,8 +29,12 @@ var class2g=new THREE.Group();
 var handleg=new THREE.Group();
 
 var hitSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/hit.mp3", inHoleSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/inhole.wav";
-var startSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/ButtonSound.mp3"
-var hitSoundBuffer,inholeSoundBuffer,startSoundBuffer;
+var startSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/ButtonSound.mp3";
+var putSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/hit.mp3";
+var eraserSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/hit.mp3"
+var pencilSound = "https://flyyu5683.github.io/project2/demo0_Touch/sound/hit.mp3"
+var hitSoundBuffer,inholeSoundBuffer,startSoundBuffer,putSoundBuffer;
+var eraserSoundBuffer,pencilSoundBuffer;
 
 let class3Button = new THREE.Vector3(300 - 9,21.6,-300 + 90)
 var pressed = false
@@ -99,6 +103,12 @@ function init() {
     .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
     .then(audioBuffer => {
       startSoundBuffer = audioBuffer;
+  });
+  window.fetch(putSound)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+    .then(audioBuffer => {
+      putSoundBuffer = audioBuffer;
   });
   //////
   setPos();
@@ -323,4 +333,4 @@ function rgb(){
     setTimeout(rgb, 1000);
 } 
 export {init,animate,steve,balls,writeSteves,setSteves}
-export {hitSoundBuffer,inholeSoundBuffer,startSoundBuffer,context,class2g,pressed,car2MoveSign}
+export {hitSoundBuffer,inholeSoundBuffer,startSoundBuffer,putSoundBuffer,context,class2g,pressed,car2MoveSign}

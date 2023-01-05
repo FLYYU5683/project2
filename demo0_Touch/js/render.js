@@ -662,7 +662,7 @@ function buildHUD(){
 	  var hintButton = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1),hintMaterial)
 	  hintButton.position.set(-2.5,5.3,100);
 	  
-	  replayGroup.add(gearBoard,replay1Button,replay2Button,aimButton,BetterAimButton,hintButton,GoButton,SteveHideButton,SteveShowButton)
+	  replayGroup.add(gearBoard,replay1Button/*,replay2Button*/,aimButton,BetterAimButton,hintButton,GoButton,SteveHideButton,SteveShowButton)
 	  replayGroup.visible = false;
 	  replayGroup.position.set(0,2,0)
 	  sceneHUD.add(replayGroup)
@@ -840,7 +840,7 @@ function HUDPress(){
 	var touch = new THREE.Vector2();
 	touch.x = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
 	touch.y = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
-	console.log(touch.y)
+	//console.log(touch.y)
 	if(start === true && modeChose === false){
 		if(between(touch.x,1,0.02) && between(touch.y,-0.1,-0.33)){
 			balls[0].start();
@@ -967,7 +967,7 @@ function HUDPress(){
 				/// select level or move ball
 				else if(replayGroup.visible === true){
 					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.94,0.81)){//從選關
-						
+						/*
 						balls[0].choose = true;
 						balls[0].start();
 						balls[1].start();
@@ -985,16 +985,27 @@ function HUDPress(){
 						chooseHoles[level-1].visible = true
 						
 						gearButton.visible = false;
-						gearButton.scale.set(1,0.5,1)
+						gearButton.scale.set(0.8,1.2,0.8)
 						replayGroup.visible = false;
+						*/
+						levelChose = false;
+						levelChangeButton.visible = false;
+						sliderGroup.visible = false;
+						manipulateButton.visible = true;		
+						inHoleBreak()
+						setOther()
+						setState()
+						chooseHoles[level-1].visible = true
 						
 					}
 					if(between(touch.x,-0.1,-0.5) && between(touch.y,0.94,0.81)){//球移動
+						/*
 						ballMoveMode = true;
 						balls[0].useG = false;
 						balls[0].vel.set(0,0,0);
 						sliderGroup.visible = false;
 						ballMoveControl.visible =  true;
+						*/
 						
 					}
 					if(between(touch.x,-0.5,-0.9) && between(touch.y,0.81,0.62)){//瞄準模式

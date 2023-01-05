@@ -4,7 +4,7 @@ import {LineMaterial} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lin
 import {LineGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/lines/LineGeometry.js';
 import {scene,cameraOnPlayer,renderer,cameraOnBall} from './render.js';
 import {balls} from './main.js'
-import {theta,beforeHit} from "./touchEvent.js"
+import {theta,beforeHit} from './touchEvent.js'
 
 const WW = 4,HH = 12;
 var swing = false,isSwing = false,change = false,isChange = false;
@@ -165,7 +165,7 @@ class Steve{
   else{
 	  this.direct.add(this.body);
 	  scene.add(this.direct);
-      console.log('123');	  
+      //console.log('123');	  
   }
   //////////////////////////////////////////////////////////
 }

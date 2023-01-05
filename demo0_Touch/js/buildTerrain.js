@@ -88,7 +88,7 @@ function buildTerrain(){
 	class3.position.set(300,0,-300);
 	class3Rotate.scale.set(2,2,2)
 	
-	let light = buildLight(new THREE.Vector3(65,150,50),400,Math.PI/5);
+	let light = buildLight(new THREE.Vector3(85,150,50),400,Math.PI/5);
 	class3.light = light;
 	let box3 = new THREE.Mesh(new THREE.BoxGeometry(10,10,10));
 	box3.position.set(65,0,50)
@@ -100,9 +100,8 @@ function buildTerrain(){
 
 	scene.add(class3);
 
-	cylinders.class3Pos = new THREE.Vector3(400,0,-200)
-	cylinders.y31 = 0;
-	cylinders.y32 = 200;
+	cylinders.class3Pos = new THREE.Vector3(300,0,-300)
+	cylinders.y3 = 0;
 	
 	let mapLight = buildLight(new THREE.Vector3(0,200,0),600,Math.PI/2,12)
 	sceneMap.add(mapLight)
@@ -114,7 +113,9 @@ function buildTerrain(){
 function buildStoneWall(){
 	var stoneGeometry = new THREE.BoxGeometry(50,5,2.5);
 	var stoneGeometry2 = new THREE.BoxGeometry(100,5,2.5);
-	
+	var loader = new THREE.TextureLoader();
+	var texture = loader.load('https://i.imgur.com/euhOAfo.jpg');
+
 	var stoneMaterial = new THREE.MeshPhongMaterial({
       color: 0x8c8f8d,side:THREE.DoubleSide})
 	  
@@ -207,7 +208,6 @@ function buildStoneWall(){
 	class3.add(stoneWall31,stoneWall32,stoneWall33,stoneWall34,stoneWall35)
 	class3.add(stoneWall36,stoneWall37,stoneWall38,stoneWall39,stoneWall310)
 	class3.add(stoneWall311,stoneWall312,stoneWall313)
-	
 }
 function buildPlane(){
   let plane;
@@ -917,7 +917,7 @@ function buildfloors(){
 	mesh.inHeightFunc = inHeightFunc;
 	mesh.convertUV = convertUV;
 	mesh.receiveShadow = true;
-	console.log(mesh)
+	//console.log(mesh)
 	
 	floors.push(mesh)
 	class2.add(mesh)
@@ -1159,7 +1159,7 @@ function bulidMiniWorld(){
 		}
 		if(true){//鼓
 			let drum = new THREE.Group();
-			let drumBody = new THREE.Mesh(new THREE.CylinderGeometry(15,15,15,32,32),new THREE.MeshPhongMaterial({color:0xe80505,side:THREE.DoubleSide}));
+			let drumBody = new THREE.Mesh(new THREE.CylinderGeometry(15,15,15,32,32),new THREE.MeshPhongMaterial({color:0xff0000,side:THREE.DoubleSide}));
 			drumBody.position.set(0,7.5,0);
 
 			let drumHead1 = new THREE.Mesh(new THREE.CircleGeometry(15,32),new THREE.MeshPhongMaterial({color:0xf5f2dc,side:THREE.DoubleSide}));
@@ -1198,6 +1198,15 @@ function bulidMiniWorld(){
 			drum.scale.set(1/3,1/3,1/3)
 			drum.rotation.z = -Math.PI / 180 * 2
 			class3.add(drum);
+			
+			var pillar = new THREE.Mesh(new THREE.CylinderGeometry(5,5,5,64),new THREE.MeshPhongMaterial({color:0x642100}));
+			pillar.R = 5;
+			pillar.height = 2.5	
+			pillar.position.set(70,12.5,85);
+			pillar.ID = "wall"
+			cylinders.push(pillar)
+			class3.add(pillar)
+			pillar.visible = false;
 		}		
 	}
 	if(true){//wall
@@ -1582,6 +1591,7 @@ function bulidMiniWorld(){
 			let wall39 = new Wall(30,50,new THREE.Vector3(0,0,1),1,0xA23400,2.5,0.2)
 			wall39.mesh.rotation.x = -Math.PI / 180 * 95;	
 			wall39.mesh.position.set(130,7.2,75);
+			wall39.ID = "floor";
 			level3Walls.push(wall39)
 			class3.add(wall39.mesh)	
 			

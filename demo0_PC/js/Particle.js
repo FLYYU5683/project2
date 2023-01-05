@@ -47,7 +47,8 @@ class Particle {
     var velH = new THREE.Vector3(0, 0, 0);
     var velV = new THREE.Vector3(0, 0, 0);
 	
-    rollingWS.copy(this.vel.clone().normalize().multiplyScalar(-this.force.dot(this.n)).multiplyScalar(this.m * this.delta * dtt))
+    rollingWS.copy(this.vel.clone().normalize().multiplyScalar(-this.force.dot(this.n)).multiplyScalar(this.delta * dtt* this.m))
+	
     velH.copy(this.vel.clone().projectOnPlane(this.n));
     velV.copy(this.vel.clone().projectOnVector(this.n));	
 	
@@ -232,20 +233,11 @@ class Particle {
 			cylinderPos.add(cylinders.class1Pos)
 			temp = cylinders.y1;
 		}
-		if(i >= 6 && i < 20){
-			cylinderPos.add(cylinders.class2Pos)
-			temp = cylinders.y2;
-		}
-		if(i >= 20 && i < 26){
+		if(i === 6){
 			cylinderPos.add(cylinders.class3Pos)
-			temp = cylinders.y31
-		}
-		if(i >= 26 && i < 55){
-			cylinderPos.add(cylinders.class3Pos)
-			temp = cylinders.y32			
+			temp = cylinders.y3;
 		}
 		temp += cylinder.position.y;
-			
 		
         var ballPos = new THREE.Vector3()
         ballPos.copy(this.pos)
@@ -316,14 +308,15 @@ class Particle {
 			}
 			if (temp.z <= this.r  && temp.z >= -this.r  && Math.abs(temp.x) <= wall.len / 2 && temp.y <= wall.height + this.r && temp.y >= -wall.height - this.r) {
 				if(this.ID === "player"){
-					this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
+					if(wall.ID !== "floor")
+						this.play(hitSoundBuffer)//playSound2(soundSource.hit) // this.hitSound.play()
 				}
 				this.n.copy(wall.normal);
 				this.pos.copy(wall.mesh.localToWorld(new THREE.Vector3(temp.x,temp.y,this.r)));
 				this.vel.sub(this.n.clone().multiplyScalar((1 + COR) * this.vel.dot(this.n)))
 				
 				if(wall.ID === "LW"){
-					console.log("in")
+					//console.log("in")
 					if(car2MoveSign === -1){
 						this.vel.add(new THREE.Vector3(-30,0,0))
 					}
@@ -450,7 +443,7 @@ class Particle {
   }
   checkarea(){
 	 if(this.pos.y < -5){//第二關
-		  if(this.pos.x > 10 && this.pos.x < 40 && this.pos.z > -445&& this.pos.z < -425){
+		  if(this.pos.x > 0 && this.pos.x < 50 && this.pos.z > -455&& this.pos.z < -425){
 			if(this.ID === "player"){
 				this.inHole = true;
 				if(this.choose){

@@ -129,7 +129,7 @@ function buildLight(){
   var dlshelper = new THREE.CameraHelper (light2.shadow.camera) 
   //scene.add ( dlshelper );
   */
-  
+  /*
   let light2 = new THREE.DirectionalLight(0xffffff);
   light2.position.set(50, 50, -100);
   light2.castShadow = true;
@@ -147,6 +147,7 @@ function buildLight(){
   scene.add(light2);
   sceneMap.add(light2.clone());
   var dlshelper = new THREE.CameraHelper (light2.shadow.camera) 
+  */
   //scene.add ( dlshelper );
   
   //class1 light
@@ -154,18 +155,39 @@ function buildLight(){
   const Pointlight = new THREE.PointLight( 0xFF8000,3,100);
   Pointlight.position.set( 22, 5, -20 );
   //Pointlight.castShadow = true;
-  scene.add( Pointlight);
+  //scene.add( Pointlight);
   
   const Pointlight2 = new THREE.PointLight( 0xFF8000,3,100);
   Pointlight2.position.set( -22, 5, -20 );
-  scene.add( Pointlight2);
+  //scene.add( Pointlight2);
   
   //class2 light
   
-  const Pointlight3 = new THREE.PointLight( 0xFF8000,3,100);
-  Pointlight3.position.set( 22, 5, -200 );
-  scene.add( Pointlight3 );
+  const Pointlight3 = new THREE.PointLight( 0xFF8000,1,300);
+  Pointlight3.position.set( 22, 200, -200 );
+  Pointlight3.power = 50
+  let box = new THREE.Mesh(new THREE.BoxGeometry(1,1,1))
+  box.position.set(22,-10,-200)
+  Pointlight3.target = box
   
+  Pointlight3.castShadow = true;
+  
+  Pointlight3.shadow.camera.left = -200;
+  Pointlight3.shadow.camera.right = 200;
+  Pointlight3.shadow.camera.top = -100;
+  Pointlight3.shadow.camera.bottom = 100;
+  Pointlight3.shadow.camera.near = 1;
+  Pointlight3.shadow.camera.far = 300;
+  Pointlight3.shadow.mapSize.width = Pointlight3.shadow.mapSize.height = 1024;
+  //Pointlight3.shadow.bias = -0.007
+  
+  var dlshelper = new THREE.CameraHelper (Pointlight3.shadow.camera) 
+  scene.add ( dlshelper );
+  
+  scene.add( Pointlight3,box );
+  
+  
+  /*
   const Pointlight4 = new THREE.PointLight( 0xFF8000,3,100);
   Pointlight4.position.set( -22, 5, -200 );
   scene.add( Pointlight4 );
@@ -181,7 +203,7 @@ function buildLight(){
   
   const Pointlight7 = new THREE.PointLight( 0xFF8000,3,100);
   Pointlight7.position.set( -20, 5, -320 );
-  scene.add( Pointlight7 );
+  scene.add( Pointlight7 );*/
   
 }
 function buildBalls(){

@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
+import {createMultiMaterialObject} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/utils/SceneUtils.js';
 import {ParametricGeometry} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/geometries/ParametricGeometry.js';
 import {FinitePlane,Wall} from './terrain.js'
 import {scene,sceneMap,renderer} from './render.js'
@@ -116,6 +117,7 @@ function buildStoneWall(){
 	
 }
 function buildPlane(){
+	
   let plane;
   table1 = new THREE.Group();
   scene.add(table1);
@@ -124,12 +126,30 @@ function buildPlane(){
   
   var loader2 = new THREE.TextureLoader();
   loader2.setCrossOrigin('');
-  var texture = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
- 
-  var floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshPhongMaterial({color:0x006000,side:THREE.DoubleSide}));
-  //floor.material.map.repeat.set( 3, 3 );
+  //test light map
+  
+  var textureTest1 = loader2.load('https://i.imgur.com/tuIeXbi.png');  
+  let material1 = new THREE.MeshBasicMaterial({
+        map: textureTest1,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+  });
+  let material2 = new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+  });
+  let ground = new THREE.PlaneGeometry(50, 50)
+  
+  let floor = createMultiMaterialObject(ground, [material2, material1]);
+  /*let floor = new THREE.Mesh(ground, new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+  }));*/
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = 0.02;
   floor.position.z = -5;
@@ -139,6 +159,49 @@ function buildPlane(){
   plane.update()
   planes.push(plane);
   
+  let floor2 = createMultiMaterialObject(ground, [material2, material1]);
+  /*
+  let floor2 = new THREE.Mesh(ground, new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+  }));*/
+  
+  floor2.rotation.x = -Math.PI / 2;
+  floor2.position.set(0,0.02,-55)
+  floor2.receiveShadow = true;
+
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor2, 50 * 1.5, table1);
+  plane.update()
+  planes.push(plane);
+
+  let floor3 = createMultiMaterialObject(ground, [material2, material1]);
+  /*let floor3 = new THREE.Mesh(ground, new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+  }));*/
+  floor3.rotation.x = -Math.PI / 2;
+  floor3.position.set(50,0.02,-55)
+  floor3.receiveShadow = true;
+
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), floor3, 50 * 1.5, table1);
+  plane.update()
+  planes.push(plane);
+  
+  let circleFloor = createMultiMaterialObject(ground, [material2, material1]);
+  //let circleFloor = new THREE.Mesh(new THREE.CircleGeometry(50,32,0,Math.PI), new THREE.MeshBasicMaterial({color: 0x006000,side: THREE.DoubleSide}));
+  circleFloor.rotation.x = -Math.PI / 2;
+  circleFloor.position.set(25,0.01,-80);
+  circleFloor.receiveShadow = true;
+
+  plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1), circleFloor, 100 , table1);
+  plane.update()
+  planes.push(plane);
+  
+  
   var color2 = new THREE.Color();
   color2.setHSL(1,0,0.8);
   
@@ -147,20 +210,23 @@ function buildPlane(){
   box1.material.color.copy(color2)
   box1.receiveShadow = true;
   
-  scene.add(box1);
 	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
 	texture2.wrapS = THREE.RepeatWrapping;
 	texture2.wrapT = THREE.RepeatWrapping;
       
 	let loader3 = new THREE.TextureLoader();
 	loader3.crossOrigin = '';
-	var alpha = loader3.load('https://i.imgur.com/4wunOkl.png');
+	var alpha = loader2.load('https://i.imgur.com/d8LnKPK.png');
+	var alphaFirst = loader2.load('https://i.imgur.com/4wunOkl.png');
+	let materialForFirstHole = new THREE.MeshBasicMaterial({color: 0x006000,side:THREE.DoubleSide,alphaMap:alphaFirst,alphaTest: 0.5,})
+	
 
-	var hole= new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({color:0x006000,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.1,}));
+	let materialForHole = new THREE.MeshBasicMaterial({color: 0x006000,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.5,})
+    let hole = createMultiMaterialObject(ground, [materialForHole, material1]);
+	//let hole = new THREE.Mesh(ground,materialForHole)
 	hole.rotation.x=-Math.PI/2;  
-	hole.position.set(0,0,-55);
-	//hole.rotation.z = Math.PI ;
-	//hole.material.map.repeat.set(3, 3);
+	hole.rotation.z=-Math.PI;  
+	hole.position.set(50,0,-5);
 	hole.receiveShadow = true;
 
 	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1),hole, 50 * 1.5, table1);
@@ -168,22 +234,23 @@ function buildPlane(){
 	planes.push(plane);
 	 
 	class1.add(table1.clone(),box1.clone())
+	
 	//class2
 	table2 = new THREE.Group();
 	scene.add(table2);
 	table2.updateMatrixWorld()
 	
-	var box2 = new THREE.Mesh(new THREE.BoxGeometry(5,0.01,5),new THREE.MeshPhongMaterial({transparent: true,opacity:0.1}));
-	box2.position.set(0,0.3,-140);
+	var box2 = new THREE.Mesh(new THREE.BoxGeometry(5,0.01,5),new THREE.MeshBasicMaterial({transparent: true,opacity:0.1}));
+	box2.position.set(0,0.2,-135);
 	box2.material.color.copy(color2)
 	box2.receiveShadow = true;
-	scene.add(box2);
 
-    var hole2= new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({color:0x006000,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.1,}));
+	//let hole2 = createMultiMaterialObject(ground, [materialForHole, material1]);
+	let hole2 = new THREE.Mesh(ground,materialForHole)
+    //var hole2= new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide,alphaMap:alpha,alphaTest: 0.1,}));
 	hole2.rotation.x=-Math.PI/2;  
 	hole2.position.set(150,0,-300);
-	hole2.rotation.z = Math.PI/2 ;
-	//hole2.material.map.repeat.set(3, 3);
+	hole2.rotation.z = Math.PI/2;
 	hole2.receiveShadow = true;
 
 	plane = new FinitePlane(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 1),hole2, 50 * 1.5, table2);
@@ -195,7 +262,7 @@ function buildPlane(){
 	table3 = new THREE.Group();
 	scene.add(table3);
 	table3.updateMatrixWorld()
-	
+	/*
 	var floor6 = new THREE.Mesh(new THREE.PlaneGeometry(150,50), new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide}));
 	floor6.material.map.repeat.set( 3, 3 );
 	floor6.rotation.x = -Math.PI / 2;
@@ -233,7 +300,7 @@ function buildPlane(){
 	planes.push(plane);
 	
 	class3.add(table3.clone())
-	
+	*/
 	//big floor
 	var loader2 = new THREE.TextureLoader();
     loader2.setCrossOrigin('');
@@ -1341,7 +1408,9 @@ function buildCylinder(){
 	class3.add(pillarC38.clone(),pillarC39.clone(),pillarC310.clone(),pillarC311.clone(),pillarC312.clone(),pillarC313.clone())
 }
 function buildfloors(){
+	
 	//class2
+	
 	var heightFunc = function(x,z) {
 	  let K1 = 5,p1x = -20,p1z = -260,w1 = 15;
 	  let K2 = 5, p2x = 15, p2z = -260, w2 = 15;
@@ -1398,23 +1467,34 @@ function buildfloors(){
 	
 	var loader2 = new THREE.TextureLoader();
 	loader2.setCrossOrigin('');
-	var texture = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
-	
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-	
-	var material = new THREE.MeshPhongMaterial({color:0x006000,side:THREE.DoubleSide});
 
+	var textureTest1 = loader2.load('https://i.imgur.com/ktNrXbh.png');  
+	
+	let materialLight1 = new THREE.MeshBasicMaterial({
+        map: textureTest1,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+	});
+	
+    let materialGround = new THREE.MeshBasicMaterial({
+        color: 0x006000,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 1
+    });	
+	
 	var convertUV = function(x,z){
 		return [(x + 25) / 50,(z + 325) / 200]
 	}
 	
-	var mesh = new THREE.Mesh(geometry, material);
+	//let mesh = createMultiMaterialObject(geometry, [materialGround, materialLight1]);
+	
+	let mesh = new THREE.Mesh(geometry, materialGround);
 	mesh.y = 0
 	mesh.heightFunc = heightFunc;
 	mesh.inHeightFunc = inHeightFunc;
 	mesh.convertUV = convertUV;
-	//mesh.material.map.repeat.set( 4, 4 );
 	mesh.receiveShadow = true;
 	
 	
@@ -1426,14 +1506,20 @@ function buildfloors(){
 	var convertUV2 = function(x,z){
 		return [(x - 25) / 100,(z + 325) / 50]
 	}
-
-	var texture2 = loader2.load('https://i.imgur.com/AwpdGoQ.jpg');
-	texture2.wrapS = THREE.RepeatWrapping;
-	texture2.wrapT = THREE.RepeatWrapping;
+	var textureTest2 = loader2.load('https://i.imgur.com/5IvClX4.png');  
 	
-	floor5 = new THREE.Mesh(geometry2, new THREE.MeshPhongMaterial({color:0x006000,side:THREE.DoubleSide}));
+	let materialLight2 = new THREE.MeshBasicMaterial({
+        map: textureTest2,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+	});
 	
-	//floor5.material.map.repeat.set( 4, 4 );
+	//let floor5 = createMultiMaterialObject(geometry2, [materialGround, materialLight2]);
+	let floor5 = new THREE.Mesh(geometry2,materialGround);
+	
+	//floor5 = new THREE.Mesh(geometry2, new THREE.MeshPhongMaterial({map: texture2,side:THREE.DoubleSide}));
+	
 	floor5.receiveShadow = true;
 	floor5.y = 0;
 	floor5.heightFunc = heightFunc;
@@ -1445,17 +1531,27 @@ function buildfloors(){
 	class2.add(mesh.clone(),floor5.clone())
 	
 	//class 3
+	/*
+
 	var geometry3 = new ParametricGeometry(function(u0, v0, pos) {
-		let x = 225 + 50 * u0;
-		let z = -325 + 50 * v0;
+		let x = 225 + 100 * u0;
+		let z = -325 + 100 * v0;
 		pos.set(x, heightFunc(x, z)+80, z);
 	}, 40, 40);
 	var convertUV3 = function(x,z){
-		return [(x - 225) / 50,(z + 325) / 50]
+		return [(x - 225) / 100,(z + 325) /100]
 	}
 	
-	var floor4 = new THREE.Mesh(geometry3, new THREE.MeshPhongMaterial({map: texture,side:THREE.DoubleSide}));
-    floor4.material.map.repeat.set( 3, 3 );
+  var textureTest3 = loader2.load('https://i.imgur.com/Gpeoj0a.png');  
+  let materialLight3 = new THREE.MeshBasicMaterial({
+        map: textureTest3,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+  });
+	//let floor4 = createMultiMaterialObject(geometry3, [materialGround, materialLight3]);
+	var floor4 = new THREE.Mesh(geometry3,materialGround);
+    //floor4.material.map.repeat.set( 3, 3 );
     floor4.y = 80;
     floor4.receiveShadow = true;
 	floor4.heightFunc = heightFunc;
@@ -1463,9 +1559,74 @@ function buildfloors(){
 	floor4.convertUV = convertUV3;
 
 	floors.push(floor4)
-	scene.add(floor4)
-	class3.add(floor4.clone())
+
+	class3.add(floor4)
 	
+	
+	var geometry4 = new ParametricGeometry(function(u0, v0, pos) {
+		let x = 325 + 200 * u0;
+		let z = -300 + 50 * v0;
+		pos.set(x, heightFunc(x, z)+80, z);
+	}, 40, 40);
+	var convertUV4 = function(x,z){
+		return [(x - 325) / 200,(z + 300) /50]
+	}
+	
+	//let floor6 = createMultiMaterialObject(geometry4, [materialGround, materialLight3]);
+	var floor6 = new THREE.Mesh(geometry4,materialGround);
+    floor6.y = 80;
+    floor6.receiveShadow = true;
+	floor6.heightFunc = heightFunc;
+	floor6.inHeightFunc = inHeightFunc;
+	floor6.convertUV = convertUV4;
+
+	floors.push(floor6)
+
+	class3.add(floor6)
+	
+	var geometry5 = new ParametricGeometry(function(u0, v0, pos) {
+		let x = 325 + 200 * u0;
+		let z = -250 + 50 * v0;
+		pos.set(x, heightFunc(x, z)+40, z);
+	}, 40, 40);
+	var convertUV5 = function(x,z){
+		return [(x - 325) / 200,(z + 250) /50]
+	}
+	
+	//let floor7 = createMultiMaterialObject(geometry5, [materialGround, materialLight3]);
+	var floor7 = new THREE.Mesh(geometry5,materialGround);
+    floor7.y = 40;
+    floor7.receiveShadow = true;
+	floor7.heightFunc = heightFunc;
+	floor7.inHeightFunc = inHeightFunc;
+	floor7.convertUV = convertUV5;
+
+	floors.push(floor7)
+
+	class3.add(floor7)
+	
+	
+	var geometry6 = new ParametricGeometry(function(u0, v0, pos) {
+		let x = 325 + 200 * u0;
+		let z = -350 + 50 * v0;
+		pos.set(x, heightFunc(x, z)+40, z);
+	}, 40, 40);
+	var convertUV6 = function(x,z){
+		return [(x - 325) / 200,(z + 350) /50]
+	}
+	
+	//let floor8 = createMultiMaterialObject(geometry6, [materialGround, materialLight3]);
+	var floor8 = new THREE.Mesh(geometry6,materialGround);
+    floor8.y = 40;
+    floor8.receiveShadow = true;
+	floor8.heightFunc = heightFunc;
+	floor8.inHeightFunc = inHeightFunc;
+	floor8.convertUV = convertUV6;
+
+	floors.push(floor8)
+
+	class3.add(floor8)
+	*/
 }
 function setClassVisible(level){
 		class1Rotate.visible = false;
