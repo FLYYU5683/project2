@@ -280,6 +280,7 @@ function mouseEvent(){
 		steve.direct.rotation.y -= Math.PI * 2
 	steve.camera.children[0].updateProjectionMatrix();
 	if(inReplay && !ballMove && !swing && repalyEnd){
+	  console.log("abc");
 	  repalyEnd = false;
 	  replay()
 	}
@@ -482,6 +483,9 @@ function setCameraMove(){
 }
 function clamp(val, min, max){
 	return Math.min(Math.max(val, min), max);
+}
+function ballMoveFalse(){
+	ballMove = false;
 }
 var playData1 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
 var playData2 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
@@ -726,4 +730,4 @@ function keyPressed() {
 export {theta,beforeHit,useOrb,countSwingReset,countSwing}
 export {mouseDown,mouseMove,mouseUp,mouseEvent}
 export {resetPlayData,setPos,replayAll,resetCameraAngle,inHoleBreak}
-export {fovX,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse}
+export {fovX,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse,ballMoveFalse}
