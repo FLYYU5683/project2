@@ -275,6 +275,7 @@ function touchEvent(){
 	if(steve.direct.rotation.y >= Math.PI * 2)
 		steve.direct.rotation.y -= Math.PI * 2
 	steve.camera.children[0].updateProjectionMatrix();
+
 	if(inReplay && !ballMove && !swing && repalyEnd){
 	  repalyEnd = false;
 	  replay()
@@ -472,6 +473,9 @@ function setCameraMove(){
 function clamp(val, min, max){
 	return Math.min(Math.max(val, min), max);
 }
+function ballMoveFalse(){
+	ballMove = false;
+}
 var playData1 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
 var playData2 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
 var playData3 = {power: [],rotation : [], ballPos: [], putt : [],theta : []};
@@ -664,4 +668,4 @@ function openMapFalse(){
 export {theta,beforeHit,useOrb,countSwingReset,countSwing}
 export {touchStart,touchMove,touchEnd,touchEvent}
 export {resetPlayData,setPos,replayAll,resetCameraAngle,inHoleBreak}
-export {fovX,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse}
+export {fovX,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse,ballMoveFalse}

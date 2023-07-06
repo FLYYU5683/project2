@@ -1,7 +1,7 @@
 import * as THREE from 'https://cdn.skypack.dev/three@0.136';
 import {OrbitControls} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/controls/OrbitControls.js';
 import {balls,steve,startSoundBuffer} from './main.js'
-import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse,countSwingReset} from './mouseEvent.js'
+import {useOrb,countSwing,resetPlayData,replayAll,resetCameraAngle,fovX,inHoleBreak,moveMode,aimModeChange,setOther,openMap,openMapFalse,hitting,hittingFalse,countSwingReset,ballMoveFalse} from './mouseEvent.js'
 import {createMultiMaterialObject} from 'https://cdn.skypack.dev/three@0.136/examples/jsm/utils/SceneUtils.js';
 import {setClassVisible} from './buildTerrain.js';
 import {stopTrue} from './Steve.js'
@@ -1316,6 +1316,7 @@ function textureAnimate() {
 function HUDForInHole(){
 	levelChangeButton.visible = true;
 	isOver = true;
+	ballMoveFalse();
 }
 function between(val,big,small){
 	var t = true, f = false;
