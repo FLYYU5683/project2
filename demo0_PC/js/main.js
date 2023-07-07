@@ -40,6 +40,7 @@ let class3Button = new THREE.Vector3(300 - 9,21.6,-300 + 90)
 var pressed = false
 
 function init() {
+alert("1. 按下Start開始遊戲\n2. 選擇練習或者是直接遊玩\n    2.1 練習模式左上角有一個齒輪，點開有特殊功能\n3.操作方式如下：\n    *按下滑鼠左鍵拖移調「力道」\n    *左箭頭、右箭頭按鈕調方向\n    *swing按鈕將球揮出去\n4.球進洞後，可以點選replay功能，回顧本洞揮桿紀錄");
   window.ontouchstart = function (e){ e.preventDefault()};
   //camera && sence
   buildCamAndSen()
